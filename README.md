@@ -4,6 +4,8 @@
 
 # Run and deploy your AI Studio app
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?s=https://github.com/duran2015/currant)
+
 This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/25944df3-0e0e-4143-bcd6-f34152b93070
