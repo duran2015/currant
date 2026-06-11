@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3BAA7C;
+  --color-primary-light: #EAF8F2;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-surface: #F9FAFB;
+}
+
+body {
+  background-color: #F3F4F6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden; /* App-like feel */
+  touch-action: pan-x pan-y; /* Prevent pull-to-refresh on mobile browsers */
+}
+
+/* Hide scrollbar for clean app design */
+::-webkit-scrollbar {
+  display: none;
+}
