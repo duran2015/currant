@@ -37,132 +37,58 @@ export function HomeTab() {
     >
       {/* 顶部个人状态 (User Status) */}
       <div className="px-6 pt-14 pb-4">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start mb-10">
           <div>
-            <h1 className="text-[22px] font-bold text-gray-900 mb-1 flex items-center">
-              {isNewUser ? "晚上好，新朋友" : `晚上好，${user.name}`} 🌙
+            <h1 className="text-[24px] font-bold text-gray-900 mb-2 flex items-center">
+              嗨{user.name || "新朋友"}，
             </h1>
-            <p className="text-gray-500 text-[14px]">
-              {isNewUser
-                ? "完成初次评估，了解你的状态"
-                : "今天对自己温柔一点～"}
+            <p className="text-gray-500 text-[16px]">
+              今天想聊聊吗？
             </p>
           </div>
-          <div className="flex flex-col items-end">
-            <button className="w-10 h-10 flex items-center justify-center text-gray-600 relative">
-              <Bell size={20} />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#f8f9fa]"></div>
-            </button>
+          <div className="w-14 h-14 bg-orange-50 rounded-full flex items-center justify-center text-3xl shadow-sm border border-orange-100/50">
+            🦦
           </div>
         </div>
 
-        {/* Cloud Character Mock */}
-        <div className="flex justify-end pr-4 -mt-4 mb-2">
-          <div className="w-16 h-12 bg-white rounded-full shadow-sm flex items-center justify-center relative">
-            <div className="absolute w-6 h-6 bg-white rounded-full -top-2 left-2"></div>
-            <div className="absolute w-8 h-8 bg-white rounded-full -top-3 right-2"></div>
-            <div className="flex space-x-2 relative z-10">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-            </div>
-            <div className="absolute bottom-2 w-2 h-1 border-b-2 border-blue-400 rounded-full"></div>
-          </div>
-        </div>
-
-        {!isNewUser ? (
-          <div className="bg-white p-5 rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] relative">
-            <button
-              onClick={() => pushView("profile-report")}
-              className="absolute inset-0 w-full h-full text-left"
-              aria-label="View Report"
-            ></button>
-            <div className="flex justify-between items-center mb-4 relative z-10 pointer-events-none">
-              <div className="flex items-center text-gray-900 font-bold text-[16px]">
-                我的状态 <Info size={14} className="text-gray-400 ml-1.5" />
-              </div>
-              <div className="text-[12px] text-gray-400">更新于 20:30</div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-6 relative z-10 pointer-events-none">
-              <div className="flex flex-col items-center">
-                <div className="text-[12px] text-gray-500 mb-1">焦虑指数</div>
-                <div className="text-[24px] font-black text-gray-900 leading-none mb-1">
-                  9
-                </div>
-                <div className="text-[11px] font-bold text-green-500">↓ 3</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-[12px] text-gray-500 mb-1">情绪指数</div>
-                <div className="text-[24px] font-black text-gray-900 leading-none mb-1">
-                  65
-                </div>
-                <div className="text-[11px] font-bold text-gray-500">中等</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-[12px] text-gray-500 mb-1">睡眠质量</div>
-                <div className="text-[16px] font-black text-gray-900 leading-none mb-1 mt-1">
-                  一般
-                </div>
-                <div className="text-[11px] font-bold text-green-500 mt-0.5">
-                  ↓ 2
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 pointer-events-none">
-              <div className="text-[12px] text-gray-500 mb-2">近7天趋势</div>
-              <div className="h-12 w-full relative">
-                <svg
-                  viewBox="0 0 100 30"
-                  preserveAspectRatio="none"
-                  className="w-full h-full"
-                >
-                  <path
-                    d="M0,20 C10,15 20,25 30,10 C40,-5 50,20 60,15 C70,10 80,25 90,5 L100,10"
-                    fill="none"
-                    stroke="#8A2BE2"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M0,20 C10,15 20,25 30,10 C40,-5 50,20 60,15 C70,10 80,25 90,5 L100,10 L100,30 L0,30 Z"
-                    fill="url(#gradient)"
-                    opacity="0.1"
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8A2BE2" stopOpacity="0.5" />
-                      <stop offset="100%" stopColor="#8A2BE2" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1 px-1">
-                <span>二</span>
-                <span>三</span>
-                <span>四</span>
-                <span>五</span>
-                <span>六</span>
-                <span>日</span>
-                <span>一</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-primary/5 p-5 rounded-3xl border border-primary/10 flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-primary mb-1">
-                未完成心理画像计算
-              </h3>
-              <p className="text-xs text-gray-500">花3分钟了解真实的自己</p>
-            </div>
+        {isNewUser ? (
+          <div className="bg-primary/5 p-6 rounded-[1.5rem] border border-primary/10 flex flex-col items-center justify-center text-center">
+            <h3 className="font-bold text-primary mb-2 text-lg">
+              未完成连接
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">花2分钟，让我认识你</p>
             <button
               onClick={() => pushView("assessment")}
-              className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-full active:bg-primary/90"
+              className="bg-primary text-white font-bold px-8 py-3 rounded-full active:bg-primary/90 shadow-md"
             >
-              去评估
+              继续连接
             </button>
+          </div>
+        ) : (
+          <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col items-center">
+            <h3 className="text-[18px] font-bold text-gray-900 mb-6">
+              今天想做点什么？
+            </h3>
+            <div className="grid grid-cols-3 gap-3 w-full">
+              <button className="flex flex-col items-center justify-center py-4 bg-[#f8f9fa] rounded-2xl active:scale-95 transition-transform hover:bg-gray-100">
+                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2">
+                  <span className="text-xl">💬</span>
+                </div>
+                <span className="text-[13px] font-medium text-gray-700">聊聊天</span>
+              </button>
+              <button className="flex flex-col items-center justify-center py-4 bg-[#f8f9fa] rounded-2xl active:scale-95 transition-transform hover:bg-gray-100">
+                <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
+                  <span className="text-xl">🌿</span>
+                </div>
+                <span className="text-[13px] font-medium text-gray-700">放松下</span>
+              </button>
+              <button className="flex flex-col items-center justify-center py-4 bg-[#f8f9fa] rounded-2xl active:scale-95 transition-transform hover:bg-gray-100">
+                <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                  <span className="text-xl">👀</span>
+                </div>
+                <span className="text-[13px] font-medium text-gray-700">随便看看</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -11,10 +11,11 @@ export function Assessment() {
   const [answers, setAnswers] = useState({
     name: "",
     stage: "",
-    q1: "",
-    q2: "",
-    q3: "",
+    domain: "",
   });
+  
+  const [phq2Scores, setPhq2Scores] = useState<number[]>([-1, -1]);
+  const [phq2Step, setPhq2Step] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -34,69 +35,104 @@ export function Assessment() {
   };
 
   const handleNext = () => {
-    if (step === 1 && !answers.name.trim()) return;
+    if (step === 3 && !answers.name.trim()) return;
 
     if (step < flow.length - 1) {
       setStep(step + 1);
     } else {
       // 完成所有流程
       updateUser({
-        name: answers.name,
-        isNewUser: true,
+        name: answers.name || "新朋友",
+        isNewUser: false,
       });
-      pushView("ai-interview");
+      resetToView("main");
     }
   };
 
   const handleSelect = (key: keyof typeof answers, val: string) => {
-    setAnswers((prev) => ({ ...prev, [key]: val }));
+    if (val === "跳过") {
+      setAnswers((prev) => ({ ...prev, [key]: "" }));
+    } else {
+      setAnswers((prev) => ({ ...prev, [key]: val }));
+    }
     setTimeout(() => {
       handleNext();
-    }, 300); // 稍微延迟一下，让用户看到点击反馈
+    }, 300);
+  };
+
+  const handlePhq2Select = (score: number) => {
+    const newScores = [...phq2Scores];
+    newScores[phq2Step] = score;
+    setPhq2Scores(newScores);
+    
+    setTimeout(() => {
+      if (phq2Step === 0) {
+        setPhq2Step(1);
+      } else {
+        handleNext();
+      }
+    }, 300);
   };
 
   const flow = [
     {
       type: "intro",
-      title: "认领你的心灵水獭",
-      desc: "在这个世界里，每个人都有一只专属于自己的小水獭。它会在你疲惫时给你抱抱，在你倾诉时安静聆听。为了让它更好地懂你，我们需要几分钟来建立连接...",
-      button: "开始连接",
+      title: "嗨，我是小愈。",
+      desc: "用2分钟，让我认识你。",
+      button: "开始",
+    },
+    {
+      type: "phq2",
+      title: "先问你两个小问题——",
+      desc: "不是考试，凭感觉选就好。",
+    },
+    {
+      type: "feedback",
+      // feedback content is generated dynamically
     },
     {
       type: "input",
       key: "name",
-      title: "给你的小水獭取个名字吧？",
-      desc: "一个让你觉得舒服、亲切的称呼，它将永远这样陪伴你。",
-      placeholder: "输入水獭的名字...",
+      title: "我叫小愈，你呢？",
+      desc: "你的名字将是我对你最温暖的呼唤",
+      placeholder: "小名也行...",
     },
     {
       type: "select",
       key: "stage",
-      title: "你现在正处于哪个人生阶段？",
-      desc: "不同的人生阶段有不同的风景，这能帮助小水獭更好地理解你的处境。",
-      options: ["校园时光 (学生)", "初入职场", "职场打拼", "其他阶段"],
+      title: "你现在是在...",
+      desc: "",
+      options: ["大学生", "研究生", "刚工作", "其他"],
     },
     {
       type: "select",
-      key: "q1",
-      title: "小水獭感知到了你最近的情绪底色...",
-      desc: "在过去的两周里，你是否感到情绪低落、沮丧或绝望？",
-      options: ["完全没有", "好几天", "一半以上天数", "几乎每天"],
+      key: "domain",
+      title: "最近主要烦什么？（可选）",
+      desc: "",
+      options: ["学业", "工作", "感情", "人际", "说不清", "跳过"],
     },
     {
-      type: "select",
-      key: "q2",
-      title: "它也察觉到了你周围的压力波纹...",
-      desc: "在过去的两周里，你是否感到紧张、焦虑或急躁？",
-      options: ["完全没有", "好几天", "一半以上天数", "几乎每天"],
+      type: "finish",
+      // finish content is generated dynamically
+    }
+  ];
+
+  const getFeedback = () => {
+    const total = phq2Scores[0] + phq2Scores[1];
+    if (total <= 1) return { text: "看起来你最近状态不错！继续保持~", mood: "微笑" };
+    if (total <= 3) return { text: "最近有点辛苦吧？没关系，我陪你。", mood: "轻微担心" };
+    return { text: "谢谢你愿意告诉我这些。我想帮你。", mood: "认真" };
+  };
+
+  const phq2Questions = [
+    {
+      q: "最近两周，有没有觉得开心不起来，\n或者心里像压了块石头？",
+      options: ["没有", "偶尔", "经常", "几乎每天"]
     },
     {
-      type: "select",
-      key: "q3",
-      title: "最后一点关于生活节奏的确认...",
-      desc: "最近一个月，你觉得难以控制生活中的重要事情吗？",
-      options: ["从不", "偶尔", "有时", "经常", "总是"],
-    },
+      q: "有没有觉得以前喜欢的事，\n突然不想做了？",
+      options: ["没有", "偶尔", "经常", "几乎每天"]
+    }
   ];
 
   const currentStep = flow[step];
@@ -143,23 +179,94 @@ export function Assessment() {
         >
           {currentStep.type === "intro" && (
             <div className="flex-1 flex flex-col items-center justify-center text-center pb-20">
-              <div className="w-32 h-32 bg-orange-50 rounded-full flex items-center justify-center mb-8 relative">
-                <div className="absolute inset-0 bg-orange-100/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
-                <span className="text-6xl relative z-10">🦦</span>
-              </div>
               <h2 className="text-[26px] font-black text-gray-900 mb-4">
                 {currentStep.title}
               </h2>
               <p className="text-[15px] text-gray-500 leading-relaxed max-w-[280px]">
                 {currentStep.desc}
               </p>
-              <div className="mt-16 w-full">
+              
+              <div className="absolute bottom-6 right-6 w-24 h-24 flex items-center justify-center">
+                <span className="text-6xl animate-bounce" style={{ animationDuration: '3s' }}>🦦</span>
+              </div>
+
+              <div className="mt-16 w-full px-6">
                 <button
                   onClick={handleNext}
                   className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-transform shadow-lg"
                 >
                   <span>{currentStep.button}</span>
                   <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep.type === "phq2" && (
+            <div className="flex-1 flex flex-col">
+              <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
+                {currentStep.title}
+              </h2>
+              <p className="text-gray-500 text-[15px] mb-8 leading-relaxed">
+                {currentStep.desc}
+              </p>
+
+              <div className="flex-1 space-y-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`phq2-${phq2Step}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
+                  >
+                    <p className="text-[18px] font-bold text-gray-900 mb-6 whitespace-pre-line">
+                      {phq2Questions[phq2Step].q}
+                    </p>
+                    <div className="space-y-3">
+                      {phq2Questions[phq2Step].options.map((opt, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handlePhq2Select(i)}
+                          className="w-full py-4 rounded-xl border border-gray-200 bg-surface flex items-center justify-center hover:border-gray-400 active:bg-gray-50 transition-all font-medium text-gray-800"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+
+                <div className="flex justify-center pt-4">
+                  <span className="text-4xl transition-transform duration-500" style={{ transform: phq2Step === 1 ? 'rotate(90deg)' : 'rotate(0deg)' }}>🦦</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep.type === "feedback" && (
+            <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
+              <div className="text-7xl mb-8">🦦</div>
+              <h2 className="text-[24px] font-bold text-gray-900 mb-12 leading-relaxed">
+                "{getFeedback().text}"
+              </h2>
+              
+              <div className="w-full space-y-4">
+                <p className="text-gray-500 text-[15px] mb-6">
+                  接下来帮我填几个基本信息，<br/>这样我能更懂你。
+                </p>
+                <button
+                  onClick={handleNext}
+                  className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-transform shadow-lg"
+                >
+                  <span>继续</span>
+                  <ArrowRight size={18} />
+                </button>
+                <button
+                  onClick={handleSkip}
+                  className="w-full py-4 text-gray-400 font-medium active:text-gray-600 transition-colors"
+                >
+                  跳过
                 </button>
               </div>
             </div>
@@ -200,36 +307,58 @@ export function Assessment() {
           )}
 
           {currentStep.type === "select" && (
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
-                {currentStep.title}
-              </h2>
-              <p className="text-gray-500 text-[15px] mb-10 leading-relaxed">
-                {currentStep.desc}
-              </p>
-              <div className="space-y-4">
-                {currentStep.options?.map((opt, i) => (
-                  <button
-                    key={i}
-                    onClick={() =>
-                      handleSelect(currentStep.key as keyof typeof answers, opt)
-                    }
-                    className="w-full p-5 rounded-2xl border border-gray-100 bg-surface flex items-center justify-between hover:border-primary active:bg-primary-light transition-all text-left group"
-                  >
-                    <span className="text-gray-800 font-medium text-[16px]">
-                      {opt}
-                    </span>
-                    <ChevronRight
-                      className="text-gray-300 group-hover:text-primary transition-colors"
-                      size={20}
-                    />
-                  </button>
-                ))}
+              <div className="flex-1 flex flex-col">
+                <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
+                  {currentStep.title}
+                </h2>
+                <p className="text-gray-500 text-[15px] mb-10 leading-relaxed">
+                  {currentStep.desc}
+                </p>
+                <div className="space-y-4">
+                  {currentStep.options?.map((opt, i) => (
+                    <button
+                      key={i}
+                      onClick={() =>
+                        handleSelect(currentStep.key as keyof typeof answers, opt)
+                      }
+                      className="w-full p-5 rounded-2xl border border-gray-100 bg-surface flex items-center justify-between hover:border-primary active:bg-primary-light transition-all text-left group"
+                    >
+                      <span className="text-gray-800 font-medium text-[16px]">
+                        {opt}
+                      </span>
+                      <ChevronRight
+                        className="text-gray-300 group-hover:text-primary transition-colors"
+                        size={20}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+            )}
+
+            {currentStep.type === "finish" && (
+              <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
+                <div className="text-7xl mb-8 animate-pulse">🦦👋</div>
+                <h2 className="text-[26px] font-black text-gray-900 mb-4">
+                  谢谢你，{answers.name || "新朋友"}。
+                </h2>
+                <p className="text-[16px] text-gray-500 leading-relaxed mb-12">
+                  我已经记住你啦。<br/>下次来，我会在这里等你。
+                </p>
+                
+                <div className="w-full">
+                  <button
+                    onClick={handleNext}
+                    className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-transform shadow-lg"
+                  >
+                    <span>进入首页</span>
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
     </motion.div>
   );
 }
