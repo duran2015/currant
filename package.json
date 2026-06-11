@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy:vercel": "npx vercel --prod",
+    "sync:feishu": "node ./scripts/feishu_sync.mjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
   },

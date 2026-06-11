@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+.vercel
+knowledge/feishu/
+.feishu_token_cache.json

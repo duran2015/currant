@@ -12,11 +12,12 @@ import {
   CalendarClock,
   History,
   Edit3,
+  Repeat2,
 } from "lucide-react";
 import { useAppStore } from "../../store";
 
 export function ProfileTab() {
-  const { resetToView, pushView } = useAppStore();
+  const { resetToView, pushView, enterAppMode } = useAppStore();
 
   const menuGroups = [
     {
@@ -101,6 +102,24 @@ export function ProfileTab() {
       </div>
 
       <div className="space-y-8 mt-4">
+        <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
+          <button
+            onClick={() => enterAppMode("counselor")}
+            className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors group"
+          >
+            <div className="flex items-center space-x-3 text-gray-800">
+              <div className="w-8 h-8 rounded-full bg-surface group-hover:bg-gray-900/10 flex items-center justify-center text-gray-500 group-hover:text-gray-900 transition-colors">
+                <Repeat2 size={18} />
+              </div>
+              <span className="font-medium text-[15px]">切换到倾听师工作台</span>
+            </div>
+            <ChevronRight
+              size={18}
+              className="text-gray-300 group-hover:text-gray-400 transition-colors"
+            />
+          </button>
+        </div>
+
         {menuGroups.map((group, idx) => (
           <div key={idx} className="space-y-3">
             <h3 className="text-[14px] font-bold text-gray-900 flex items-center">

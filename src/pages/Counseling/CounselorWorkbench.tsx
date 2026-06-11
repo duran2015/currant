@@ -6,7 +6,7 @@ import {
   MessageSquare,
   Phone,
   Target,
-  LogOut,
+  Repeat2,
   ChevronRight,
   TrendingUp,
   Settings
@@ -14,7 +14,7 @@ import {
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-  const { pushView, resetToView, setAppMode } = useAppStore();
+  const { pushView, enterAppMode } = useAppStore();
   const [status, setStatus] = useState<"online" | "busy" | "offline">("online");
   const [activeTab, setActiveTab] = useState<"upcoming" | "requests">("requests");
 
@@ -80,12 +80,11 @@ export function CounselorWorkbench() {
            </div>
            <button 
              onClick={() => {
-                setAppMode("user");
-                resetToView("login");
+               enterAppMode("user");
              }}
              className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-50 active:text-gray-600 transition-colors"
            >
-             <LogOut size={20} />
+             <Repeat2 size={20} />
            </button>
          </div>
 
@@ -229,4 +228,3 @@ export function CounselorWorkbench() {
     </motion.div>
   );
 }
-

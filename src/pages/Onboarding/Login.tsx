@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ClipboardEvent, type KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
 import { Loader2, CheckCircle2, Circle, ArrowLeft, Apple, AlertCircle } from "lucide-react";
 
 export function Login() {
-  const { pushView, updateUser, resetToView, setAppMode } = useAppStore();
+  const { pushView, updateUser } = useAppStore();
   const [step, setStep] = useState<"phone" | "code" | "bind-phone">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState(["", "", "", ""]);
@@ -41,14 +41,14 @@ export function Login() {
     }, 800);
   };
 
-  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (idx: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !code[idx] && idx > 0) {
       const prevInput = document.getElementById(`code-${idx - 1}`);
       prevInput?.focus();
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
     if (!pastedData) return;
@@ -206,65 +206,8 @@ export function Login() {
                 {loading && !thirdPartyProvider && <Loader2 size={18} className="animate-spin" />}
                 <span>获取验证码</span>
               </button>
-
+              
               <div className="mt-auto mb-6 flex flex-col items-center">
-                <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-8">
-                  <h3 className="text-xs font-bold text-gray-500 mb-3 text-center uppercase tracking-wider">
-                    测试通道快速直达
-                  </h3>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => {
-                        updateUser({
-                          isNewUser: false,
-                          hasRisk: true,
-                          role: "active",
-                        });
-                        localStorage.setItem("isLoggedIn", "true");
-                        resetToView("main");
-                      }}
-                      className="flex-1 bg-white border border-gray-200 p-3 rounded-xl text-sm font-bold text-gray-800 active:bg-gray-50 shadow-sm"
-                    >
-                      老用户
-                      <br />
-                      <span className="text-[10px] text-gray-400 font-normal">
-                        直接进首页
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        updateUser({
-                          isNewUser: true,
-                          hasRisk: false,
-                          role: "guest",
-                        });
-                        pushView("complete-profile");
-                      }}
-                      className="flex-1 bg-white border border-gray-200 p-3 rounded-xl text-sm font-bold text-primary active:bg-primary/5 shadow-sm"
-                    >
-                      新用户
-                      <br />
-                      <span className="text-[10px] text-gray-400 font-normal">
-                        进入引导
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAppMode("counselor");
-                        localStorage.setItem("isLoggedIn", "true");
-                        resetToView("counselor-workbench");
-                      }}
-                      className="flex-1 bg-gray-900 border border-gray-800 p-3 rounded-xl text-sm font-bold text-white active:bg-gray-800 shadow-sm"
-                    >
-                      我是倾听师
-                      <br />
-                      <span className="text-[10px] text-gray-300 font-normal">
-                        进入工作台
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
                 <div className="flex items-center space-x-10 text-gray-500 mb-8">
                   <button
                     onClick={() => handleThirdParty("wechat")}

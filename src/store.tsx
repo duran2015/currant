@@ -15,6 +15,7 @@ export interface AppState {
   resetToView: (view: AppView) => void;
   setTab: (tab: AppTab) => void;
   setAppMode: (mode: "user" | "counselor") => void;
+  enterAppMode: (mode: "user" | "counselor") => void;
   updateUser: (data: Partial<UserProfile>) => void;
   setSelectedCounselorId: (id: string) => void;
   setBookingOrder: (order: any) => void;
@@ -67,6 +68,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("appMode", mode);
   };
 
+  const enterAppMode = (mode: "user" | "counselor") => {
+    handleSetAppMode(mode);
+    if (mode === "user") {
+      setCurrentTab("home");
+      resetToView("main");
+      return;
+    }
+    resetToView("counselor-workbench");
+  };
+
   const updateUser = (data: Partial<UserProfile>) => {
     setUser((prev) => ({ ...prev, ...data }));
   };
@@ -86,6 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         resetToView,
         setTab,
         setAppMode: handleSetAppMode,
+        enterAppMode,
         updateUser,
         setSelectedCounselorId,
         setBookingOrder,
