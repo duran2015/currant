@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
-import { ChevronRight, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronRight, ArrowRight } from "lucide-react";
 
 export function Assessment() {
   const { pushView, resetToView, updateUser } = useAppStore();
@@ -58,42 +58,42 @@ export function Assessment() {
   const flow = [
     {
       type: "intro",
-      title: "遇见你的心灵伴侣",
-      desc: "每个人内心都住着一个等待被听见的小精灵。为了孵化出最懂你的专属心灵伴侣，我们需要简单感知你当下的频率...",
-      button: "开始共鸣",
+      title: "认领你的心灵水獭",
+      desc: "在这个世界里，每个人都有一只专属于自己的小水獭。它会在你疲惫时给你抱抱，在你倾诉时安静聆听。为了让它更好地懂你，我们需要几分钟来建立连接...",
+      button: "开始连接",
     },
     {
       type: "input",
       key: "name",
-      title: "首先，小精灵该如何称呼你？",
-      desc: "一个让你觉得舒服的昵称就好，它将永远这样陪伴你。",
-      placeholder: "输入昵称...",
+      title: "给你的小水獭取个名字吧？",
+      desc: "一个让你觉得舒服、亲切的称呼，它将永远这样陪伴你。",
+      placeholder: "输入水獭的名字...",
     },
     {
       type: "select",
       key: "stage",
       title: "你现在正处于哪个人生阶段？",
-      desc: "不同的人生阶段有不同的风景，这能帮助小精灵更好地理解你的处境。",
+      desc: "不同的人生阶段有不同的风景，这能帮助小水獭更好地理解你的处境。",
       options: ["校园时光 (学生)", "初入职场", "职场打拼", "其他阶段"],
     },
     {
       type: "select",
       key: "q1",
-      title: "小精灵感知到了你最近的情绪底色...",
+      title: "小水獭感知到了你最近的情绪底色...",
       desc: "在过去的两周里，你是否感到情绪低落、沮丧或绝望？",
       options: ["完全没有", "好几天", "一半以上天数", "几乎每天"],
     },
     {
       type: "select",
       key: "q2",
-      title: "它也察觉到了你周围的能量波动...",
+      title: "它也察觉到了你周围的压力波纹...",
       desc: "在过去的两周里，你是否感到紧张、焦虑或急躁？",
       options: ["完全没有", "好几天", "一半以上天数", "几乎每天"],
     },
     {
       type: "select",
       key: "q3",
-      title: "最后一点关于掌控感的确认...",
+      title: "最后一点关于生活节奏的确认...",
       desc: "最近一个月，你觉得难以控制生活中的重要事情吗？",
       options: ["从不", "偶尔", "有时", "经常", "总是"],
     },
@@ -143,9 +143,9 @@ export function Assessment() {
         >
           {currentStep.type === "intro" && (
             <div className="flex-1 flex flex-col items-center justify-center text-center pb-20">
-              <div className="w-32 h-32 bg-primary/5 rounded-full flex items-center justify-center mb-8 relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
-                <Sparkles size={48} className="text-primary relative z-10" />
+              <div className="w-32 h-32 bg-orange-50 rounded-full flex items-center justify-center mb-8 relative">
+                <div className="absolute inset-0 bg-orange-100/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+                <span className="text-6xl relative z-10">🦦</span>
               </div>
               <h2 className="text-[26px] font-black text-gray-900 mb-4">
                 {currentStep.title}
