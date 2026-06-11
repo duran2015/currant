@@ -16,7 +16,7 @@ import { mockUser } from "../../data";
 export function CounselorWorkbench() {
   const { pushView, enterAppMode } = useAppStore();
   const [status, setStatus] = useState<"online" | "busy" | "offline">("online");
-  const [activeTab, setActiveTab] = useState<"upcoming" | "requests">("requests");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
 
   // Mock data for requests
   const requests = [
@@ -124,6 +124,15 @@ export function CounselorWorkbench() {
                <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
              )}
            </button>
+           <button 
+             onClick={() => setActiveTab("messages")}
+             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'messages' ? 'text-gray-900' : 'text-gray-400'}`}
+           >
+             消息
+             {activeTab === 'messages' && (
+               <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
+             )}
+           </button>
         </div>
 
         <AnimatePresence mode="wait">
@@ -173,8 +182,32 @@ export function CounselorWorkbench() {
                  </div>
                ))}
              </motion.div>
+          ) : activeTab === "messages" ? (
+             <motion.div
+               key="messages"
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -10 }}
+               className="space-y-3"
+             >
+               <button
+                 onClick={() => pushView("counseling-text-chat")}
+                 className="w-full bg-white p-4 rounded-3xl flex items-center shadow-sm border border-gray-50 active:scale-[0.98] transition-transform"
+               >
+                 <img src="https://i.pravatar.cc/150?img=12" alt="" className="w-12 h-12 rounded-full object-cover mr-4 shrink-0" />
+                 <div className="flex-1 text-left">
+                   <div className="flex justify-between items-center mb-1">
+                     <h3 className="font-bold text-gray-900 text-[16px]">小林</h3>
+                     <span className="text-[11px] text-gray-400">10:30</span>
+                   </div>
+                   <p className="text-[13px] text-gray-500 line-clamp-1">
+                     (未读) 咨询师你好，我想问一下...
+                   </p>
+                 </div>
+               </button>
+             </motion.div>
           ) : (
-            <motion.div
+             <motion.div
                key="upcoming"
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}

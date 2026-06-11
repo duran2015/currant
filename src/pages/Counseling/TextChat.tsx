@@ -25,6 +25,10 @@ export function TextChat() {
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [timeLeft, setTimeLeft] = useState(30 * 60);
+  
+  // 模拟服务期：如果在服务期内则可以打字，否则为只读模式
+  // 实际业务中，这应该由订单状态和时间(例如：预约开始前24h ~ 结束后24h)决定
+  const isSessionValid = bookingOrder?.status !== "completed" && bookingOrder?.status !== "cancelled";
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -96,9 +100,9 @@ export function TextChat() {
                 {counselor.name}
               </h1>
               <div className="text-[10px] text-green-500 font-medium">
-                {timeLeft > 0
-                  ? `剩余文字时间：${formatTime(timeLeft)}`
-                  : "咨询已结束"}
+                {isSessionValid
+                  ? "服务期内 · 可留言沟通"
+                  : "服务已结束 · 当前为只读模式"}
               </div>
             </div>
           </div>
@@ -140,25 +144,43 @@ export function TextChat() {
             </div>
           </div>
         ))}
+
+        {!isSessionValid && (
+          <div className="flex justify-center mt-6">
+            <div className="bg-gray-200/60 text-gray-500 text-[12px] px-4 py-2 rounded-full">
+              本次咨询服务期已结束，沟通通道已关闭
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input Area */}
       <div className="bg-white px-4 py-3 pb-8 border-t border-gray-100 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] flex items-center">
-        <input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          disabled={timeLeft <= 0}
-          placeholder={timeLeft <= 0 ? "咨询已结束" : "输入你想说的..."}
-          className="flex-1 bg-gray-50 border border-gray-100 px-4 py-3 rounded-full outline-none text-[14px] disabled:bg-gray-100 disabled:text-gray-400"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!inputValue.trim() || timeLeft <= 0}
-          className={`ml-2 w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${inputValue.trim() && timeLeft > 0 ? "bg-primary text-white" : "bg-gray-200 text-gray-400"}`}
-        >
-          <ArrowRight size={20} />
-        </button>
+        {isSessionValid ? (
+          <>
+            <input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+              disabled={timeLeft <= 0}
+              placeholder={timeLeft <= 0 ? "咨询已结束" : "输入你想说的..."}
+              className="flex-1 bg-gray-50 border border-gray-100 px-4 py-3 rounded-full outline-none text-[14px] disabled:bg-gray-100 disabled:text-gray-400"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!inputValue.trim() || timeLeft <= 0}
+              className={`ml-2 w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${inputValue.trim() && timeLeft > 0 ? "bg-primary text-white" : "bg-gray-200 text-gray-400"}`}
+            >
+              <ArrowRight size={20} />
+            </button>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-full px-4 py-3 border border-gray-200">
+            <span className="text-gray-400 text-[14px]">
+              如需继续沟通，请重新预约咨询
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -21,6 +21,7 @@ import { OrdersList } from "./pages/Counseling/OrdersList";
 import { ProfileReport } from "./pages/Profile/ProfileReport";
 import { AssessmentRecords } from "./pages/Profile/AssessmentRecords";
 import { AIChatRecords } from "./pages/Profile/AIChatRecords";
+import { AIChatView } from "./pages/Main/AIChatView";
 import { TextChat } from "./pages/Counseling/TextChat";
 
 import { TreeHole } from "./pages/Main/TreeHole";
@@ -50,7 +51,8 @@ function ViewManager() {
         currentView === "orders-list" ||
         currentView === "profile-report" ||
         currentView === "assessment-records" ||
-        currentView === "ai-chat-records") && <MainLayout key="main" />}
+        currentView === "ai-chat-records" ||
+        currentView === "ai-chat") && <MainLayout key="main" />}
 
       {/* Counselor Dashboard - Separate from MainLayout */}
       {currentView === "counselor-workbench" && <CounselorWorkbench key="c_workbench" />}
@@ -69,6 +71,7 @@ function ViewManager() {
         <AssessmentRecords key="arecords" />
       )}
       {currentView === "ai-chat-records" && <AIChatRecords key="achat_rec" />}
+      {currentView === "ai-chat" && <AIChatView key="ai-chat" />}
       {currentView === "tree-hole" && <TreeHole key="tree_hole" />}
       {currentView === "mini-assessment-home" && (
         <MiniAssessmentHome key="mini_home" />

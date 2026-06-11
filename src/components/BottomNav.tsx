@@ -1,5 +1,5 @@
 import { useAppStore } from "../store";
-import { Home, MessageCircle, User } from "lucide-react";
+import { Home, MessageCircle, User, HeartHandshake } from "lucide-react";
 import { motion } from "motion/react";
 
 export function BottomNav() {
@@ -7,7 +7,8 @@ export function BottomNav() {
 
   const tabs = [
     { id: "home", icon: Home, label: "首页" },
-    { id: "ai", icon: MessageCircle, label: "AI" },
+    { id: "counseling", icon: HeartHandshake, label: "咨询" },
+    { id: "messages", icon: MessageCircle, label: "消息" },
     { id: "profile", icon: User, label: "我的" },
   ] as const;
 

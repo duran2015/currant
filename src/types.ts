@@ -15,6 +15,7 @@ export type AppView =
   | "profile-report"
   | "assessment-records"
   | "ai-chat-records"
+  | "ai-chat"
   | "tree-hole"
   | "mini-assessment-home"
   | "mini-assessment-test"
@@ -24,7 +25,7 @@ export type AppView =
   | "counselor-patient-profile"
   | "counselor-earnings";
 
-export type AppTab = "home" | "ai" | "profile";
+export type AppTab = "home" | "counseling" | "messages" | "profile";
 
 export interface UserProfile {
   id: string;
