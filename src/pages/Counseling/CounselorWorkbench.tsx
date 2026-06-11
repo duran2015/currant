@@ -82,9 +82,9 @@ export function CounselorWorkbench() {
              onClick={() => {
                enterAppMode("user");
              }}
-             className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-50 active:text-gray-600 transition-colors"
+             className="text-primary text-sm font-medium px-3 py-1.5 bg-primary/5 rounded-full"
            >
-             <Repeat2 size={20} />
+             切换为用户身份
            </button>
          </div>
 

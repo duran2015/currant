@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { mockUser } from "../../data";
 import {
   Settings,
   Shield,
@@ -13,11 +12,12 @@ import {
   History,
   Edit3,
   Repeat2,
+  Briefcase
 } from "lucide-react";
 import { useAppStore } from "../../store";
 
 export function ProfileTab() {
-  const { resetToView, pushView, enterAppMode } = useAppStore();
+  const { resetToView, pushView, enterAppMode, user } = useAppStore();
 
   const menuGroups = [
     {
@@ -102,23 +102,20 @@ export function ProfileTab() {
       </div>
 
       <div className="space-y-8 mt-4">
-        <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
-          <button
+        {user.role === "active" && (
+          <button 
             onClick={() => enterAppMode("counselor")}
-            className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors group"
+            className="w-full flex items-center justify-between p-4 bg-white rounded-2xl mb-6 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
           >
-            <div className="flex items-center space-x-3 text-gray-800">
-              <div className="w-8 h-8 rounded-full bg-surface group-hover:bg-gray-900/10 flex items-center justify-center text-gray-500 group-hover:text-gray-900 transition-colors">
-                <Repeat2 size={18} />
+            <div className="flex items-center space-x-3 text-primary">
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                <Briefcase size={18} />
               </div>
-              <span className="font-medium text-[15px]">切换到倾听师工作台</span>
+              <span className="font-medium text-[15px]">切换为咨询师身份</span>
             </div>
-            <ChevronRight
-              size={18}
-              className="text-gray-300 group-hover:text-gray-400 transition-colors"
-            />
+            <ChevronRight size={20} className="text-gray-300" />
           </button>
-        </div>
+        )}
 
         {menuGroups.map((group, idx) => (
           <div key={idx} className="space-y-3">

@@ -22,7 +22,7 @@ const mockQuestions = [
 ];
 
 export function Assessment() {
-  const { pushView } = useAppStore();
+  const { pushView, resetToView } = useAppStore();
   const [step, setStep] = useState(0);
 
   const handleSelect = () => {
@@ -42,13 +42,21 @@ export function Assessment() {
       exit={{ opacity: 0 }}
       className="flex flex-col h-full bg-white p-6"
     >
-      <div className="mt-16 mb-8 flex space-x-2">
-        {mockQuestions.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-gray-100"}`}
-          />
-        ))}
+      <div className="mt-12 mb-8 flex items-center justify-between">
+        <div className="flex space-x-2 flex-1 mr-6">
+          {mockQuestions.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-gray-100"}`}
+            />
+          ))}
+        </div>
+        <button 
+          onClick={() => resetToView("main")} 
+          className="text-[13px] font-bold text-gray-400 shrink-0"
+        >
+          跳过
+        </button>
       </div>
 
       <AnimatePresence mode="wait">

@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, type ClipboardEvent, type KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
-import { Loader2, CheckCircle2, Circle, ArrowLeft, Apple, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, Circle, ArrowLeft, Apple, AlertCircle, Briefcase, User } from "lucide-react";
 
 export function Login() {
-  const { pushView, updateUser } = useAppStore();
-  const [step, setStep] = useState<"phone" | "code" | "bind-phone">("phone");
+  const { pushView, updateUser, enterAppMode } = useAppStore();
+  const [step, setStep] = useState<"phone" | "code" | "bind-phone" | "role-select">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,14 @@ export function Login() {
         return;
       }
 
+      // 模拟后端逻辑：识别特定手机号为已开通的咨询师账号
+      if (phone === "18888888888") {
+        console.log("[Event Analytics] Dual-role user authenticated via Phone & OTP");
+        updateUser({ role: "active", name: "双重身份测试账号", isNewUser: false });
+        setStep("role-select");
+        return;
+      }
+
       updateUser({ role: "registered", isNewUser: true });
       
       if (thirdPartyProvider) {
@@ -134,7 +142,7 @@ export function Login() {
       className="flex flex-col h-full bg-white absolute inset-0 z-50 p-6"
     >
       <div className="pt-10 mb-8 min-h-[40px]">
-        {(step === "code" || step === "bind-phone") && (
+        {(step === "code" || step === "bind-phone" || step === "role-select") && (
           <button
             onClick={() => {
               if (step === "code") {
@@ -142,6 +150,11 @@ export function Login() {
               } else if (step === "bind-phone") {
                 setThirdPartyProvider(false);
                 setStep("phone");
+              } else if (step === "role-select") {
+                // 退出登录，回到输入手机号
+                setStep("phone");
+                setPhone("");
+                setCode(["", "", "", ""]);
               }
             }}
             className="p-2 -ml-2 rounded-full active:bg-gray-100 transition-colors"
@@ -153,7 +166,46 @@ export function Login() {
 
       <div className="flex-1 flex flex-col">
         <AnimatePresence mode="wait">
-          {step === "phone" ? (
+          {step === "role-select" ? (
+            <motion.div
+              key="role-select"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex-1 flex flex-col pt-10"
+            >
+              <div className="mb-10 text-center">
+                <h2 className="text-2xl font-bold text-gray-900">请选择您的身份</h2>
+                <p className="text-gray-500 mt-2">您拥有双重身份，请选择本次需要使用的身份</p>
+              </div>
+              <div className="space-y-4">
+                <button
+                  onClick={() => enterAppMode("counselor")}
+                  className="w-full p-6 border-2 border-primary/20 rounded-2xl flex items-center space-x-4 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                    <Briefcase size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">我是咨询师</h3>
+                    <p className="text-gray-500 text-sm">处理订单、管理日程与服务</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => enterAppMode("user")}
+                  className="w-full p-6 border-2 border-gray-100 rounded-2xl flex items-center space-x-4 hover:border-primary/50 hover:bg-gray-50 transition-all text-left"
+                >
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600">
+                    <User size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">我是用户</h3>
+                    <p className="text-gray-500 text-sm">寻找咨询师、体验AI服务</p>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          ) : step === "phone" ? (
             <motion.div
               key="phone"
               initial={{ opacity: 0, x: -20 }}

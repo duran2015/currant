@@ -3,14 +3,15 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 
 export function ProfileGeneration() {
-  const { resetToView } = useAppStore();
+  const { resetToView, updateUser } = useAppStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      updateUser({ isNewUser: false });
       resetToView("main");
     }, 4000);
     return () => clearTimeout(timer);
-  }, [resetToView]);
+  }, [resetToView, updateUser]);
 
   return (
     <motion.div
