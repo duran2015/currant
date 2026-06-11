@@ -57,7 +57,7 @@ export function ProfileTab() {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
-              src={mockUser.avatar}
+              src={user.avatar}
               alt="avatar"
               className="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover"
             />
@@ -67,7 +67,7 @@ export function ProfileTab() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              {mockUser.name}
+              {user.name}
             </h1>
             <p className="text-gray-500 text-sm">在这里，关注最真实的自己</p>
           </div>

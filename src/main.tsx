@@ -8,7 +8,6 @@ import "./index.css";
 // Pages
 import { Login } from "./pages/Onboarding/Login";
 import { CompleteProfile } from "./pages/Onboarding/CompleteProfile";
-import { Welcome } from "./pages/Onboarding/Welcome";
 import { Assessment } from "./pages/Onboarding/Assessment";
 import { AIInterview } from "./pages/Onboarding/AIInterview";
 import { ProfileGeneration } from "./pages/Onboarding/ProfileGeneration";
@@ -45,7 +44,6 @@ function ViewManager() {
       {currentView === "complete-profile" && (
         <CompleteProfile key="complete-profile" />
       )}
-      {currentView === "welcome" && <Welcome key="welcome" />}
       {currentView === "assessment" && <Assessment key="assessment" />}
       {currentView === "ai-interview" && <AIInterview key="ai-interview" />}
       {currentView === "generation" && <ProfileGeneration key="generation" />}

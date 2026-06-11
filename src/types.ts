@@ -1,7 +1,6 @@
 export type AppView =
   | "login"
   | "complete-profile"
-  | "welcome"
   | "assessment"
   | "ai-interview"
   | "generation"

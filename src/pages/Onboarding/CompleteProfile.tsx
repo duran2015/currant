@@ -22,7 +22,7 @@ export function CompleteProfile() {
       grade: profile.grade,
       isNewUser: true,
     });
-    pushView("welcome");
+    pushView("assessment");
   };
 
   const isFormValid = profile.name.trim().length > 0;
@@ -45,7 +45,7 @@ export function CompleteProfile() {
         <button
           onClick={() => {
              updateUser({ isNewUser: true });
-             pushView("welcome");
+             pushView("assessment");
           }}
           className="text-gray-400 text-sm font-medium"
         >
