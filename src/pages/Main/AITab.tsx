@@ -1,39 +1,53 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  ChevronLeft,
-  Send,
-  Mic,
-  Filter,
-  Star,
-  Clock,
-  Settings,
-  Camera,
-  Image as ImageIcon,
-  FileText,
-  ChevronRight,
-  MoreVertical,
   Activity,
+  AlertTriangle,
   ArrowRight,
-  ShieldAlert,
+  ArrowUp,
+  Camera,
+  Check,
+  ChevronRight,
+  FileText,
+  Image as ImageIcon,
+  Keyboard,
+  Lightbulb,
+  Mic,
+  MoreHorizontal,
   Phone,
   PlusCircle,
+  ShieldAlert,
+  Star,
   Wind,
-  AlertTriangle,
-  ChevronDown,
-  Check,
-  Lightbulb,
-  Moon,
-  Plus,
-  MoreHorizontal,
-  AudioLines
+  Volume2,
+  VolumeX,
+  ThumbsUp,
+  ThumbsDown,
+  Filter
 } from "lucide-react";
 import { useAppStore } from "../../store";
 import { mockCounselors } from "../../data";
 
 export function AITab() {
-  const { currentTab, pushView, popView, setSelectedCounselorId } = useAppStore();
+  const { currentTab, pushView, popView, setSelectedCounselorId, user, blackboard, aiSettings, updateAISettings } = useAppStore();
   const [activeTab, setActiveTab] = useState<"ai" | "human">("ai");
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [sortBy, setSortBy] = useState("recommended");
+  const [feedbackState, setFeedbackState] = useState<Record<number, 'up' | 'down'>>({});
+  const [playingMsgIdx, setPlayingMsgIdx] = useState<number | null>(null);
+
+  const toggleFeedback = (idx: number, type: 'up' | 'down') => {
+    setFeedbackState(prev => ({
+      ...prev,
+      [idx]: prev[idx] === type ? undefined : type
+    }));
+  };
+
+  const isDark = aiSettings.theme === 'dark';
+  // Increase the distinction between font sizes to make it obvious
+  const textSize = aiSettings.fontSize === 'small' ? 'text-[13px]' : aiSettings.fontSize === 'large' ? 'text-[18px]' : 'text-[15px]';
+  const avatarEmoji = aiSettings.avatar === 'otter' ? '🦦' : '🐱';
+  const avatarName = aiSettings.avatar === 'otter' ? '心灵水獭 小愈' : '治愈猫咪 小愈';
 
   // AI Chat State
   const [messages, setMessages] = useState<{
@@ -42,6 +56,7 @@ export function AITab() {
     type?: "text" | "referral" | "task";
     text: string;
     time?: string;
+    suggestedTopics?: string[];
     task?: {
       title: string;
       desc: string;
@@ -54,55 +69,78 @@ export function AITab() {
       desc: string;
       type: "ai" | "info" | "human";
     }[];
-  }>([
-    {
-      id: "1",
-      role: "ai",
-      type: "text",
-      text: "晚上好，小林 👋\n今天过得怎么样？想和我聊聊吗？",
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
-  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  }[]>([]);
 
-  // Human Counseling State
-  const [showSortMenu, setShowSortMenu] = useState(false);
-  const [sortBy, setSortBy] = useState<
-    "comprehensive" | "rating" | "experience" | "price"
-  >("comprehensive");
+  // Initialize messages based on blackboard
+  useEffect(() => {
+    if (messages.length === 0) {
+      let initialGreeting = `晚上好，${user.name || "新朋友"}\n今天过得怎么样？想和我聊聊吗？`;
+      let suggestedTopics = [
+        "今天有件开心事",
+        "感觉有点无聊",
+        "其实有点焦虑"
+      ];
+      
+      if (blackboard.clinical) {
+        if (blackboard.clinical.phq2Score <= 1) {
+          initialGreeting = `晚上好，${user.name || "新朋友"}\n看起来你最近状态不错！有什么开心的事想分享吗？`;
+          suggestedTopics = [
+            "分享开心事 🎉",
+            "发现新爱好",
+            "记录好心情"
+          ];
+        } else if (blackboard.clinical.phq2Score <= 3) {
+          initialGreeting = `晚上好，${user.name || "新朋友"}\n最近有点辛苦吧？没关系，我在这里陪你。`;
+          suggestedTopics = [
+            "确实有点累 😮‍💨",
+            "最近睡不好",
+            "带我深呼吸"
+          ];
+        } else {
+          initialGreeting = `晚上好，${user.name || "新朋友"}\n谢谢你愿意告诉我这些。你想从哪里开始聊起呢？`;
+          suggestedTopics = [
+            "压力好大 🥺",
+            "控制不住情绪",
+            "不知怎么缓解"
+          ];
+        }
+      }
+
+      setMessages([
+        {
+          id: "1",
+          role: "ai",
+          type: "text",
+          text: initialGreeting,
+          suggestedTopics,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    }
+  }, [user.name, blackboard, messages.length]);
+
+  const [input, setInput] = useState("");
+  const [inputMode, setInputMode] = useState<"text" | "voice">("text");
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [showPlusMenu, setShowPlusMenu] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, currentTab]);
-
-  const sortedAndFilteredCounselors = [...mockCounselors];
-  if (sortBy) {
-    switch (sortBy) {
-      case "rating":
-        sortedAndFilteredCounselors.sort((a, b) => b.rating - a.rating);
-        break;
-      case "experience":
-        sortedAndFilteredCounselors.sort((a, b) => b.reviewsCount - a.reviewsCount);
-        break;
-      case "price":
-        sortedAndFilteredCounselors.sort((a, b) => a.price - b.price);
-        break;
-      case "comprehensive":
-      default:
-        sortedAndFilteredCounselors.sort(
-          (a, b) => b.rating * b.reviewsCount - a.rating * a.reviewsCount,
-        );
-        break;
-    }
-  }
+  }, [messages]);
 
   const handleSend = (text?: string) => {
     const newMsg = text || input;
     if (!newMsg.trim()) return;
     setInput("");
+    setShowPlusMenu(false);
+    
+    // reset textarea height
+    const ta = document.querySelector('textarea');
+    if (ta) ta.style.height = 'auto';
     
     const newMsgId = Date.now().toString();
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -116,9 +154,7 @@ export function AITab() {
 
     // 危机词库识别 (模拟 L4 危机识别与转介 - 功能 8)
     const crisisKeywords = ["死", "不想活", "没意思", "绝望", "结束"];
-    const isCrisis = crisisKeywords.some((keyword) =>
-      newMsg.includes(keyword),
-    );
+    const isCrisis = crisisKeywords.some((keyword) => newMsg.includes(keyword));
 
     if (isCrisis) {
       console.log("[Event Analytics] L4 Crisis risk detected & intercepted");
@@ -126,68 +162,198 @@ export function AITab() {
       return;
     }
 
-    const taskKeywords = ["睡眠", "专注", "放松", "冥想"];
-    const needsTask = taskKeywords.some((keyword) => newMsg.includes(keyword));
+    // 意图识别与 Skill 调用引擎
+    const intents = {
+      cbt: ["失败", "没用", "糟糕", "差劲", "做不好", "肯定"],
+      dbt: ["生气", "发火", "忍不住", "崩溃", "气死", "受不了"],
+      mindfulness: ["想太多", "走神", "脑子乱", "发呆", "烦"],
+      ba: ["不想动", "没力气", "无聊", "躺平", "没劲"],
+      game: ["木鱼", "静心", "敲", "积德"],
+      stress: ["焦虑", "压力", "累", "失眠", "考试", "睡", "抑郁"],
+      referral: ["找人", "真人", "倾听师", "咨询", "还是很难受", "没效果"]
+    };
 
-    // 模拟 L1 转 L2 的逻辑 
-    const stressKeywords = ["焦虑", "压力", "烦", "累", "失眠", "考试", "睡"];
-    const isStressed = stressKeywords.some((keyword) =>
-      newMsg.includes(keyword),
-    );
+    const detectIntent = (text: string) => {
+      for (const [intent, keywords] of Object.entries(intents)) {
+        if (keywords.some(k => text.includes(k))) return intent;
+      }
+      return "default";
+    };
+
+    const userIntent = detectIntent(newMsg);
 
     setTimeout(() => {
       const responseTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      if (isStressed || needsTask) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString() + "_1",
-            role: "ai",
-            type: "text",
-            text: "听起来确实让你很难受，导致状态也受到了影响 🥺\n\n你愿意多和我说说，最近具体是什么让你感到压力最大吗？",
-            time: responseTime,
-          },
-          {
-            id: Date.now().toString() + "_2",
-            role: "ai",
-            type: "task",
-            text: "",
-            time: responseTime,
-            task: {
-              title: "呼吸放松练习",
-              desc: "深呼吸可以帮助缓解焦虑，试试这个5分钟练习吧",
-              actionText: "开始练习",
-              duration: "持续5分钟"
+      let aiResponses: any[] = [];
+
+      switch (userIntent) {
+        case "cbt":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_cbt1",
+              role: "ai",
+              type: "text",
+              text: "听到你这么评价自己，我有点心疼。有时候，我们的情绪会给我们戴上“有色眼镜”，让我们只看到不好的那一面。要不要和我一起，做个简单的认知重构练习，把这副眼镜摘下来看看？",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_cbt2",
+              role: "ai",
+              type: "task",
+              text: "",
+              time: responseTime,
+              task: {
+                title: "思维记录卡 · 认知重构",
+                desc: "识别那些让你难受的“自动思维”，并尝试寻找客观的证据来反驳它。这能帮你跳出思维陷阱。",
+                actionText: "开始思维记录",
+                duration: "CBT 技能 · 5分钟"
+              }
             }
-          }
-        ]);
-        return;
+          ];
+          break;
+        case "dbt":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_dbt1",
+              role: "ai",
+              type: "text",
+              text: "我完全能感觉到你现在情绪的强烈波动，就像是一座快要喷发的火山。在这个时候，讲道理可能没用。我们可以先试着用一种物理的方法（TIPP技巧），给身体降降温，把这股强烈的冲动扛过去。",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_dbt2",
+              role: "ai",
+              type: "task",
+              text: "",
+              time: responseTime,
+              task: {
+                title: "冰水驻颜术 (TIPP 技能)",
+                desc: "利用温度的剧烈变化来强制启动潜水反射，迅速降低心率，平息难以忍受的极端情绪。",
+                actionText: "查看具体步骤",
+                duration: "DBT 技能 · 1分钟"
+              }
+            }
+          ];
+          break;
+        case "ba":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_ba1",
+              role: "ai",
+              type: "text",
+              text: "确实，当我们情绪低落的时候，身体就像没电了一样，什么都不想做。这是很正常的保护机制。但一直躺着可能会让我们感觉更糟，要不要试试完成一个微小的、几乎不需要力气的小任务？",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_ba2",
+              role: "ai",
+              type: "task",
+              text: "",
+              time: responseTime,
+              task: {
+                title: "微小行为激活",
+                desc: "不需要做多大的事，比如喝一杯水、走到窗边看看天，或者整理一下桌面。用小动作打破情绪的死循环。",
+                actionText: "获取我的小任务",
+                duration: "BA 技能 · 2分钟"
+              }
+            }
+          ];
+          break;
+        case "game":
+        case "mindfulness":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_game1",
+              role: "ai",
+              type: "text",
+              text: "感觉脑子里一团乱麻，很难静下来对吗？我为你准备了一个「电子木鱼」小练习，通过简单的动作节奏，把注意力锚定在当下，慢慢把心收回来。",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_game2",
+              role: "ai",
+              type: "task",
+              text: "",
+              time: responseTime,
+              task: {
+                title: "电子木鱼 · 赛博积德",
+                desc: "轻触屏幕敲击，配合呼吸节奏，每次敲击都是一次压力的释放。适合焦虑、烦躁时随时使用。",
+                actionText: "开始敲击",
+                duration: "游戏化干预 · 随时"
+              }
+            }
+          ];
+          break;
+        case "stress":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_1",
+              role: "ai",
+              type: "text",
+              text: "听起来压力确实让你很难受，导致状态也受到了很大影响 🥺\n\n除了跟我倾诉，我们也可以先做个简单的呼吸放松，让紧绷的神经缓一缓。",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_2",
+              role: "ai",
+              type: "task",
+              text: "",
+              time: responseTime,
+              task: {
+                title: "4-7-8 呼吸放松练习",
+                desc: "通过控制呼吸频率来激活副交感神经，帮助身体快速进入放松状态。适合考前、睡前或感到紧绷时使用。",
+                actionText: "开始练习",
+                duration: "调节类工具 · 3分钟"
+              }
+            }
+          ];
+          break;
+        case "referral":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_ref1",
+              role: "ai",
+              type: "text",
+              text: "我听到了，当前的状况确实让人感到有些无助。AI的陪伴有时候可能不够，如果你愿意的话，我可以帮你对接一位专业的真人倾听师。他们经验丰富，能给你更温暖、更深度的支持。",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_ref2",
+              role: "ai",
+              type: "referral",
+              text: "",
+              time: responseTime,
+            }
+          ];
+          break;
+        default:
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_3",
+              role: "ai",
+              text: "我很理解你的感受。为了更好地帮助你，根据我们目前的交流，我为你整理了分层的心理支持方案，你可以选择最舒服的方式：",
+              time: responseTime,
+              recommendations: [
+                {
+                  level: "L1",
+                  title: "AI 心理疏导",
+                  desc: "适合较轻的情绪压力，随时陪伴，无等待。",
+                  type: "ai",
+                },
+                {
+                  level: "L2",
+                  title: "真人倾听辅导",
+                  desc: "需要真实人类的情感共鸣与倾听，缓解孤独。",
+                  type: "human",
+                },
+              ],
+            },
+          ];
+          break;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "_3",
-          role: "ai",
-          text: "了解你的状况了。为了更好地帮助你，根据我们目前的交流，我为你整理了分层的心理支持方案，你可以选择最舒服的方式：",
-          time: responseTime,
-          recommendations: [
-            {
-              level: "L1",
-              title: "AI 心理疏导",
-              desc: "适合较轻的情绪压力，随时陪伴，无等待。",
-              type: "ai",
-            },
-            {
-              level: "L2",
-              title: "真人倾听辅导",
-              desc: "需要真实人类的情感共鸣与倾听，缓解孤独。",
-              type: "human",
-            },
-          ],
-        },
-      ]);
+      setMessages(prev => [...prev, ...aiResponses]);
     }, 1500);
   };
 
@@ -202,475 +368,436 @@ export function AITab() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa] relative"
+      className={`flex flex-col h-full relative ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}
     >
-      <div className="pt-12 pb-2 px-6 bg-white sticky top-0 z-20 flex flex-col shadow-[0_1px_10px_rgba(0,0,0,0.02)] relative">
-        <button
-          onClick={popView}
-          className="absolute left-4 top-12 w-8 h-8 flex items-center justify-center text-gray-900 z-30 active:scale-95 transition-transform"
+      <div className={`pt-12 pb-2 px-6 sticky top-0 z-20 flex flex-col shadow-[0_1px_10px_rgba(0,0,0,0.02)] relative transition-colors ${isDark ? 'bg-[#1A1A1A] border-b border-gray-800' : 'bg-white'}`}>
+        <button 
+          onClick={() => popView()} 
+          className={`absolute left-4 top-11 p-2 transition-colors z-10 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
         >
-          <ChevronLeft size={24} />
+          <ChevronRight size={24} className="rotate-180" />
         </button>
-        <div className="flex justify-center space-x-8 mb-2 relative">
-          <button
-            onClick={() => setActiveTab("ai")}
-            className={`pb-2 text-[16px] font-bold transition-all relative ${
-              activeTab === "ai"
-                ? "text-primary"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-          >
+        <div className="flex justify-between items-center mb-2 w-full px-2">
+          <span className={`text-[16px] font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
             心愈 AI
-            {activeTab === "ai" && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full"
-              />
-            )}
-          </button>
+          </span>
           <button
-            onClick={() => setActiveTab("human")}
-            className={`pb-2 text-[16px] font-bold transition-all relative ${
-              activeTab === "human"
-                ? "text-gray-900"
-                : "text-gray-400 hover:text-gray-600"
+            onClick={() => pushView("counseling-booking")}
+            className={`text-[13px] font-bold transition-all px-3 py-1.5 rounded-full ${
+              isDark 
+                ? "bg-[#20A6A6] text-white hover:bg-[#1C8C8C]" 
+                : "bg-primary text-white hover:bg-[#20A6A6]"
             }`}
           >
-            真人倾听师
-            {activeTab === "human" && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full"
-              />
-            )}
+            预约真人咨询
           </button>
         </div>
       </div>
 
-      {activeTab === "ai" && (
-        <div className="bg-white/95 backdrop-blur-md px-4 py-3 border-b border-gray-100 flex items-center justify-between sticky top-[92px] z-20">
-           <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-[#e0f4f4] rounded-full flex items-center justify-center border border-primary/10 overflow-hidden">
-                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=xinyu&backgroundColor=e0f4f4" alt="bot" className="w-8 h-8 rounded-full" />
-                </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+      <div className={`backdrop-blur-md px-4 py-3 border-b flex items-center justify-between sticky top-[92px] z-20 transition-colors ${isDark ? 'bg-[#1A1A1A]/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
+         <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl border overflow-hidden ${isDark ? 'bg-orange-900/20 border-orange-900/50' : 'bg-orange-50 border-orange-100'}`}>
+                {avatarEmoji}
               </div>
-              <div>
-                 <div className="text-[15px] font-bold text-gray-900 leading-tight">心愈</div>
-                 <div className="text-[11px] text-gray-500 font-medium flex items-center mt-0.5">
-                   随时陪伴你 <div className="w-1.5 h-1.5 bg-green-500 rounded-full ml-1.5 opacity-80"></div>
-                 </div>
-              </div>
-           </div>
-           <div className="flex items-center space-x-2">
-             <button onClick={() => pushView("ai-settings")} className="text-gray-600 p-2 hover:bg-gray-50 rounded-full transition-colors flex items-center">
-                <Settings size={20} />
-             </button>
-           </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto w-full relative">
-        {activeTab === "human" && (
-          <div className="pb-2 space-y-2 sticky top-0 bg-white/90 backdrop-blur-md z-10 box-border px-6 pt-2">
-            <div className="flex items-center justify-between relative">
-              <button
-                onClick={() => setShowSortMenu(!showSortMenu)}
-                className="flex items-center space-x-1 text-gray-600 text-[14px] font-medium bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm"
-              >
-                <Filter size={14} />
-                <span>综合推荐</span>
-              </button>
-
-              <AnimatePresence>
-                {showSortMenu && (
-                  <>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="fixed inset-0 z-40 bg-black/20"
-                      onClick={() => setShowSortMenu(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute top-10 left-0 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 w-40"
-                    >
-                      {[
-                        { id: "comprehensive", label: "综合推荐" },
-                        { id: "rating", label: "好评优先" },
-                        { id: "experience", label: "经验优先" },
-                        { id: "price", label: "价格最低" },
-                      ].map((option) => (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            setSortBy(option.id as any);
-                            setShowSortMenu(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 text-[14px] hover:bg-gray-50 transition-colors ${sortBy === option.id ? "text-primary font-bold bg-primary/5" : "text-gray-700"}`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-
-              <div className="flex space-x-2">
-                <span className="bg-blue-50 text-blue-600 text-[11px] px-2 py-1 rounded-md font-bold">
-                  响应快
-                </span>
-                <span className="bg-purple-50 text-purple-600 text-[11px] px-2 py-1 rounded-md font-bold">
-                  新客特惠
-                </span>
-              </div>
+              <div className={`absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 rounded-full ${isDark ? 'border-[#1A1A1A]' : 'border-white'}`}></div>
             </div>
-          </div>
-        )}
+            <div>
+               <div className={`text-[15px] font-bold leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{avatarName}</div>
+               <div className={`text-[11px] font-medium flex items-center mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                 随时陪伴你
+               </div>
+            </div>
+         </div>
+         <div className="flex items-center space-x-2">
+           <button 
+             onClick={() => updateAISettings({ autoPlayVoice: !aiSettings.autoPlayVoice })}
+             className={`p-2 rounded-full transition-colors flex items-center ${aiSettings.autoPlayVoice ? (isDark ? 'text-blue-400 bg-blue-900/30' : 'text-blue-500 bg-blue-50') : (isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50')}`}
+           >
+              {aiSettings.autoPlayVoice ? <Volume2 size={20} /> : <VolumeX size={20} />}
+           </button>
+           <button onClick={() => pushView("ai-settings")} className={`p-2 rounded-full transition-colors flex items-center ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50'}`}>
+              <MoreHorizontal size={20} />
+           </button>
+         </div>
+      </div>
 
-        {activeTab === "ai" ? (
-          <div className="p-4 bg-[#f8f9fa] pb-48 min-h-full">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} px-1 mb-5`}
-              >
-                {msg.role === "user" ? (
-                  <div className="flex flex-col items-end">
-                    <div className="max-w-[280px] rounded-[1.2rem] p-3 text-gray-900 rounded-tr-sm shadow-[0_2px_10px_rgba(0,0,0,0.03)] bg-[#E8E2FF] border border-[#DCD6FC]">
-                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                    </div>
-                    {msg.time && <div className="text-[11px] text-gray-400 mt-1.5 mr-1 flex items-center">{msg.time} <Check size={14} className="ml-1 text-[#C4BCE8]" /></div>}
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    {msg.type === "text" && msg.text && (
-                      <div className="flex items-start">
-                        <div className="flex flex-col items-start w-full">
-                          <div className="bg-white border border-gray-100 rounded-[1.2rem] p-3 shadow-sm rounded-tl-sm inline-block max-w-[280px]">
-                            <p className="text-[15px] text-gray-800 leading-relaxed whitespace-pre-wrap">
-                              {msg.text}
-                            </p>
-                          </div>
-                          {msg.time && <div className="text-[11px] text-gray-400 mt-1.5 ml-1">{msg.time}</div>}
+      <div className={`flex-1 overflow-y-auto w-full relative pt-4 transition-colors ${isDark ? 'bg-[#121212]' : 'bg-gradient-to-b from-[#EBF0FA] via-[#F8F9FF] to-[#f8f9fa]'}`}>
+            {/* Chat Flow */}
+            <div className="px-4 pb-[140px] pt-4">
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} px-1 mb-5`}
+                >
+                  {msg.role === "user" ? (
+                      <div className="flex flex-col items-end">
+                        <div className="max-w-[280px] rounded-[1.2rem] p-3 text-white rounded-tr-sm shadow-[0_2px_10px_rgba(0,0,0,0.03)] bg-blue-500 border border-blue-400">
+                          <p className={`leading-relaxed whitespace-pre-wrap transition-all duration-200 ${textSize}`}>{msg.text}</p>
                         </div>
+                        {msg.time && <div className="text-[11px] text-gray-400 mt-1.5 mr-1 flex items-center">{msg.time} <Check size={14} className="ml-1 text-[#C4BCE8]" /></div>}
                       </div>
-                    )}
+                    ) : (
+                      <div className="w-full">
+                        {msg.type === "text" && (
+                            <div className="flex items-start w-full">
+                              <div className="w-2 mr-0 shrink-0"></div>
+                            <div className="flex flex-col items-start w-full">
+                              <div className={`${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-100'} border rounded-[1.2rem] p-3 shadow-sm inline-block max-w-[280px] ${(idx === 0 || messages[idx - 1].role === "user") ? "rounded-tl-sm" : ""}`}>
+                                <p className={`leading-relaxed whitespace-pre-wrap transition-all duration-200 ${textSize} ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                                  {msg.text}
+                                </p>
+                              </div>
+                              
+                              {/* Message Action Bar */}
+                              <div className={`flex items-center space-x-3 mt-1.5 ml-2`}>
+                                 <button 
+                                   onClick={() => setPlayingMsgIdx(playingMsgIdx === idx ? null : idx)}
+                                   className={`transition-colors active:scale-95 ${playingMsgIdx === idx ? 'text-blue-500' : (isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600')}`} 
+                                   title="朗读"
+                                 >
+                                    <Volume2 size={15} />
+                                 </button>
+                                 <button 
+                                   onClick={() => toggleFeedback(idx, 'up')}
+                                   className={`transition-colors active:scale-95 ${feedbackState[idx] === 'up' ? 'text-green-500' : (isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600')}`} 
+                                   title="有帮助"
+                                 >
+                                    <ThumbsUp size={15} className={feedbackState[idx] === 'up' ? "fill-current" : ""} />
+                                 </button>
+                                 <button 
+                                   onClick={() => toggleFeedback(idx, 'down')}
+                                   className={`transition-colors active:scale-95 ${feedbackState[idx] === 'down' ? 'text-red-500' : (isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600')}`} 
+                                   title="无帮助"
+                                 >
+                                    <ThumbsDown size={15} className={feedbackState[idx] === 'down' ? "fill-current" : ""} />
+                                 </button>
+                              </div>
+                              
+                              {idx === 0 && msg.suggestedTopics && (
+                                <div className="mt-3 flex overflow-x-auto scrollbar-hide space-x-2 pb-1 -mr-4 pr-4">
+                                  {msg.suggestedTopics.map((topic, tIdx) => (
+                                    <button
+                                      key={tIdx}
+                                      onClick={() => handleSend(topic)}
+                                      className={`shrink-0 text-[13px] border shadow-[0_2px_8px_rgba(43,58,103,0.04)] px-3.5 py-1.5 rounded-full font-medium active:scale-95 transition-all flex items-center ${isDark ? 'bg-[#2A2A2A] border-gray-800 text-gray-300 hover:text-white' : 'bg-white border-[#EBF0FA] text-[#2B3A67] hover:border-blue-200 hover:text-blue-500'}`}
+                                    >
+                                      {topic}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
 
-                    {idx === 0 && (
-                      <div className="mt-3 w-full overflow-x-auto no-scrollbar pb-2">
-                        <div className="flex space-x-2 w-max pr-4">
-                          {quickReplies.map((reply, rIdx) => (
-                            <button
-                              key={rIdx}
-                              onClick={() => handleSend(reply)}
-                              className="bg-white border border-primary/20 text-primary text-[13px] font-medium px-4 py-1.5 rounded-full whitespace-nowrap shadow-sm active:scale-95 transition-transform"
-                            >
-                              {reply}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {msg.type === "task" && msg.task && (
-                      <div className="flex items-start mt-2">
-                        <div className="w-[280px] bg-white p-4 rounded-[1.2rem] border border-gray-100 shadow-[0_2px_15px_rgba(0,0,0,0.03)] relative overflow-hidden">
-                           <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-gradient-to-br from-blue-50 to-transparent rounded-full pointer-events-none opacity-60"></div>
-                           
-                           <h4 className="font-bold text-gray-900 text-[16px] mb-2 flex items-center">
-                             {msg.task.title} <Wind className="ml-1 text-[#2CC1C1]" size={16} />
-                           </h4>
-                           <p className="text-[13px] text-gray-500 mb-4 relative z-10 leading-relaxed">
-                             {msg.task.desc}
-                           </p>
-
-                           <div className="flex items-end justify-between relative z-10 mt-2">
-                             <div className="text-[11px] text-[#2CC1C1] font-bold flex items-center bg-[#2CC1C1]/10 px-2 py-1 rounded-md">
-                               {msg.task.duration}
-                             </div>
-                             <button className="bg-primary text-white px-5 py-2 hover:bg-[#20A6A6] font-bold rounded-xl text-[13px] transition-colors shadow-sm">
-                               {msg.task.actionText}
-                             </button>
-                           </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {msg.type === "referral" && (
-                      <div className="flex items-start space-x-2 mt-1">
-                        <div className="flex-1 bg-white p-4 rounded-[1.2rem] border border-primary/20 shadow-[0_4px_20px_-4px_rgba(44,193,193,0.15)] relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
-                          <div className="flex items-center mb-3">
-                            <Activity className="text-primary mr-2" size={18} />
-                            <span className="font-bold text-gray-900 text-[14px]">真人倾听师支持</span>
-                          </div>
-                          <p className="text-[12px] text-gray-600 mb-4 leading-relaxed">
-                            为您推荐了适合缓解当前状态的资深倾听师，他们非常有经验。
-                          </p>
-                          <button
-                            onClick={() => {
-                              setActiveTab("human");
-                            }}
-                            className="w-full bg-primary text-white font-bold py-2 rounded-xl text-[13px] hover:bg-[#20A6A6] active:scale-[0.98] transition-all flex justify-center items-center"
-                          >
-                            查看推荐倾听师 <ArrowRight size={14} className="ml-1" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {msg.recommendations && (
-                      <div className="mt-1 space-y-3 max-w-[280px]">
-                        {msg.recommendations.map((rec, rIdx) => (
-                          <div
-                            key={rIdx}
-                            className="bg-white rounded-[1.2rem] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col pt-4 relative overflow-hidden"
-                          >
-                            <div
-                              className={`absolute top-0 left-0 w-full h-1 ${
-                                rec.level === "L1"
-                                  ? "bg-[#2CC1C1]"
-                                  : rec.level === "L2"
-                                    ? "bg-blue-500"
-                                    : rec.level === "L3"
-                                      ? "bg-orange-500"
-                                      : "bg-red-500"
-                              }`}
-                            />
-                            <div className="flex items-center space-x-2 mb-2">
-                              <span
-                                className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
-                                  rec.level === "L1"
-                                    ? "bg-[#2CC1C1]/10 text-[#2CC1C1]"
-                                    : rec.level === "L2"
-                                      ? "bg-blue-50 text-blue-500"
-                                      : rec.level === "L3"
-                                        ? "bg-orange-50 text-orange-500"
-                                        : "bg-red-50 text-red-500"
-                                }`}
-                              >
-                                {rec.level}
-                              </span>
-                              <h4 className="text-[14px] font-bold text-gray-900 truncate">
-                                {rec.title}
-                              </h4>
+                              {msg.time && <div className="text-[11px] text-gray-400 mt-2 ml-1">{msg.time}</div>}
                             </div>
-                            <p className="text-[12px] text-gray-500 mb-4 leading-relaxed">
-                              {rec.desc}
-                            </p>
-                            <button
-                              onClick={() => {
-                                if (rec.type === "ai")
-                                  handleSend("我想继续跟你聊聊");
-                              }}
-                              className={`w-full py-2.5 rounded-xl text-[12px] font-bold transition-transform active:scale-[0.98] ${
-                                rec.level === "L1" || rec.level === "L2"
-                                  ? "bg-gray-900 text-white shadow-sm"
-                                  : "bg-surface text-gray-600 border border-gray-100"
-                              }`}
-                            >
-                              {rec.level === "L1"
-                                ? "继续跟我聊聊"
-                                : rec.level === "L2"
-                                  ? "查看在线心愈师"
-                                  : rec.level === "L3"
-                                    ? "了解专业咨询"
-                                    : "获取危机热线"}
-                            </button>
                           </div>
-                        ))}
+                        )}
+                        
+                        {msg.type === "task" && msg.task && (
+                          <div className="flex items-start mt-2">
+                            <div className="w-2 mr-0 shrink-0"></div>
+                            <div className={`w-[280px] p-4 rounded-[1.2rem] border shadow-[0_2px_15px_rgba(0,0,0,0.03)] relative overflow-hidden ${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-100'}`}>
+                               <div className={`absolute -right-6 -bottom-6 w-28 h-28 bg-gradient-to-br rounded-full pointer-events-none opacity-60 ${isDark ? 'from-blue-900/20' : 'from-blue-50'} to-transparent`}></div>
+                               
+                               <h4 className={`font-bold text-[16px] mb-2 flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                 {msg.task.title} <Wind className="ml-1 text-[#2CC1C1]" size={16} />
+                               </h4>
+                               <p className={`text-[13px] mb-4 relative z-10 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                 {msg.task.desc}
+                               </p>
+
+                               <div className="flex items-end justify-between relative z-10 mt-2">
+                                 <div className={`text-[11px] text-[#2CC1C1] font-bold flex items-center px-2 py-1 rounded-md ${isDark ? 'bg-[#2CC1C1]/20' : 'bg-[#2CC1C1]/10'}`}>
+                                   {msg.task.duration}
+                                 </div>
+                                 <button className={`px-5 py-2 font-bold rounded-xl text-[13px] transition-colors shadow-sm ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}>
+                                   {msg.task.actionText}
+                                 </button>
+                               </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {msg.type === "referral" && (
+                          <div className="flex items-start mt-1">
+                            <div className="w-2 mr-0 shrink-0"></div>
+                            <div className={`w-[280px] p-4 rounded-[1.2rem] border shadow-[0_4px_20px_-4px_rgba(44,193,193,0.15)] relative overflow-hidden ${isDark ? 'bg-[#2A2A2A] border-primary/40' : 'bg-white border-primary/20'}`}>
+                              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+                              <div className="flex items-center mb-3">
+                                <Activity className="text-primary mr-2" size={18} />
+                                <span className={`font-bold text-[14px] ${isDark ? 'text-white' : 'text-gray-900'}`}>真人倾听师支持</span>
+                              </div>
+                              <p className={`text-[12px] mb-4 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                为您推荐了适合缓解当前状态的资深倾听师，他们非常有经验。
+                              </p>
+                              <button
+                                onClick={() => {
+                                  pushView("counseling-booking");
+                                }}
+                                className={`w-full font-bold py-2 rounded-xl text-[13px] active:scale-[0.98] transition-all flex justify-center items-center ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}
+                              >
+                                查看推荐倾听师 <ArrowRight size={14} className="ml-1" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {msg.recommendations && (
+                          <div className="flex items-start mt-1 w-full">
+                            <div className="w-2 mr-0 shrink-0"></div>
+                            <div className="space-y-3 max-w-[280px]">
+                              {msg.recommendations.map((rec, rIdx) => (
+                                <div
+                                  key={rIdx}
+                                  className={`rounded-[1.2rem] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border flex flex-col pt-4 relative overflow-hidden ${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-50'}`}
+                                >
+                                  <div
+                                    className={`absolute top-0 left-0 w-full h-1 ${
+                                      rec.level === "L1"
+                                        ? "bg-[#2CC1C1]"
+                                        : rec.level === "L2"
+                                          ? "bg-blue-500"
+                                          : rec.level === "L3"
+                                            ? "bg-orange-500"
+                                            : "bg-red-500"
+                                    }`}
+                                  />
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <span
+                                      className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
+                                        rec.level === "L1"
+                                          ? (isDark ? 'bg-[#2CC1C1]/20 text-[#2CC1C1]' : 'bg-[#2CC1C1]/10 text-[#2CC1C1]')
+                                          : rec.level === "L2"
+                                            ? (isDark ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-500')
+                                            : rec.level === "L3"
+                                              ? (isDark ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-50 text-orange-500')
+                                              : (isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-500')
+                                      }`}
+                                    >
+                                      {rec.level}
+                                    </span>
+                                    <h4 className={`text-[14px] font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {rec.title}
+                                    </h4>
+                                  </div>
+                                  <p className={`text-[12px] mb-4 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {rec.desc}
+                                  </p>
+                                  <button
+                                    onClick={() => {
+                                      if (rec.type === "ai")
+                                        handleSend("我想继续跟你聊聊");
+                                    }}
+                                    className={`w-full py-2.5 rounded-xl text-[12px] font-bold transition-transform active:scale-[0.98] ${
+                                      rec.level === "L1" || rec.level === "L2"
+                                        ? (isDark ? 'bg-white text-gray-900' : 'bg-gray-900 text-white shadow-sm')
+                                        : (isDark ? 'bg-[#1C1C1E] text-gray-400 border border-gray-700' : 'bg-surface text-gray-600 border border-gray-100')
+                                    }`}
+                                  >
+                                    {rec.level === "L1"
+                                      ? "继续跟我聊聊"
+                                      : rec.level === "L2"
+                                        ? "查看在线心愈师"
+                                        : rec.level === "L3"
+                                          ? "了解专业咨询"
+                                          : "获取危机热线"}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
+                ))}
+                
               </div>
-            ))}
             <div ref={endRef} />
           </div>
-        ) : (
-          <div className="p-4 space-y-4 pb-32 min-h-full">
-            {sortedAndFilteredCounselors.map((counselor) => (
-              <div
-                key={counselor.id}
-                onClick={() => {
-                  setSelectedCounselorId(counselor.id);
-                  pushView("counseling-detail");
-                }}
-                className="bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-gray-50 flex active:scale-[0.98] transition-transform cursor-pointer overflow-hidden relative"
-              >
-                {counselor.type === "pro" && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#FFD700] to-[#F5A623] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 shadow-sm border-b border-l border-white/20">
-                    专家团
-                  </div>
-                )}
-                {counselor.type === "listener" && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#2CC1C1] to-[#20A6A6] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 shadow-sm border-b border-l border-white/20">
-                    优选倾听师
-                  </div>
-                )}
-                <div className="relative mr-4 shrink-0">
-                  <img
-                    src={counselor.avatar}
-                    alt={counselor.name}
-                    className="w-16 h-16 rounded-2xl object-cover shadow-sm border border-gray-100"
-                  />
-                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm">
-                    {counselor.status === "online" ? (
-                      <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    ) : counselor.status === "busy" ? (
-                      <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
-                    ) : (
-                      <div className="w-3 h-3 bg-gray-300 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1 pt-1">
-                    <h3 className="font-bold text-[16px] text-gray-900 truncate">
-                      {counselor.name}
-                    </h3>
-                  </div>
-
-                  <div className="flex items-center space-x-3 mb-2 flex-wrap">
-                    <div className="flex items-center text-orange-500">
-                      <Star size={12} className="fill-current mr-1" />
-                      <span className="text-[12px] font-bold">
-                        {counselor.rating}
-                      </span>
-                    </div>
-                    <span className="text-gray-300 text-[10px]">|</span>
-                    <span className="text-[12px] text-gray-500">
-                      {counselor.reviewsCount}次服务
-                    </span>
-                  </div>
-
-                  <p className="text-[12px] text-gray-500 line-clamp-1 mb-2 font-medium">
-                    {counselor.title}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-3 mb-1">
-                    <div className="flex space-x-1.5">
-                      {counselor.tags.slice(0, 2).map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2.5 py-1 bg-surface text-gray-600 rounded-md text-[10px] font-medium border border-gray-100"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-baseline text-primary">
-                      <span className="text-[10px] font-bold mr-0.5">¥</span>
-                      <span className="text-[16px] font-black tracking-tight leading-none">
-                        {counselor.price}
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-medium ml-0.5">
-                        /次
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {activeTab === "ai" && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#f8f9fa] via-[#f8f9fa] to-transparent pt-6 pb-6 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+        <div className={`absolute bottom-0 left-0 right-0 border-t pt-2 z-20 flex flex-col transition-colors duration-200 ${isDark ? 'bg-[#121212] border-gray-800' : 'bg-[#f8f9fa] border-gray-200/60'}`}>
           {/* Quick Replies */}
-          <div className="px-4 pb-3 flex space-x-2 overflow-x-auto scrollbar-hide">
-             <button onClick={() => setInput("我想进行担忧管理")} className="shrink-0 bg-white border border-gray-100 shadow-sm text-gray-700 text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform">
-               <Wind size={14} className="text-blue-500 mr-1.5" /> 担忧管理
+          <div className="px-3 pb-2 flex space-x-2 overflow-x-auto scrollbar-hide">
+             <button onClick={() => handleSend("心里有点烦，想敲敲木鱼")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+               <Activity size={14} className="text-orange-500 mr-1.5" /> 敲木鱼静静心
              </button>
-             <button onClick={() => setInput("我想做认知调整")} className="shrink-0 bg-white border border-gray-100 shadow-sm text-gray-700 text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform">
-               <Lightbulb size={14} className="text-green-500 mr-1.5" /> 认知调整
+             <button onClick={() => handleSend("我觉得有点紧绷，带我做个深呼吸吧")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+               <Wind size={14} className="text-blue-500 mr-1.5" /> 带我深呼吸
              </button>
-             <button onClick={() => setInput("我想改善睡眠")} className="shrink-0 bg-white border border-gray-100 shadow-sm text-gray-700 text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform">
-               <Moon size={14} className="text-purple-500 mr-1.5" /> 睡眠改善
-             </button>
-             <button className="shrink-0 bg-white border border-gray-100 shadow-sm text-gray-600 px-2 py-1.5 rounded-full flex items-center active:scale-95 transition-transform">
-               <ChevronDown size={14} />
+             <button onClick={() => handleSend("最近压力有点大，想找你吐吐槽")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+               <Lightbulb size={14} className="text-green-500 mr-1.5" /> 想找你吐吐槽
              </button>
           </div>
 
-          <div className="px-4 pb-4">
-             <div className="flex items-end space-x-2 mb-2 bg-white rounded-3xl border border-gray-200 shadow-sm p-1.5 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
-               <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 shrink-0 active:bg-gray-100 transition-colors">
-                 <Plus size={20} className={showAttachMenu ? "rotate-45 transition-transform" : "transition-transform"} />
+          {/* Input Row */}
+          <div className={`px-3 pb-2 flex items-end space-x-2.5 relative z-10 transition-colors ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}>
+             <div className={`flex-1 rounded-[22px] border shadow-sm flex items-end min-h-[44px] relative transition-all overflow-hidden p-1 pl-1.5 ${isFocused ? 'ring-2 ring-primary/20 border-primary/40' : ''} ${isDark ? 'bg-[#2A2A2A] border-gray-700' : 'bg-white border-gray-200'}`}>
+               {/* + Menu Trigger (Inside input) */}
+               <button 
+                 onClick={() => setShowPlusMenu(!showPlusMenu)} 
+                 className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${showPlusMenu ? (isDark ? 'text-gray-300' : 'text-gray-800') : (isDark ? 'text-gray-500 active:text-gray-400' : 'text-gray-400 active:text-gray-600')}`}
+               >
+                 <PlusCircle size={24} strokeWidth={1.5} className={showPlusMenu ? 'rotate-45 transition-transform' : 'transition-transform'} />
                </button>
-               <div className="flex-1 flex items-center bg-transparent px-2 py-1 min-h-[36px]">
-                 <textarea
-                   value={input}
-                   onChange={(e) => setInput(e.target.value)}
-                   onKeyPress={(e) => { if(e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                   className="flex-1 bg-transparent border-none outline-none text-[15px] text-gray-800 placeholder-gray-400 w-full resize-none max-h-[100px]"
-                   placeholder="想对心愈说点什么..."
-                   rows={1}
-                   style={{ minHeight: '24px' }}
-                 />
-                 {input.trim() ? (
-                   <button onClick={() => handleSend()} className="text-white bg-primary rounded-full w-8 h-8 ml-2 flex items-center justify-center shadow-md active:scale-95 transition-transform shrink-0">
-                     <Send size={14} className="translate-x-[-1px] translate-y-[1px]" />
+
+               {inputMode === "text" ? (
+                 <>
+                   <textarea
+                     value={input}
+                     onChange={(e) => {
+                       setInput(e.target.value);
+                       e.target.style.height = 'auto';
+                       e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                       if (showPlusMenu) setShowPlusMenu(false);
+                     }}
+                     onFocus={() => {
+                       setIsFocused(true);
+                       if (showPlusMenu) setShowPlusMenu(false);
+                     }}
+                     onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                     onKeyDown={(e) => { 
+                       if(e.key === "Enter" && !e.shiftKey) { 
+                         e.preventDefault();
+                         handleSend(); 
+                       } 
+                     }}
+                     rows={1}
+                     className={`flex-1 bg-transparent border-none outline-none text-[15px] px-2 py-2 resize-none max-h-[120px] self-center leading-relaxed ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'}`}
+                     placeholder="发消息..."
+                   />
+                   {!input.trim() && (
+                     <button onClick={() => setInputMode("voice")} className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                       <Mic size={22} strokeWidth={1.5} />
+                     </button>
+                   )}
+                 </>
+               ) : (
+                 <div className="flex-1 flex items-center h-[36px] mt-0.5 pr-1">
+                   <button onClick={() => setInputMode("text")} className={`pl-1 pr-3 transition-colors flex items-center h-full shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                     <Keyboard size={20} strokeWidth={1.5} />
                    </button>
-                 ) : (
-                   <button className="text-gray-400 ml-2 w-8 h-8 flex items-center justify-center active:text-primary transition-colors shrink-0">
-                     <Mic size={18} />
-                   </button>
-                 )}
-               </div>
-             </div>
-             
-             <AnimatePresence>
-               {showAttachMenu && (
-                 <motion.div 
-                   initial={{ height: 0, opacity: 0 }}
-                   animate={{ height: 'auto', opacity: 1 }}
-                   exit={{ height: 0, opacity: 0 }}
-                   className="overflow-hidden"
-                 >
-                   <div className="flex items-center space-x-6 px-4 py-2 mt-2 mb-2">
-                     <div className="flex flex-col items-center">
-                       <button className="w-12 h-12 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center text-gray-600 mb-1 active:scale-95 transition-transform">
-                         <Camera size={22} />
-                       </button>
-                       <span className="text-[11px] text-gray-500">拍照</span>
-                     </div>
-                     <div className="flex flex-col items-center">
-                       <button className="w-12 h-12 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center text-gray-600 mb-1 active:scale-95 transition-transform">
-                         <ImageIcon size={22} />
-                       </button>
-                       <span className="text-[11px] text-gray-500">相册</span>
-                     </div>
-                     <div className="flex flex-col items-center">
-                       <button className="w-12 h-12 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center text-gray-600 mb-1 active:scale-95 transition-transform">
-                         <FileText size={22} />
-                       </button>
-                       <span className="text-[11px] text-gray-500">文件</span>
-                     </div>
+                   <div 
+                     className={`flex-1 h-[32px] rounded-full flex items-center justify-center font-bold text-[14px] select-none transition-colors cursor-pointer ${isRecording ? "bg-primary text-white" : (isDark ? "bg-[#1C1C1E] text-gray-300" : "bg-gray-100 text-gray-700")}`}
+                     onPointerDown={() => setIsRecording(true)}
+                     onPointerUp={() => {
+                       setIsRecording(false);
+                       setIsTranscribing(true);
+                       setTimeout(() => {
+                         setIsTranscribing(false);
+                         handleSend("我现在感觉有点焦虑，能陪我聊聊吗？");
+                         setInputMode("text");
+                       }, 1500);
+                     }}
+                     onPointerCancel={() => setIsRecording(false)}
+                   >
+                     {isTranscribing ? "转译中..." : isRecording ? "松开 发送" : "按住 说话"}
                    </div>
+                 </div>
+               )}
+             </div>
+
+             {/* Send Button outside (only when typing) */}
+             <AnimatePresence>
+               {input.trim() && (
+                 <motion.div 
+                   initial={{ scale: 0, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   exit={{ scale: 0, opacity: 0 }}
+                   className="shrink-0 mb-1"
+                 >
+                   <button onClick={() => handleSend()} className="w-[38px] h-[38px] bg-primary text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform">
+                     <ArrowUp size={22} strokeWidth={2.5} />
+                   </button>
                  </motion.div>
                )}
              </AnimatePresence>
-             
-             {hasRiskContext && (
-               <div className="flex justify-center mt-2 h-6">
-                 <button onClick={() => setShowCrisisAlert(true)} className="flex items-center text-[11px] bg-red-50 text-red-500 px-3 py-1 rounded-full font-bold border border-red-100 shadow-sm">
-                   <AlertTriangle size={12} className="mr-1" />
-                   SOS 紧急求助
-                 </button>
-               </div>
-             )}
           </div>
+
+          {/* Expandable Plus Menu */}
+          <AnimatePresence>
+            {showPlusMenu && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className={`overflow-hidden z-10 relative transition-colors ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}
+              >
+                <div className={`pt-4 pb-6 px-8 flex justify-between border-t mt-3 max-w-[320px] mx-auto ${isDark ? 'border-gray-800' : 'border-gray-200/50'}`}>
+                  {[
+                    { icon: ImageIcon, label: "相册", color: "text-blue-500" },
+                    { icon: Camera, label: "拍摄", color: "text-gray-400" },
+                    { icon: FileText, label: "文件", color: "text-orange-500" },
+                  ].map((item, i) => (
+                    <button key={i} onClick={() => setShowPlusMenu(false)} className="flex flex-col items-center active:scale-95 transition-transform w-16">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border mb-2 ${isDark ? 'bg-[#2A2A2A] border-gray-700' : 'bg-white border-gray-100'}`}>
+                        <item.icon size={26} strokeWidth={1.5} className={item.color} />
+                      </div>
+                      <span className={`text-[11px] font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Mock iOS Keyboard Presentation */}
+          <AnimatePresence>
+            {isFocused && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 260, opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                className="w-full bg-[#D1D4D9] flex flex-col justify-start px-1 pt-3 pb-8 select-none overflow-hidden"
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                <div className="flex justify-center space-x-1.5 mb-3 px-1">
+                  {['Q','W','E','R','T','Y','U','I','O','P'].map(k => (
+                    <div key={k} className="w-[9%] h-11 bg-white rounded-lg flex items-center justify-center text-[17px] font-medium text-gray-900 shadow-sm">{k}</div>
+                  ))}
+                </div>
+                <div className="flex justify-center space-x-1.5 mb-3 px-5">
+                  {['A','S','D','F','G','H','J','K','L'].map(k => (
+                    <div key={k} className="w-[10%] h-11 bg-white rounded-lg flex items-center justify-center text-[17px] font-medium text-gray-900 shadow-sm">{k}</div>
+                  ))}
+                </div>
+                <div className="flex justify-center space-x-1.5 mb-3 px-1">
+                  <div className="w-[13%] h-11 bg-[#B3B6BE] rounded-lg flex items-center justify-center shadow-sm">
+                    <ArrowUp size={18} strokeWidth={2.5} className="text-gray-900" />
+                  </div>
+                  {['Z','X','C','V','B','N','M'].map(k => (
+                    <div key={k} className="w-[10%] h-11 bg-white rounded-lg flex items-center justify-center text-[17px] font-medium text-gray-900 shadow-sm">{k}</div>
+                  ))}
+                  <div className="w-[13%] h-11 bg-[#B3B6BE] rounded-lg flex items-center justify-center shadow-sm">
+                    <svg width="22" height="16" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.5 1L1 7L5.5 13H16C16.5523 13 17 12.5523 17 12V2C17 1.44772 16.5523 1 16 1H5.5Z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M9 4.5L14 9.5M14 4.5L9 9.5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex justify-center space-x-1.5 px-1">
+                  <div className="w-[22%] h-11 bg-[#B3B6BE] rounded-lg flex items-center justify-center text-[15px] font-medium text-gray-900 shadow-sm">123</div>
+                  <div className="w-[12%] h-11 bg-[#B3B6BE] rounded-lg flex items-center justify-center shadow-sm"><Mic size={20} className="text-gray-900"/></div>
+                  <div className="w-[42%] h-11 bg-white rounded-lg flex items-center justify-center text-[15px] font-medium text-gray-900 shadow-sm">换行 (Shift+Enter)</div>
+                  <div className="w-[22%] h-11 bg-blue-500 rounded-lg flex items-center justify-center text-[15px] font-bold text-white shadow-sm" onClick={() => {
+                    handleSend();
+                    setIsFocused(false);
+                  }}>发送</div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {hasRiskContext && (
+             <div className="flex justify-center mt-2 h-6">
+               <button onClick={() => setShowCrisisAlert(true)} className="flex items-center text-[11px] bg-red-50 text-red-500 px-3 py-1 rounded-full font-bold border border-red-100 shadow-sm">
+                 <AlertTriangle size={12} className="mr-1" />
+                 SOS 紧急求助
+               </button>
+             </div>
+          )}
         </div>
-      )}
 
       {/* 危机预警弹窗 (L4 发现风险词拦截) */}
       <AnimatePresence>

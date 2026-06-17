@@ -137,7 +137,7 @@ export function CounselorDetail() {
                   <span className="text-primary mr-1.5">💬</span> 文字沟通
                 </h4>
                 <span className="text-primary font-bold text-[14px]">
-                  ¥{counselor.price}/次
+                  ¥{counselor.pricing.text}/次
                 </span>
               </div>
               <p className="text-[12px] text-gray-600 mb-2 leading-relaxed">
@@ -159,7 +159,7 @@ export function CounselorDetail() {
                   <span className="text-blue-500 mr-1.5">🎙️</span> 语音沟通
                 </h4>
                 <span className="text-gray-900 font-bold text-[14px]">
-                  ¥{counselor.price + 100}/50分钟
+                  ¥{counselor.pricing.voice}/50分钟
                 </span>
               </div>
               <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
@@ -173,7 +173,7 @@ export function CounselorDetail() {
                   <span className="text-green-500 mr-1.5">📹</span> 视频沟通
                 </h4>
                 <span className="text-gray-900 font-bold text-[14px]">
-                  ¥{counselor.price + 200}/50分钟
+                  ¥{counselor.pricing.video}/50分钟
                 </span>
               </div>
               <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
@@ -323,7 +323,10 @@ export function CounselorDetail() {
                 ¥
               </span>
               <span className="text-[24px] font-bold text-primary leading-none">
-                {counselor.price}
+                {counselor.pricing.text}
+              </span>
+              <span className="text-[11px] text-gray-400 ml-1 mb-1 line-through">
+                ¥{counselor.pricing.video + 200}
               </span>
             </div>
           </div>

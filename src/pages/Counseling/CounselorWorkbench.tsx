@@ -5,99 +5,51 @@ import {
   Clock, 
   MessageSquare,
   Phone,
-  Video,
   Target,
   Repeat2,
   ChevronRight,
   TrendingUp,
-  Settings,
-  Sparkles
+  Settings
 } from "lucide-react";
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-  const { pushView, enterAppMode, setSelectedCounselorOrder } = useAppStore();
-  const [activeTab, setActiveTab] = useState<"appointments" | "completed" | "messages">("appointments");
+  const { pushView, enterAppMode } = useAppStore();
+  const [status, setStatus] = useState<"online" | "busy" | "offline">("online");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
 
-  // Mock data for appointments
-  const appointments = [
+  // Mock data for requests
+  const requests = [
     {
-      id: "ord-1",
-      timeStr: "14:00",
-      dateStr: "今天",
+      id: "req-1",
       userName: "匿名用户 0495",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      userProfile: "21岁 · 大学生",
       type: "voice",
-      duration: "50分钟",
-      aiSummary: "职业倦怠，情绪低落，近期压力较大",
-      tags: ["高敏焦虑", "考研压力", "近期失眠", "脆弱敏感"],
-      timestamp: new Date().setHours(14, 0, 0, 0),
-      status: "pending"
+      duration: "30分钟",
+      price: 159,
+      tags: ["高敏焦虑", "考研压力"],
+      timeRequested: "10分钟前",
     },
     {
-      id: "ord-2",
-      timeStr: "20:00",
-      dateStr: "今天",
-      userName: "陈小希",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      userProfile: "25岁 · 财务",
-      type: "voice",
-      duration: "50分钟",
-      aiSummary: "亲密关系冲突，缺乏安全感",
-      tags: ["焦虑依恋", "缺乏安全感"],
-      timestamp: new Date().setHours(20, 0, 0, 0),
-      status: "pending"
-    },
-    {
-      id: "ord-3",
-      timeStr: "10:00",
-      dateStr: "明天",
+      id: "req-2",
       userName: "小林",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      userProfile: "28岁 · 互联网运营",
-      type: "video",
-      duration: "50分钟",
-      aiSummary: "长期失眠，人际关系紧张，自我效能感低",
-      tags: ["职业倦怠", "情绪低落", "讨好型人格"],
-      timestamp: new Date().setDate(new Date().getDate() + 1),
-      status: "pending"
-    }
-  ].sort((a, b) => a.timestamp - b.timestamp); // 按照预约临近时间做正排序
-
-  const completed = [
-    {
-      id: "ord-4",
-      timeStr: "10:00",
-      dateStr: "昨天",
-      userName: "李某某",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=11",
-      userProfile: "32岁 · 自由职业",
-      type: "voice",
-      duration: "50分钟",
-      aiSummary: "职业发展迷茫，轻度抑郁倾向",
-      tags: ["职业规划", "轻度抑郁"],
-      status: "completed",
-      counselorAdvice: "建议结合 MBTI 和霍兰德职业兴趣测试做一次深度探索，同时每天保持30分钟的有氧运动以缓解抑郁情绪。"
-    },
-    {
-      id: "ord-5",
-      timeStr: "14:00",
-      dateStr: "前天",
-      userName: "王小明",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=12",
-      userProfile: "19岁 · 大学生",
       type: "text",
       duration: "30分钟",
-      aiSummary: "学业焦虑，对未来迷茫",
-      tags: ["学业焦虑", "迷茫"],
-      status: "completed",
-      counselorAdvice: "" // 空字符串代表尚未补充建议
+      price: 69,
+      tags: ["情绪低落", "失眠"],
+      timeRequested: "15分钟前",
     }
   ];
 
-  const isBusy = appointments.length > 0 && appointments[0].dateStr === "今天"; // 简单判断是否有今天的预约
-  const status = isBusy ? "busy" : "online";
+  const upcoming = [
+    {
+      id: "ord-8890",
+      userName: "陈小希",
+      avatar: "https://i.pravatar.cc/150?img=12",
+      type: "voice",
+      time: "今天 20:00 - 20:30",
+      status: "pending_call"
+    }
+  ];
 
   return (
     <motion.div
@@ -111,12 +63,19 @@ export function CounselorWorkbench() {
            <div className="flex items-center space-x-4">
              <div className="relative">
                 <img src={mockUser.avatar} alt="counselor" className="w-14 h-14 rounded-full border border-gray-100 object-cover shadow-sm" />
+                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${status === "online" ? "bg-green-500" : status === "busy" ? "bg-orange-500" : "bg-gray-400"}`}></div>
              </div>
              <div>
                 <h1 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight">林安 <span className="text-[12px] font-medium text-gray-500 font-normal">高级咨询师</span></h1>
-                <div className="text-gray-600 text-[13px] font-medium mt-1">
-                  {status === "online" ? "🟢 在线" : "🟠 咨询中"}
-                </div>
+                <select 
+                  value={status} 
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  className="bg-transparent text-gray-600 text-[13px] font-medium p-0 border-none outline-none focus:ring-0 active:bg-transparent"
+                >
+                  <option value="online">🟢 在线接单的</option>
+                  <option value="busy">🟠 忙线中</option>
+                  <option value="offline">⚫ 休息中</option>
+                </select>
              </div>
            </div>
            <button 
@@ -131,8 +90,8 @@ export function CounselorWorkbench() {
 
          <div className="grid grid-cols-3 gap-3">
             <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
-               <div className="text-gray-500 text-[11px] mb-1 font-medium">用户评价</div>
-               <div className="text-gray-400 font-medium text-[12px] mt-1">暂无，还需努力</div>
+               <div className="text-gray-500 text-[11px] mb-1 font-medium">今日收益</div>
+               <div className="text-gray-900 font-bold text-[18px]">¥850</div>
             </div>
             <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
                <div className="text-gray-500 text-[11px] mb-1 font-medium">待服务</div>
@@ -148,20 +107,20 @@ export function CounselorWorkbench() {
       <div className="px-5 pt-4 pb-12 w-full">
         <div className="flex space-x-6 mb-4 px-2">
            <button 
-             onClick={() => setActiveTab("appointments")}
-             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'appointments' ? 'text-gray-900' : 'text-gray-400'}`}
+             onClick={() => setActiveTab("requests")}
+             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'requests' ? 'text-gray-900' : 'text-gray-400'}`}
            >
-             待咨询 <span className="absolute top-1 -right-2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-             {activeTab === 'appointments' && (
+             新派单 <span className="absolute top-1 -right-2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+             {activeTab === 'requests' && (
                <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
              )}
            </button>
            <button 
-             onClick={() => setActiveTab("completed")}
-             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'completed' ? 'text-gray-900' : 'text-gray-400'}`}
+             onClick={() => setActiveTab("upcoming")}
+             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'upcoming' ? 'text-gray-900' : 'text-gray-400'}`}
            >
-             已咨询
-             {activeTab === 'completed' && (
+             即将开始
+             {activeTab === 'upcoming' && (
                <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
              )}
            </button>
@@ -177,54 +136,50 @@ export function CounselorWorkbench() {
         </div>
 
         <AnimatePresence mode="wait">
-          {activeTab === "appointments" ? (
+          {activeTab === "requests" ? (
              <motion.div
-               key="appointments"
+               key="requests"
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                exit={{ opacity: 0, y: -10 }}
                className="space-y-4"
              >
-               {appointments.map(req => (
-                 <button 
-                   key={req.id} 
-                   onClick={() => {
-                     setSelectedCounselorOrder(req);
-                     pushView("counselor-order-detail");
-                   }}
-                   className="w-full text-left bg-white rounded-[14px] p-4 shadow-sm border border-gray-100 relative active:scale-[0.98] transition-transform flex flex-col"
-                 >
-                    {/* 第一行：时间、方式与头像姓名 */}
-                    <div className="flex justify-between items-center w-full mb-3">
-                       <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
-                          <span className="text-[18px] font-black text-gray-900 tracking-tight leading-none shrink-0">{req.timeStr}</span>
-                          <span className="text-[11px] font-bold text-gray-500 shrink-0">{req.dateStr}</span>
-                          <div className="h-3 w-px bg-gray-200 mx-1 shrink-0"></div>
-                          <img src={req.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-gray-100 shrink-0" />
-                          <span className="text-[14px] font-bold text-gray-900 leading-none truncate">{req.userName}</span>
+               {requests.map(req => (
+                 <div key={req.id} className="bg-white rounded-3xl p-5 shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-50 relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-4">
+                       <div className="flex items-center space-x-3">
+                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${req.type === 'voice' ? 'bg-indigo-50/50 text-indigo-500 border-indigo-100' : 'bg-blue-50/50 text-blue-500 border-blue-100'}`}>
+                           {req.type === 'voice' ? <Phone size={16} /> : <MessageSquare size={16} />}
+                         </div>
+                         <div>
+                            <div className="text-[16px] font-bold text-gray-900 mb-0.5">{req.userName}</div>
+                            <div className="text-[12px] text-gray-500">{req.type === 'voice' ? '语音连线' : '文字倾听'} · {req.duration}</div>
+                         </div>
                        </div>
-                       <div className="flex items-center shrink-0 text-[11px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 whitespace-nowrap">
-                          {req.type === 'voice' ? <Phone size={10} className="mr-1" /> : req.type === 'video' ? <Video size={10} className="mr-1" /> : <MessageSquare size={10} className="mr-1" />}
-                          {req.type === 'voice' ? '语音' : req.type === 'video' ? '视频' : '文字'}
+                       <div className="text-right">
+                          <div className="text-[18px] font-black tracking-tight text-gray-900 flex items-baseline justify-end"><span className="text-[12px] font-bold mr-0.5">¥</span>{req.price}</div>
+                          <div className="text-[10px] text-gray-400 mt-1 flex items-center"><Clock size={10} className="mr-0.5" />{req.timeRequested}</div>
                        </div>
                     </div>
                     
-                    {/* 第二行：标签混合展示（防挤压自动换行） */}
-                    <div className="flex flex-wrap gap-1.5 w-full mb-3 items-center">
-                       <span className="text-[11px] text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded shrink-0">{req.userProfile}</span>
+                    <div className="flex space-x-2 mb-5">
                        {req.tags.map(tag => (
-                          <span key={tag} className="bg-gray-50 text-gray-400 border border-gray-100 px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 whitespace-nowrap">{tag}</span>
+                          <span key={tag} className="bg-gray-50 text-gray-600 border border-gray-100 px-2.5 py-1 rounded-md text-[11px] font-medium">{tag}</span>
                        ))}
                     </div>
 
-                    {/* 第三行：AI 解读诉求 */}
-                    <div className="bg-blue-50/40 rounded-xl p-2.5 border border-blue-100/30 w-full flex items-start space-x-1.5">
-                       <Sparkles size={14} className="text-blue-500 shrink-0 mt-[1px]" />
-                       <div className="text-[12px] text-gray-600 leading-snug font-medium line-clamp-2">
-                         {req.aiSummary}
-                       </div>
+                    <div className="flex space-x-3 pt-4 border-t border-gray-50">
+                       <button className="flex-1 bg-white border border-gray-200 text-gray-600 font-bold py-3 rounded-2xl text-[13px] active:bg-gray-50 transition-colors">
+                         婉拒
+                       </button>
+                       <button 
+                         onClick={() => pushView("counselor-order-detail")}
+                         className="flex-[2] bg-gray-900 text-white font-bold py-3 rounded-2xl text-[13px] hover:bg-gray-800 shadow-sm flex items-center justify-center transition-colors"
+                       >
+                         查看详情接单 <ChevronRight size={14} className="ml-1" />
+                       </button>
                     </div>
-                 </button>
+                 </div>
                ))}
              </motion.div>
           ) : activeTab === "messages" ? (
@@ -239,11 +194,11 @@ export function CounselorWorkbench() {
                  onClick={() => pushView("counseling-text-chat")}
                  className="w-full bg-white p-4 rounded-3xl flex items-center shadow-sm border border-gray-50 active:scale-[0.98] transition-transform"
                >
-                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="" className="w-12 h-12 rounded-full object-cover mr-4 shrink-0" />
-                 <div className="flex-1 text-left min-w-0">
+                 <img src="https://i.pravatar.cc/150?img=12" alt="" className="w-12 h-12 rounded-full object-cover mr-4 shrink-0" />
+                 <div className="flex-1 text-left">
                    <div className="flex justify-between items-center mb-1">
-                     <h3 className="font-bold text-gray-900 text-[16px] truncate pr-2">小林</h3>
-                     <span className="text-[11px] text-gray-400 shrink-0">10:30</span>
+                     <h3 className="font-bold text-gray-900 text-[16px]">小林</h3>
+                     <span className="text-[11px] text-gray-400">10:30</span>
                    </div>
                    <p className="text-[13px] text-gray-500 line-clamp-1">
                      (未读) 咨询师你好，我想问一下...
@@ -251,62 +206,56 @@ export function CounselorWorkbench() {
                  </div>
                </button>
              </motion.div>
-          ) : activeTab === "completed" ? (
+          ) : (
              <motion.div
-               key="completed"
+               key="upcoming"
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                exit={{ opacity: 0, y: -10 }}
                className="space-y-4"
              >
-               {completed.map(item => (
-                 <button 
-                   key={item.id} 
-                   onClick={() => {
-                     setSelectedCounselorOrder(item);
-                     pushView("counselor-patient-profile");
-                   }}
-                   className="w-full text-left bg-white rounded-[14px] p-4 shadow-sm border border-gray-100 relative flex flex-col opacity-80 active:scale-[0.98] transition-transform"
-                 >
-                    {/* 第一行：时间、方式与头像姓名 */}
-                    <div className="flex justify-between items-center w-full mb-3">
-                       <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
-                          <span className="text-[16px] font-black text-gray-400 tracking-tight leading-none shrink-0">{item.timeStr}</span>
-                          <span className="text-[11px] font-bold text-gray-400 shrink-0">{item.dateStr}</span>
-                          <div className="h-3 w-px bg-gray-100 mx-1 shrink-0"></div>
-                          <img src={item.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-gray-100 grayscale shrink-0" />
-                          <span className="text-[14px] font-bold text-gray-500 leading-none truncate">{item.userName}</span>
-                       </div>
-                       <div className="flex items-center shrink-0 text-[11px] font-bold px-1.5 py-0.5 rounded bg-gray-50 text-gray-500 whitespace-nowrap">
-                          {item.type === 'voice' ? <Phone size={10} className="mr-1" /> : item.type === 'video' ? <Video size={10} className="mr-1" /> : <MessageSquare size={10} className="mr-1" />}
-                          {item.type === 'voice' ? '语音' : item.type === 'video' ? '视频' : '文字'}
-                       </div>
+               {upcoming.map(item => (
+                 <div key={item.id} className="bg-white rounded-3xl p-5 shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-50 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1.5 rounded-bl-xl z-10 border-b border-l border-green-100/50">
+                      待接听
                     </div>
                     
-                    {/* 第二行：标签混合展示（防挤压自动换行） */}
-                    <div className="flex flex-wrap gap-1.5 w-full mb-3 items-center">
-                       <span className="text-[11px] text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded shrink-0">{item.userProfile}</span>
-                       {item.tags.map(tag => (
-                          <span key={tag} className="bg-gray-50 text-gray-400 border border-gray-100 px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 whitespace-nowrap">{tag}</span>
-                       ))}
+                    <div className="flex items-center space-x-3 mb-5 mt-1">
+                       <img src={item.avatar} alt={item.userName} className="w-14 h-14 rounded-full border border-gray-100 object-cover" />
+                       <div>
+                          <div className="text-[18px] font-bold text-gray-900 mb-1">{item.userName}</div>
+                          <div className="flex items-center text-[12px] text-gray-500 font-medium bg-gray-50 px-2 py-0.5 rounded-md w-fit">
+                             <Clock size={12} className="mr-1" /> {item.time}
+                          </div>
+                       </div>
                     </div>
 
-                    {/* 第三行：AI 解读诉求 */}
-                    <div className="bg-gray-50/50 rounded-xl p-2.5 border border-gray-100/50 w-full flex items-start space-x-1.5 grayscale opacity-80 mb-3">
-                       <Sparkles size={14} className="text-gray-400 shrink-0 mt-[1px]" />
-                       <div className="text-[12px] text-gray-500 leading-snug font-medium line-clamp-2">
-                         {item.aiSummary}
-                       </div>
+                    <div className="bg-gray-50/50 p-3.5 rounded-2xl mb-5 border border-gray-100 flex items-center justify-between">
+                       <span className="text-[13px] text-gray-500 font-medium">服务项目</span>
+                       <span className="text-[13px] font-bold text-gray-900 flex items-center">
+                         {item.type === 'voice' ? <Phone size={14} className="mr-1.5 text-indigo-500" /> : <MessageSquare size={14} className="mr-1.5 text-blue-500" />}
+                         {item.type === 'voice' ? '语音倾听' : '文字聊天'} (30分钟)
+                       </span>
                     </div>
-                    
-                    {/* 底部：点击查看详情入口 */}
-                    <div className="flex items-center justify-center w-full pt-1.5 border-t border-gray-50/50 text-[11px] font-bold text-blue-500">
-                      查看该用户画像与定性总结 <ChevronRight size={12} className="ml-0.5" />
+
+                    <div className="flex space-x-3">
+                       <button 
+                         onClick={() => pushView("counselor-patient-profile")}
+                         className="flex-1 bg-white text-gray-700 font-bold py-3.5 rounded-2xl text-[13px] flex items-center justify-center border border-gray-200 transition-colors active:bg-gray-50"
+                       >
+                         <Target size={16} className="mr-1.5" /> 画像档案
+                       </button>
+                       <button 
+                         onClick={() => pushView("counseling-call")}
+                         className="flex-1 bg-gray-900 text-white font-bold py-3.5 rounded-2xl text-[13px] shadow-sm flex items-center justify-center transition-colors hover:bg-gray-800"
+                       >
+                         <Phone size={16} className="mr-1.5" /> 进入连线
+                       </button>
                     </div>
-                 </button>
+                 </div>
                ))}
             </motion.div>
-          ) : null}
+          )}
         </AnimatePresence>
       </div>
     </motion.div>

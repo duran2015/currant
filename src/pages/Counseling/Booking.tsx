@@ -2,73 +2,44 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { mockUser } from "../../data";
-import { BookingOrder, AvailableSlot } from "../../types";
+import { mockCounselors } from "../../data";
+import { BookingOrder } from "../../types";
 
 export function Booking() {
-  const { popView, pushView, setBookingOrder } = useAppStore();
+  const { popView, pushView, selectedCounselorId, setBookingOrder } =
+    useAppStore();
+  const counselor =
+    mockCounselors.find((c) => c.id === selectedCounselorId) ||
+    mockCounselors[0];
 
-  // 模拟从后端获取的数据
-  const [availableDates, setAvailableDates] = useState<string[]>([
-    "2026-06-20",
-    "2026-06-21",
-    "2026-06-22",
-  ]);
-  const [selectedDate, setSelectedDate] = useState(availableDates[0]);
-  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const initialDate =
+    counselor.schedules.find((s) => !s.isFull)?.date ||
+    counselor.schedules[0].date;
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [selectedMethod, setSelectedMethod] = useState<"text" | "voice" | "video">(
+    "voice",
+  );
   const [selectedTime, setSelectedTime] = useState("");
-  const [price, setPrice] = useState(99);
-  const [isTrial, setIsTrial] = useState(false);
 
-  // 模拟 GET /api/appointments/available-slots?date={selectedDate}
+  const currentSchedule = counselor.schedules.find(
+    (s) => s.date === selectedDate,
+  );
+
+  // Reset time when date changes
   useEffect(() => {
-    const fetchAvailableSlots = () => {
-      // 模拟后端根据 user_id 查询使用次数计算价格
-      const usedTrialCount = mockUser.usedTrialCount || 0;
-      const calculatedPrice = usedTrialCount < 2 ? 9.9 : 99;
-      const calculatedIsTrial = usedTrialCount < 2;
-
-      setPrice(calculatedPrice);
-      setIsTrial(calculatedIsTrial);
-
-      // 模拟返回的时段
-      if (selectedDate === "2026-06-20") {
-        setAvailableSlots([
-          { time: "09:00", shift: "morning", available: true },
-          { time: "10:30", shift: "morning", available: false },
-          { time: "13:00", shift: "afternoon", available: true },
-          { time: "14:15", shift: "afternoon", available: true },
-          { time: "15:30", shift: "afternoon", available: false },
-          { time: "16:45", shift: "afternoon", available: true },
-          { time: "19:00", shift: "evening", available: true },
-        ]);
-      } else if (selectedDate === "2026-06-21") {
-        setAvailableSlots([
-          { time: "09:00", shift: "morning", available: false },
-          { time: "10:30", shift: "morning", available: true },
-          { time: "14:15", shift: "afternoon", available: true },
-        ]);
-      } else {
-        setAvailableSlots([]);
-      }
-      setSelectedTime("");
-    };
-
-    fetchAvailableSlots();
+    setSelectedTime("");
   }, [selectedDate]);
 
   const handleConfirm = () => {
     if (!selectedTime) return;
 
-    // 注意：MVP 阶段不需要选择具体咨询师，后端会自动分配。
-    // 这里前端只负责将预约时间和价格传给支付页
     const newOrder: BookingOrder = {
       id: `ord_${Date.now()}`,
-      counselorId: "auto-assigned", // 占位
+      counselorId: counselor.id,
       date: selectedDate,
       time: selectedTime,
-      type: "video", // MVP 默认视频或由后端决定，这里仅作展示
-      price: price,
+      type: selectedMethod,
+      price: counselor.pricing[selectedMethod],
       status: "pending",
     };
 
@@ -98,6 +69,95 @@ export function Booking() {
 
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="p-5">
+          <div className="flex items-center space-x-3 mb-6 bg-surface border border-gray-100 p-4 rounded-[2rem] shadow-sm">
+            <img
+              src={counselor.avatar}
+              alt=""
+              className="w-12 h-12 rounded-full object-cover shadow-sm"
+            />
+            <div>
+              <p className="font-bold text-gray-900 text-[15px]">
+                {counselor.name}
+              </p>
+              <p className="text-[11px] font-medium text-gray-500 bg-white border border-gray-100 px-2 py-0.5 rounded-full inline-block mt-1">
+                L2 / L3 心理健康支持支持
+              </p>
+            </div>
+          </div>
+
+          <h2 className="text-[15px] font-bold mb-4 flex items-center text-gray-900">
+            <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
+            选择咨询方式
+          </h2>
+          <div className="flex flex-col space-y-3 mb-8">
+            <button
+              onClick={() => setSelectedMethod("text")}
+              className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${
+                selectedMethod === "text"
+                  ? "border-primary bg-primary-light/30 shadow-sm"
+                  : "border-gray-100 bg-white hover:border-gray-200"
+              }`}
+            >
+              <div className="flex flex-col items-start">
+                <span
+                  className={`font-bold text-[14px] mb-1 flex items-center ${selectedMethod === "text" ? "text-primary" : "text-gray-900"}`}
+                >
+                  <span className="mr-1.5">💬</span> 文字沟通
+                </span>
+                <span className="text-[11px] text-gray-500">
+                  异步回复，陪伴引导
+                </span>
+              </div>
+              <span className={`font-bold ${selectedMethod === "text" ? "text-primary" : "text-gray-900"}`}>
+                ¥{counselor.pricing.text}
+              </span>
+            </button>
+            <button
+              onClick={() => setSelectedMethod("voice")}
+              className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${
+                selectedMethod === "voice"
+                  ? "border-primary bg-primary-light/30 shadow-sm"
+                  : "border-gray-100 bg-white hover:border-gray-200"
+              }`}
+            >
+              <div className="flex flex-col items-start">
+                <span
+                  className={`font-bold text-[14px] mb-1 flex items-center ${selectedMethod === "voice" ? "text-primary" : "text-gray-900"}`}
+                >
+                  <span className="mr-1.5">🎙️</span> 语音咨询
+                </span>
+                <span className="text-[11px] text-gray-500">
+                  注重倾听，50分钟
+                </span>
+              </div>
+              <span className={`font-bold ${selectedMethod === "voice" ? "text-primary" : "text-gray-900"}`}>
+                ¥{counselor.pricing.voice}
+              </span>
+            </button>
+            <button
+              onClick={() => setSelectedMethod("video")}
+              className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${
+                selectedMethod === "video"
+                  ? "border-primary bg-primary-light/30 shadow-sm"
+                  : "border-gray-100 bg-white hover:border-gray-200"
+              }`}
+            >
+              <div className="flex flex-col items-start">
+                <span
+                  className={`font-bold text-[14px] mb-1 flex items-center ${selectedMethod === "video" ? "text-primary" : "text-gray-900"}`}
+                >
+                  <span className="mr-1.5">📹</span> 视频咨询
+                </span>
+                <span className="text-[11px] text-gray-500">
+                  面对面深度交流，50分钟
+                </span>
+              </div>
+              <span className={`font-bold ${selectedMethod === "video" ? "text-primary" : "text-gray-900"}`}>
+                ¥{counselor.pricing.video}
+              </span>
+            </button>
+          </div>
+
           <h2 className="text-[15px] font-bold mb-4 flex items-center text-gray-900">
             <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
             选择日期
@@ -105,21 +165,36 @@ export function Booking() {
 
           {/* Scrollable Date Strip */}
           <div className="flex space-x-3 overflow-x-auto pb-2 mb-6 scrollbar-hide -mx-5 px-5">
-            {availableDates.map((date) => (
+            {counselor.schedules.map((schedule) => (
               <button
-                key={date}
-                onClick={() => setSelectedDate(date)}
-                className={`flex-shrink-0 w-[5rem] py-3 rounded-2xl border-2 transition-colors flex flex-col items-center justify-center ${
-                  selectedDate === date
+                key={schedule.date}
+                onClick={() =>
+                  !schedule.isFull && setSelectedDate(schedule.date)
+                }
+                disabled={schedule.isFull}
+                className={`flex-shrink-0 w-[4.5rem] py-3 rounded-2xl border-2 transition-colors flex flex-col items-center justify-center ${
+                  selectedDate === schedule.date
                     ? "border-gray-900 bg-gray-900 text-white shadow-md"
-                    : "border-gray-100 bg-white text-gray-600 hover:border-gray-200"
+                    : schedule.isFull
+                      ? "border-transparent bg-gray-50 text-gray-400 opacity-60 cursor-not-allowed"
+                      : "border-gray-100 bg-white text-gray-600 hover:border-gray-200"
                 }`}
               >
                 <span
-                  className={`text-[15px] font-bold tracking-tighter`}
+                  className={`text-[11px] mb-1 font-medium ${selectedDate === schedule.date ? "text-gray-300" : "text-gray-400"}`}
                 >
-                  {date.slice(5)}
+                  {schedule.label}
                 </span>
+                <span
+                  className={`text-[15px] font-bold tracking-tighter ${schedule.isFull ? "line-through" : ""}`}
+                >
+                  {schedule.date}
+                </span>
+                {schedule.isFull && (
+                  <span className="text-[9px] mt-1 text-gray-400 font-bold">
+                    已满
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -130,29 +205,23 @@ export function Booking() {
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
-            {availableSlots.map((slot) => (
+            {currentSchedule?.times.map((time) => (
               <button
-                key={`${slot.shift}-${slot.time}`}
-                onClick={() => slot.available && setSelectedTime(slot.time)}
-                disabled={!slot.available}
-                className={`py-4 px-4 rounded-[1.5rem] border-2 transition-transform flex items-center justify-between ${
-                  selectedTime === slot.time
+                key={time}
+                onClick={() => setSelectedTime(time)}
+                className={`py-4 px-4 rounded-[1.5rem] border-2 transition-transform active:scale-[0.98] flex items-center justify-between ${
+                  selectedTime === time
                     ? "border-primary bg-primary-light/50 text-primary font-bold shadow-sm"
-                    : !slot.available
-                      ? "border-transparent bg-gray-50 text-gray-400 opacity-60 cursor-not-allowed"
-                      : "border-gray-100 text-gray-700 bg-white hover:border-gray-200 font-medium active:scale-[0.98]"
+                    : "border-gray-100 text-gray-700 bg-white hover:border-gray-200 font-medium"
                 }`}
               >
-                <span className={`text-[17px] tracking-tight ${!slot.available ? "line-through" : ""}`}>{slot.time}</span>
-                {selectedTime === slot.time && (
+                <span className="text-[17px] tracking-tight">{time}</span>
+                {selectedTime === time && (
                   <CheckCircle2 size={20} className="text-primary fall-in" />
-                )}
-                {!slot.available && (
-                   <span className="text-[10px] text-gray-400 font-bold">已满</span>
                 )}
               </button>
             ))}
-            {availableSlots.length === 0 && (
+            {currentSchedule?.times.length === 0 && (
               <div className="col-span-2 py-8 text-center text-gray-400 text-sm bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                 该日期暂无可约时间
               </div>
@@ -168,21 +237,18 @@ export function Booking() {
               合计金额
             </span>
             <div className="text-gray-400 text-[11px] mt-0.5">
-              1对1 心理咨询 50分钟
+              {selectedMethod === "video"
+                ? "视频咨询 50分钟"
+                : selectedMethod === "voice"
+                  ? "语音咨询 50分钟"
+                  : "文字沟通 (按次/周期)"}
             </div>
           </div>
-          <div className="flex flex-col items-end">
-             {isTrial && (
-                <span className="text-[10px] text-primary bg-primary-light/30 px-1.5 py-0.5 rounded font-bold mb-1">
-                  新用户体验价
-                </span>
-             )}
-            <div className="flex items-end">
-              <span className="text-sm font-bold text-gray-900 mr-0.5">¥</span>
-              <span className="text-[26px] font-bold text-gray-900 leading-none">
-                {price}
-              </span>
-            </div>
+          <div className="flex items-end">
+            <span className="text-sm font-bold text-gray-900 mr-0.5">¥</span>
+            <span className="text-[26px] font-bold text-gray-900 leading-none">
+              {counselor.pricing[selectedMethod]}
+            </span>
           </div>
         </div>
         <button

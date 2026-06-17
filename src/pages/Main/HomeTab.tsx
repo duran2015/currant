@@ -163,12 +163,12 @@ export function HomeTab() {
 
   const handleEmojiSelect = (level: number) => {
     setSelectedEmoji(level);
-    // Auto-save after selecting mood
+    // Simulate auto-save after 3 seconds or when tags are selected
     setTimeout(() => {
       setHasRecordedToday(true);
       setShowInputSheet(false);
       setStreakDays(prev => prev + 1);
-    }, 500);
+    }, 1500);
   };
 
   const toggleTag = (id: string) => {
@@ -189,7 +189,7 @@ export function HomeTab() {
         <div className="flex items-center">
           <div className="relative mr-3">
             <div className="w-10 h-10 bg-gradient-to-br from-orange-50 to-orange-100 rounded-full flex items-center justify-center text-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-white z-10 relative">
-              🦦
+              {hasRecordedToday ? (selectedEmoji && selectedEmoji >= 4 ? '🥰' : (selectedEmoji === 3 ? '🦦' : '🥺')) : '🦦'}
             </div>
             {/* 对话气泡小红点提示 */}
             {!hasRecordedToday && (
@@ -491,6 +491,53 @@ export function HomeTab() {
                   </button>
                 ))}
               </div>
+
+              {/* 可选标签 */}
+              <AnimatePresence>
+                {selectedEmoji && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="border-t border-gray-100 pt-6"
+                  >
+                    <div className="text-center text-[12px] text-gray-400 mb-4 flex items-center justify-center">
+                      <span className="w-10 h-px bg-gray-200 mr-3"></span>
+                      可选：是什么影响了心情？
+                      <span className="w-10 h-px bg-gray-200 ml-3"></span>
+                    </div>
+                    
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {TAGS.map(tag => (
+                        <button
+                          key={tag.id}
+                          onClick={() => toggleTag(tag.id)}
+                          className={`flex items-center px-4 py-2 rounded-full text-[13px] font-medium transition-all ${
+                            selectedTags.includes(tag.id) 
+                              ? 'bg-primary text-white shadow-md scale-105' 
+                              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <span className="mr-1.5 text-[15px]">{tag.emoji}</span>
+                          {tag.label}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-8 text-center">
+                      <button 
+                        onClick={() => {
+                          setHasRecordedToday(true);
+                          setShowInputSheet(false);
+                          setStreakDays(prev => prev + 1);
+                        }}
+                        className="bg-gray-900 text-white font-bold py-3.5 px-12 rounded-full active:scale-95 transition-transform"
+                      >
+                        保存记录
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
         )}
