@@ -1,34 +1,38 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, Info, HelpCircle, ArrowRight } from "lucide-react";
+import { ChevronLeft, Info, HelpCircle, ArrowRight, Mic, PlayCircle } from "lucide-react";
 import { useAppStore } from "../../store";
-import { mockCounselors } from "../../data";
+import { mockCounselors, mockConsultationRecords } from "../../data";
 
 export function TextChat() {
-  const { popView, pushView, bookingOrder, selectedCounselorId } =
+  const { popView, pushView, bookingOrder, selectedCounselorId, selectedConsultationId } =
     useAppStore();
 
-  const counselor =
-    mockCounselors.find(
-      (c) => c.id === (bookingOrder?.counselorId || selectedCounselorId),
-    ) || mockCounselors[0];
+  const record = mockConsultationRecords.find(r => r.id === selectedConsultationId);
+  const targetCounselorId = record?.counselorId || bookingOrder?.counselorId || selectedCounselorId;
+  const counselor = mockCounselors.find((c) => c.id === targetCounselorId) || mockCounselors[0];
 
-  const [messages, setMessages] = useState<
-    { id: string; role: "user" | "counselor"; text: string }[]
-  >([
-    {
-      id: "1",
-      role: "counselor",
-      text: `你好，我是你的倾听师 ${counselor.name}。我们的文字沟通时间为 30 分钟。在这段时间里，请随时留下你想说的话，我会逐一认真阅读并回复。我可以为你提供情感上的陪伴和倾听。`,
-    },
-  ]);
+  const isVoice = record?.type === "voice";
+  const defaultMessages = record?.messages && record.messages.length > 0
+    ? record.messages.map((m, i) => ({ id: i.toString(), role: m.role as "user" | "counselor", text: m.content }))
+    : [
+        {
+          id: "sys-1",
+          role: "counselor",
+          text: isVoice
+            ? `我们已经完成了 ${record?.duration || 50} 分钟的语音咨询。以下是本次咨询的摘要：\n\n${record?.summary || "期待下次与你交流。"}\n\n建议：${record?.counselorNotes || "保持好心情。"}`
+            : `你好，我是你的倾听师 ${counselor.name}。我们的文字沟通时间为 30 分钟。在这段时间里，请随时留下你想说的话，我会逐一认真阅读并回复。我可以为你提供情感上的陪伴和倾听。`,
+        },
+      ];
+
+  const [messages, setMessages] = useState<{ id: string; role: "user" | "counselor"; text: string }[]>(defaultMessages as any);
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   
-  // 模拟服务期：如果在服务期内则可以打字，否则为只读模式
-  // 实际业务中，这应该由订单状态和时间(例如：预约开始前24h ~ 结束后24h)决定
-  const isSessionValid = bookingOrder?.status !== "completed" && bookingOrder?.status !== "cancelled";
+  // 如果是从记录进入的，或者是语音订单，通常服务期已结束
+  // 这里为了演示文字沟通，如果是文字类型默认开放，如果是语音则视为已结束
+  const isSessionValid = !isVoice && (bookingOrder?.status !== "completed" && bookingOrder?.status !== "cancelled");
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -99,9 +103,9 @@ export function TextChat() {
               <h1 className="text-[15px] font-bold text-gray-900 leading-tight">
                 {counselor.name}
               </h1>
-              <div className="text-[10px] text-green-500 font-medium">
-                {isSessionValid
-                  ? "服务期内 · 可留言沟通"
+              <div className="text-[10px] text-gray-500 bg-white/50 px-2 py-0.5 rounded-full inline-block backdrop-blur-sm shadow-sm border border-gray-100">
+                {!isVoice 
+                  ? (isSessionValid ? `剩余沟通时间 ${formatTime(timeLeft)}` : "服务已结束 · 当前为只读模式")
                   : "服务已结束 · 当前为只读模式"}
               </div>
             </div>
@@ -113,16 +117,26 @@ export function TextChat() {
       </div>
 
       {/* Notice Banner */}
-      <div className="bg-amber-50/80 backdrop-blur border-b border-amber-100/50 py-2 px-4 flex items-center text-[11px] text-amber-700/80 absolute top-[72px] w-full z-10 shadow-sm">
-        <HelpCircle size={14} className="mr-1.5 shrink-0" />
-        单次文字咨询限时 30 分钟，倾听师手动回复可能需要等待，请不要着急。
-      </div>
+      {!isVoice && (
+        <div className="bg-amber-50/80 backdrop-blur border-b border-amber-100/50 py-2 px-4 flex items-center text-[11px] text-amber-700/80 absolute top-[72px] left-0 w-full z-10 shadow-sm">
+          <HelpCircle size={14} className="mr-1.5 shrink-0" />
+          单次文字咨询限时 30 分钟，倾听师手动回复可能需要等待，请不要着急。
+        </div>
+      )}
 
       {/* Messages */}
       <div
-        className="flex-1 overflow-y-auto p-4 pt-16 space-y-5"
+        className={`flex-1 overflow-y-auto p-4 ${!isVoice ? 'pt-16' : 'pt-4'} space-y-5`}
         ref={scrollRef}
       >
+        {isVoice && (
+          <div className="flex justify-center mb-6">
+            <div className="bg-gray-100 text-gray-500 text-[11px] px-3 py-1 rounded-full flex items-center">
+              <PlayCircle size={12} className="mr-1" />
+              包含 {record?.duration || 50} 分钟的语音记录摘要
+            </div>
+          </div>
+        )}
         {messages.map((msg) => (
           <div
             key={msg.id}

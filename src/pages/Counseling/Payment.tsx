@@ -159,7 +159,9 @@ export function Payment() {
                     <span className="font-medium text-gray-900">
                       {bookingOrder.type === "text"
                         ? "文字沟通"
-                        : "语音/视频咨询"}
+                        : bookingOrder.type === "voice"
+                          ? "语音咨询"
+                          : "视频咨询"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -287,7 +289,7 @@ export function Payment() {
               时间：{bookingOrder.date} {bookingOrder.time}
               <br />
               <span className="inline-block mt-4 text-[12px] bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full">
-                请提前 5 分钟进入咨询室准备
+                请提前 5 分钟进入{bookingOrder.type === 'text' ? '文字咨询室' : '会议室'}准备
               </span>
             </p>
 

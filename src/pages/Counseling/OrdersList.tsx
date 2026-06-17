@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import {
@@ -6,22 +7,64 @@ import {
   MessageSquare,
   Video,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 import { mockCounselors } from "../../data";
 
 export function OrdersList() {
-  const { popView, pushView, orders, setBookingOrder } = useAppStore();
+  const { popView, pushView, orders, setBookingOrder, setActiveCallSession, setIsCallMinimized } = useAppStore();
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const getCounselor = (id: string) => {
     return mockCounselors.find((c) => c.id === id) || mockCounselors[0];
   };
 
-  const handleEnterConsultation = (order: any) => {
+  const getLockStatus = (order: any) => {
+    if (order.type === "text") return { isLocked: false, lockMessage: "" };
+    
+    let scheduledTime = new Date();
+    const timeStr = order.timeStr || order.time;
+    const dateStr = order.dateStr || order.date;
+
+    if (timeStr) {
+      const [hourStr, minStr] = timeStr.split(":");
+      scheduledTime.setHours(parseInt(hourStr), parseInt(minStr), 0, 0);
+    }
+    
+    if (dateStr && dateStr.includes("-")) {
+      const [month, day] = dateStr.split("-");
+      scheduledTime.setMonth(parseInt(month) - 1);
+      scheduledTime.setDate(parseInt(day));
+    } else if (dateStr === "明天") {
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
+
+    const diffMinutes = (scheduledTime.getTime() - now.getTime()) / 60000;
+    if (diffMinutes > 10) {
+      const openTime = new Date(scheduledTime.getTime() - 10 * 60000);
+      const openDateStr = `${openTime.getMonth() + 1}月${openTime.getDate()}日`;
+      const openTimeStr = `${openTime.getHours().toString().padStart(2, '0')}:${openTime.getMinutes().toString().padStart(2, '0')}`;
+      return { isLocked: true, lockMessage: `预计 ${openDateStr} ${openTimeStr} 开放` };
+    }
+    return { isLocked: false, lockMessage: "" };
+  };
+
+  const handleEnterConsultation = (order: any, isLocked: boolean, lockMessage: string) => {
+    if (isLocked) {
+      alert(`会议室将在开始前10分钟开放，请稍后再试\n（${lockMessage}）`);
+      return;
+    }
     setBookingOrder(order);
     if (order.type === "text") {
       pushView("counseling-text-chat");
     } else {
-      pushView("counseling-call");
+      setActiveCallSession(order);
+      setIsCallMinimized(false);
     }
   };
 
@@ -72,7 +115,11 @@ export function OrdersList() {
                           {counselor.name}
                         </h3>
                         <p className="text-[11px] text-gray-500">
-                          {order.type === "text" ? "文字沟通" : "语音/视频咨询"}
+                          {order.type === "text"
+                            ? "文字沟通"
+                            : order.type === "voice"
+                              ? "语音咨询"
+                              : "视频咨询"}
                         </p>
                       </div>
                     </div>
@@ -103,14 +150,36 @@ export function OrdersList() {
                     </div>
                   </div>
 
-                  {order.status === "paid" && (
-                    <button
-                      onClick={() => handleEnterConsultation(order)}
-                      className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center transition-transform active:scale-[0.98]"
-                    >
-                      进入咨询空间 <ArrowRight size={16} className="ml-1" />
-                    </button>
-                  )}
+                  {order.status === "paid" && (() => {
+                    const { isLocked, lockMessage } = getLockStatus(order);
+                    return (
+                      <div className="relative mt-4">
+                        {/* 加锁和倒计时作为悬浮提示层 */}
+                        {order.type !== "text" && isLocked && (
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[12px] px-3 py-1.5 rounded-lg whitespace-nowrap flex items-center shadow-lg pointer-events-none z-20">
+                            <Lock size={12} className="mr-1.5 text-gray-300" />
+                            {lockMessage}
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => handleEnterConsultation(order, isLocked, lockMessage)}
+                          disabled={isLocked}
+                          className={`w-full py-3 rounded-xl font-bold flex items-center justify-center transition-all ${
+                            isLocked 
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
+                              : "bg-gray-900 text-white active:scale-[0.98]"
+                          }`}
+                        >
+                          {order.type === "text" ? (
+                            <>进入文字咨询室 <MessageSquare size={16} className="ml-2" /></>
+                          ) : (
+                            <>进入视频/语音会议室 <Video size={16} className="ml-2" /></>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}

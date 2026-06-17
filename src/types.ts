@@ -41,6 +41,7 @@ export interface UserProfile {
   isNewUser: boolean;
   hasRisk: boolean;
   role: "guest" | "registered" | "active";
+  usedTrialCount?: number;
 }
 
 export interface BookingOrder {
@@ -49,7 +50,7 @@ export interface BookingOrder {
   date: string;
   time: string;
   price: number;
-  type?: "text" | "voice";
+  type?: "text" | "voice" | "video";
   status:
     | "pending"
     | "paid"
@@ -66,6 +67,47 @@ export interface CounselorSchedule {
   times: string[];
 }
 
+export interface MVPCounselorSchedule {
+  id: string;
+  counselorId: string;
+  date: string;
+  shift: "morning" | "afternoon" | "evening";
+  slotCount: number;
+  status: "active" | "cancelled";
+}
+
+export interface Appointment {
+  id: string;
+  userId: string;
+  counselorId: string;
+  date: string;
+  timeSlot: string;
+  price: number;
+  isTrial: boolean;
+  status: "pending_payment" | "paid" | "in_progress" | "completed" | "cancelled" | "no_show";
+  meetingUrl?: string;
+  paidAt?: string;
+  startedAt?: string;
+  endedAt?: string;
+  cancelledAt?: string;
+  cancelReason?: string;
+  createdAt?: string;
+}
+
+// For frontend display mapping
+export interface AvailableSlot {
+  time: string;
+  shift: string;
+  available: boolean;
+}
+
+export interface AvailabilityResponse {
+  date: string;
+  slots: AvailableSlot[];
+  price: number;
+  isTrial: boolean;
+}
+
 export interface Counselor {
   id: string;
   name: string;
@@ -73,6 +115,11 @@ export interface Counselor {
   title: string;
   tags: string[];
   price: number;
+  pricing?: {
+    text: number;
+    voice: number;
+    video: number;
+  };
   rating: number;
   reviewsCount: number;
   about: string;
@@ -157,4 +204,26 @@ export interface ConsultationRecord {
     text: string;
     completed: boolean;
   }[];
+}
+
+// ----------------------------------------------------
+// Blackboard State Pool Models (Agent Collaboration)
+// ----------------------------------------------------
+
+export interface BlackboardState {
+  clinical: {
+    phq2Score: number;
+    severity: "轻度" | "中度" | "重度" | "危机" | "未评估";
+    crisis: boolean;
+  } | null;
+  domain: {
+    primary: "学业" | "工作" | "情感" | "家庭" | "社交" | "自我" | "说不清" | "未分类";
+    secondary?: string;
+  } | null;
+  phase: 1 | 2 | 3 | 4;
+  recommendation: {
+    serviceLevel: "L1" | "L2" | "L3" | "L4";
+    firstTool?: string;
+    persona?: string;
+  } | null;
 }

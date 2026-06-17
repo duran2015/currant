@@ -1,14 +1,14 @@
 import { useAppStore } from "../store";
-import { Home, MessageCircle, User, HeartHandshake } from "lucide-react";
+import { Home, MessageCircle, MessageSquare, User } from "lucide-react";
 import { motion } from "motion/react";
 
 export function BottomNav() {
-  const { currentTab, setTab } = useAppStore();
+  const { currentTab, setTab, pushView } = useAppStore();
 
   const tabs = [
     { id: "home", icon: Home, label: "首页" },
-    { id: "counseling", icon: HeartHandshake, label: "咨询" },
-    { id: "messages", icon: MessageCircle, label: "消息" },
+    { id: "ai", icon: MessageCircle, label: "水獭" },
+    { id: "messages", icon: MessageSquare, label: "消息" },
     { id: "profile", icon: User, label: "我的" },
   ] as const;
 
@@ -20,7 +20,13 @@ export function BottomNav() {
         return (
           <button
             key={tab.id}
-            onClick={() => setTab(tab.id)}
+            onClick={() => {
+              if (tab.id === "ai") {
+                pushView("ai-chat");
+              } else {
+                setTab(tab.id as any);
+              }
+            }}
             className="flex flex-col items-center justify-center w-20 relative pt-2"
           >
             <div

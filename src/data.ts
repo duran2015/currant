@@ -10,6 +10,7 @@ export const mockUser: UserProfile = {
   isNewUser: false,
   hasRisk: false,
   role: "active",
+  usedTrialCount: 0,
 };
 
 export const mockCounselors: Counselor[] = [
@@ -89,3 +90,6 @@ export const mockTodayTask: TodayTask = {
     "你最近反映睡前容易焦虑，这个练习可以帮助你快速平静下来，为入睡做准备。",
   type: "breathing",
 };
+
+export const mockConsultationRecords: any[] = [];
+export const mockNotifications: any[] = [];

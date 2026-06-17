@@ -111,7 +111,7 @@ export function Login() {
       
       if (thirdPartyProvider) {
         console.log("[Event Analytics] User authenticated via Third Party + Phone Binding");
-        updateUser({ name: thirdPartyProvider === "wechat" ? "微信用户" : "Apple 授权用户", avatar: "https://i.pravatar.cc/150?img=12" });
+        updateUser({ name: thirdPartyProvider === "wechat" ? "微信用户" : "Apple 授权用户", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" });
         pushView("assessment");
       } else {
         console.log("[Event Analytics] User authenticated via Phone & OTP");
@@ -333,7 +333,7 @@ export function Login() {
               </div>
               
               <div className="flex items-center space-x-3 mb-8 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                 <img src="https://i.pravatar.cc/150?img=12" alt="wechat avatar" className="w-10 h-10 rounded-full" />
+                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="wechat avatar" className="w-10 h-10 rounded-full" />
                  <div>
                     <div className="text-sm font-bold text-gray-900">微信用户</div>
                     <div className="text-[10px] text-gray-500">已授权获取基础信息</div>

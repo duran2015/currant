@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppProvider, useAppStore } from "./store";
 import { MobileLayout } from "./components/MobileLayout";
-import { AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import "./index.css";
 
 // Pages
@@ -11,8 +11,7 @@ import { Assessment } from "./pages/Onboarding/Assessment";
 import { AIInterview } from "./pages/Onboarding/AIInterview";
 import { ProfileGeneration } from "./pages/Onboarding/ProfileGeneration";
 import { MainLayout } from "./components/MainLayout";
-import { CounselorList } from "./pages/Counseling/CounselorList";
-import { CounselorDetail } from "./pages/Counseling/CounselorDetail";
+import { AITab } from "./pages/Main/AITab";
 import { Booking } from "./pages/Counseling/Booking";
 import { Payment } from "./pages/Counseling/Payment";
 import { VoiceCall } from "./pages/Counseling/VoiceCall";
@@ -21,26 +20,42 @@ import { OrdersList } from "./pages/Counseling/OrdersList";
 import { ProfileReport } from "./pages/Profile/ProfileReport";
 import { AssessmentRecords } from "./pages/Profile/AssessmentRecords";
 import { AIChatRecords } from "./pages/Profile/AIChatRecords";
-import { AIChatView } from "./pages/Main/AIChatView";
 import { TextChat } from "./pages/Counseling/TextChat";
+import { NotificationsList } from "./pages/Main/NotificationsList";
+import { NotificationDetail } from "./pages/Main/NotificationDetail";
+import { ConsultationRecords } from "./pages/Profile/ConsultationRecords";
+import { ConsultationDetail } from "./pages/Profile/ConsultationDetail";
+import { AISettings } from "./pages/Main/AISettings";
 
 import { TreeHole } from "./pages/Main/TreeHole";
 import { MiniAssessmentHome } from "./pages/Onboarding/MiniAssessmentHome";
 import { MiniAssessmentTest } from "./pages/Onboarding/MiniAssessmentTest";
 import { MiniAssessmentResult } from "./pages/Onboarding/MiniAssessmentResult";
+import { 
+  BreathingTool, 
+  WhiteNoiseTool, 
+  MuyuTool, 
+  MeditationTool, 
+  SleepGuideTool, 
+  BubbleWrapTool 
+} from "./pages/Main/ReliefTools";
 
 // Counselor App Pages
 import { CounselorWorkbench } from "./pages/Counseling/CounselorWorkbench";
 import { CounselorOrderDetail } from "./pages/Counseling/CounselorOrderDetail";
 import { CounselorPatientProfile } from "./pages/Counseling/CounselorPatientProfile";
+import { CounselorDetail } from "./pages/Counseling/CounselorDetail";
+
+
 
 function ViewManager() {
-  const { viewStack } = useAppStore();
+  const { viewStack, activeCallSession } = useAppStore();
   const currentView = viewStack[viewStack.length - 1];
 
   return (
-    <AnimatePresence mode="wait">
-      {currentView === "login" && <Login key="login" />}
+    <>
+      <AnimatePresence mode="wait">
+        {currentView === "login" && <Login key="login" />}
       {currentView === "assessment" && <Assessment key="assessment" />}
       {currentView === "ai-interview" && <AIInterview key="ai-interview" />}
       {currentView === "generation" && <ProfileGeneration key="generation" />}
@@ -48,21 +63,30 @@ function ViewManager() {
       {/* Main Tab Wrapper maintains continuous presence unless replaced linearly by full screen sub-views */}
       {(currentView === "main" ||
         currentView.startsWith("counseling-") ||
+        currentView === "ai-chat" ||
         currentView === "orders-list" ||
+        currentView === "notifications-list" ||
+        currentView === "notification-detail" ||
+        currentView === "consultation-records" ||
+        currentView === "consultation-detail" ||
         currentView === "profile-report" ||
         currentView === "assessment-records" ||
-        currentView === "ai-chat-records" ||
-        currentView === "ai-chat") && <MainLayout key="main" />}
+        currentView === "ai-chat-records") && <MainLayout key="main" />}
 
       {/* Counselor Dashboard - Separate from MainLayout */}
       {currentView === "counselor-workbench" && <CounselorWorkbench key="c_workbench" />}
 
+
+
       {/* Sub views stacked above Main Layout absolutely */}
-      {currentView === "counseling-list" && <CounselorList key="clist" />}
+      {currentView === "ai-chat" && (
+        <div className="absolute inset-0 z-50 bg-white">
+          <AITab />
+        </div>
+      )}
       {currentView === "counseling-detail" && <CounselorDetail key="cdetail" />}
       {currentView === "counseling-booking" && <Booking key="cbooking" />}
       {currentView === "counseling-payment" && <Payment key="cpayment" />}
-      {currentView === "counseling-call" && <VoiceCall key="ccall" />}
       {currentView === "counseling-text-chat" && <TextChat key="tchat" />}
       {currentView === "counseling-summary" && <CallSummary key="csummary" />}
       {currentView === "orders-list" && <OrdersList key="orders" />}
@@ -71,7 +95,6 @@ function ViewManager() {
         <AssessmentRecords key="arecords" />
       )}
       {currentView === "ai-chat-records" && <AIChatRecords key="achat_rec" />}
-      {currentView === "ai-chat" && <AIChatView key="ai-chat" />}
       {currentView === "tree-hole" && <TreeHole key="tree_hole" />}
       {currentView === "mini-assessment-home" && (
         <MiniAssessmentHome key="mini_home" />
@@ -82,9 +105,23 @@ function ViewManager() {
       {currentView === "mini-assessment-result" && (
         <MiniAssessmentResult key="mini_result" />
       )}
+      {currentView === "notifications-list" && <NotificationsList key="n_list" />}
+      {currentView === "notification-detail" && <NotificationDetail key="n_detail" />}
+      {currentView === "consultation-records" && <ConsultationRecords key="cons_records" />}
+      {currentView === "consultation-detail" && <ConsultationDetail key="cons_detail" />}
       {currentView === "counselor-order-detail" && <CounselorOrderDetail key="c_order_detail" />}
       {currentView === "counselor-patient-profile" && <CounselorPatientProfile key="c_pt_profile" />}
+      {currentView === "ai-settings" && <AISettings key="ai_settings" />}
+      
+      {currentView === "breathing" && <BreathingTool key="tool_breathing" />}
+      {currentView === "white-noise" && <WhiteNoiseTool key="tool_white_noise" />}
+      {currentView === "muyu" && <MuyuTool key="tool_muyu" />}
+      {currentView === "meditation" && <MeditationTool key="tool_meditation" />}
+      {currentView === "sleep-guide" && <SleepGuideTool key="tool_sleep" />}
+      {currentView === "bubble-wrap" && <BubbleWrapTool key="tool_bubble" />}
     </AnimatePresence>
+    {activeCallSession && <VoiceCall />}
+    </>
   );
 }
 

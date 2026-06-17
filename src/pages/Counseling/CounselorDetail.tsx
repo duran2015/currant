@@ -137,7 +137,7 @@ export function CounselorDetail() {
                   <span className="text-primary mr-1.5">💬</span> 文字沟通
                 </h4>
                 <span className="text-primary font-bold text-[14px]">
-                  ¥{counselor.price * 0.7}/次
+                  ¥{counselor.price}/次
                 </span>
               </div>
               <p className="text-[12px] text-gray-600 mb-2 leading-relaxed">
@@ -156,15 +156,28 @@ export function CounselorDetail() {
             <div className="border border-gray-100 bg-surface rounded-2xl p-4">
               <div className="flex justify-between items-start mb-1">
                 <h4 className="font-bold text-[14px] text-gray-900 flex items-center">
-                  <span className="text-blue-500 mr-1.5">🎙️</span> 视频/语音沟通
+                  <span className="text-blue-500 mr-1.5">🎙️</span> 语音沟通
                 </h4>
                 <span className="text-gray-900 font-bold text-[14px]">
-                  ¥{counselor.price}/50分钟
+                  ¥{counselor.price + 100}/50分钟
                 </span>
               </div>
               <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
-                传统的 50
-                分钟单次深度咨询，适合需要系统性梳理问题、深层挖掘潜意识的阶段。
+                注重倾听与交流，无需露面，让您在更放松、安全的环境中敞开心扉，适合想要保护隐私或不方便视频的阶段。
+              </p>
+            </div>
+
+            <div className="border border-gray-100 bg-surface rounded-2xl p-4">
+              <div className="flex justify-between items-start mb-1">
+                <h4 className="font-bold text-[14px] text-gray-900 flex items-center">
+                  <span className="text-green-500 mr-1.5">📹</span> 视频沟通
+                </h4>
+                <span className="text-gray-900 font-bold text-[14px]">
+                  ¥{counselor.price + 200}/50分钟
+                </span>
+              </div>
+              <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
+                传统的 50 分钟单次深度咨询，面对面交流能够传递更多非言语信息，适合需要系统性梳理问题、深层挖掘潜意识的阶段。
               </p>
             </div>
           </div>
@@ -298,11 +311,6 @@ export function CounselorDetail() {
       {/* Sticky Bottom Booking Bar */}
       <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-20">
         <div className="flex items-center justify-between space-x-4">
-          <div className="flex items-center text-xs text-gray-500 bg-surface px-3 py-1.5 rounded-full absolute -top-10 left-1/2 -translate-x-1/2 border border-gray-100 shadow-sm whitespace-nowrap">
-            <ShieldCheck size={14} className="text-green-500 mr-1" />
-            首次不满意可申请退款
-          </div>
-
           <div className="flex flex-col ml-2">
             <span className="text-[11px] text-gray-500 font-medium tracking-wide mb-0.5">
               文字/语音/视频支持
@@ -315,10 +323,7 @@ export function CounselorDetail() {
                 ¥
               </span>
               <span className="text-[24px] font-bold text-primary leading-none">
-                {counselor.price * 0.7}
-              </span>
-              <span className="text-[11px] text-gray-400 ml-1 mb-1 line-through">
-                ¥{counselor.price + 200}
+                {counselor.price}
               </span>
             </div>
           </div>

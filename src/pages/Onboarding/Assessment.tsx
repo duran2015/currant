@@ -4,18 +4,24 @@ import { useAppStore } from "../../store";
 import { ChevronRight, ArrowRight } from "lucide-react";
 
 export function Assessment() {
-  const { pushView, resetToView, updateUser } = useAppStore();
-  const [step, setStep] = useState(0);
+  const { pushView, resetToView, updateUser, updateBlackboard, assessmentState, setAssessmentState } = useAppStore();
+  const { step, answers, phq2Scores, phq2Step } = assessmentState;
 
-  // 统一收集所有的信息（包含基础信息和问卷）
-  const [answers, setAnswers] = useState({
-    name: "",
-    stage: "",
-    domain: "",
-  });
-  
-  const [phq2Scores, setPhq2Scores] = useState<number[]>([-1, -1]);
-  const [phq2Step, setPhq2Step] = useState(0);
+  const setStep = (val: number | ((prev: number) => number)) => {
+    setAssessmentState((prev: any) => ({ ...prev, step: typeof val === 'function' ? val(prev.step) : val }));
+  };
+
+  const setAnswers = (val: any) => {
+    setAssessmentState((prev: any) => ({ ...prev, answers: typeof val === 'function' ? val(prev.answers) : val }));
+  };
+
+  const setPhq2Scores = (val: any) => {
+    setAssessmentState((prev: any) => ({ ...prev, phq2Scores: typeof val === 'function' ? val(prev.phq2Scores) : val }));
+  };
+
+  const setPhq2Step = (val: number | ((prev: number) => number)) => {
+    setAssessmentState((prev: any) => ({ ...prev, phq2Step: typeof val === 'function' ? val(prev.phq2Step) : val }));
+  };
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,6 +37,27 @@ export function Assessment() {
       name: answers.name || "新用户",
       isNewUser: true,
     });
+
+    // Write what we have to blackboard
+    const totalScore = phq2Scores[0] !== -1 && phq2Scores[1] !== -1 ? phq2Scores[0] + phq2Scores[1] : 0;
+    
+    updateBlackboard({
+      clinical: phq2Scores[0] !== -1 ? {
+        phq2Score: totalScore,
+        severity: totalScore >= 4 ? "中度" : totalScore >= 2 ? "轻度" : "轻度", // Using MVP mapping
+        crisis: phq2Scores.some(s => s === 3)
+      } : null,
+      domain: answers.domain ? {
+        primary: answers.domain as any
+      } : null,
+      phase: 1,
+      recommendation: {
+        serviceLevel: totalScore >= 4 ? "L1" : "L1", // All default to L1 for now, will upgrade later
+        firstTool: "呼吸引导",
+        persona: "温暖陪伴"
+      }
+    });
+
     resetToView("main");
   };
 
@@ -45,6 +72,27 @@ export function Assessment() {
         name: answers.name || "新朋友",
         isNewUser: false,
       });
+
+      // Write complete data to blackboard
+      const totalScore = phq2Scores[0] + phq2Scores[1];
+      
+      updateBlackboard({
+        clinical: {
+          phq2Score: totalScore,
+          severity: totalScore >= 4 ? "中度" : totalScore >= 2 ? "轻度" : "轻度",
+          crisis: phq2Scores.some(s => s === 3)
+        },
+        domain: {
+          primary: (answers.domain && answers.domain !== "跳过" ? answers.domain : "未分类") as any
+        },
+        phase: 1,
+        recommendation: {
+          serviceLevel: "L1",
+          firstTool: "呼吸引导",
+          persona: "温暖陪伴"
+        }
+      });
+
       resetToView("main");
     }
   };

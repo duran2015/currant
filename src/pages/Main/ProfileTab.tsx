@@ -130,12 +130,10 @@ export function ProfileTab() {
                   <button
                     key={i}
                     onClick={() => {
-                      if (
-                        ["预约记录", "咨询记录", "订单管理"].includes(
-                          item.label,
-                        )
-                      ) {
+                      if (item.label === "预约记录" || item.label === "订单管理") {
                         pushView("orders-list");
+                      } else if (item.label === "咨询记录") {
+                        pushView("consultation-records");
                       } else if (item.label === "心理画像") {
                         pushView("profile-report");
                       } else if (item.label === "量表记录") {

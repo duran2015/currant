@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { AppView, AppTab, UserProfile } from "./types";
+import { AppView, AppTab, UserProfile, BlackboardState } from "./types";
 import { mockUser } from "./data";
 
 export interface AppState {
@@ -7,9 +7,30 @@ export interface AppState {
   currentTab: AppTab;
   appMode: "user" | "counselor";
   user: UserProfile;
+  blackboard: BlackboardState;
   selectedCounselorId: string;
+  selectedNotificationId: string;
+  selectedConsultationId: string;
+  selectedCounselorOrder: any;
   bookingOrder: any;
   orders: any[];
+  activeCallSession: any | null;
+  isCallMinimized: boolean;
+  assessmentState: {
+    step: number;
+    answers: { name: string; stage: string; domain: string };
+    phq2Scores: number[];
+    phq2Step: number;
+  };
+  aiSettings: {
+    avatar: "otter" | "cat";
+    fontSize: "small" | "medium" | "large";
+    theme: "light" | "dark";
+    voice: "gentle" | "sexy" | "neutral";
+    autoPlayVoice: boolean;
+  };
+  setAssessmentState: (state: any) => void;
+  updateAISettings: (settings: Partial<AppState["aiSettings"]>) => void;
   pushView: (view: AppView) => void;
   popView: () => void;
   resetToView: (view: AppView) => void;
@@ -17,9 +38,15 @@ export interface AppState {
   setAppMode: (mode: "user" | "counselor") => void;
   enterAppMode: (mode: "user" | "counselor") => void;
   updateUser: (data: Partial<UserProfile>) => void;
+  updateBlackboard: (data: Partial<BlackboardState>) => void;
   setSelectedCounselorId: (id: string) => void;
+  setSelectedNotificationId: (id: string) => void;
+  setSelectedConsultationId: (id: string) => void;
+  setSelectedCounselorOrder: (order: any) => void;
   setBookingOrder: (order: any) => void;
   addOrder: (order: any) => void;
+  setActiveCallSession: (session: any | null) => void;
+  setIsCallMinimized: (minimized: boolean) => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -34,9 +61,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentTab, setCurrentTab] = useState<AppTab>("home");
   const [appMode, setAppMode] = useState<"user" | "counselor">((localStorage.getItem("appMode") as any) || "user");
   const [user, setUser] = useState<UserProfile>(mockUser);
+  const [blackboard, setBlackboard] = useState<BlackboardState>({
+    clinical: null,
+    domain: null,
+    phase: 1,
+    recommendation: {
+      serviceLevel: "L1",
+      firstTool: "呼吸引导",
+      persona: "温暖陪伴"
+    }
+  });
   const [selectedCounselorId, setSelectedCounselorId] = useState<string>("c1");
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string>("n1");
+  const [selectedConsultationId, setSelectedConsultationId] = useState<string>("");
+  const [selectedCounselorOrder, setSelectedCounselorOrder] = useState<any>(null);
   const [bookingOrder, setBookingOrder] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
+  const [activeCallSession, setActiveCallSession] = useState<any | null>(null);
+  const [isCallMinimized, setIsCallMinimized] = useState<boolean>(false);
+  const [assessmentState, setAssessmentState] = useState({
+    step: 0,
+    answers: { name: "", stage: "", domain: "" },
+    phq2Scores: [-1, -1],
+    phq2Step: 0,
+  });
+  const [aiSettings, setAISettings] = useState<AppState["aiSettings"]>({
+    avatar: "otter",
+    fontSize: "medium",
+    theme: "light",
+    voice: "gentle",
+    autoPlayVoice: false,
+  });
+
+  const updateAISettings = (settings: Partial<AppState["aiSettings"]>) => {
+    setAISettings((prev) => ({ ...prev, ...settings }));
+  };
 
   const addOrder = (order: any) => {
     setOrders((prev) => [order, ...prev]);
@@ -82,6 +141,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser((prev) => ({ ...prev, ...data }));
   };
 
+  const updateBlackboard = (data: Partial<BlackboardState>) => {
+    setBlackboard((prev) => ({ ...prev, ...data }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -89,9 +152,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         currentTab,
         appMode,
         user,
+        blackboard,
         selectedCounselorId,
+        selectedNotificationId,
+        selectedConsultationId,
+        selectedCounselorOrder,
         bookingOrder,
         orders,
+        activeCallSession,
+        isCallMinimized,
+        assessmentState,
+        aiSettings,
+        setAssessmentState,
+        updateAISettings,
         pushView,
         popView,
         resetToView,
@@ -99,9 +172,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAppMode: handleSetAppMode,
         enterAppMode,
         updateUser,
+        updateBlackboard,
         setSelectedCounselorId,
+        setSelectedNotificationId,
+        setSelectedConsultationId,
+        setSelectedCounselorOrder,
         setBookingOrder,
         addOrder,
+        setActiveCallSession,
+        setIsCallMinimized,
       }}
     >
       {children}
