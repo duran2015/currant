@@ -103,32 +103,33 @@ export function CounselorWorkbench() {
          </div>
 
          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
-               <div className="text-gray-500 text-[11px] mb-1 font-medium">今日收益</div>
-               <div className="text-gray-900 font-bold text-[18px]">¥850</div>
-            </div>
-            <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
-               <div className="text-gray-500 text-[11px] mb-1 font-medium">待服务</div>
-               <div className="text-gray-900 font-bold text-[18px]">3</div>
-            </div>
-            <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
-               <div className="text-gray-500 text-[11px] mb-1 font-medium">接单率</div>
-               <div className="text-gray-900 font-bold text-[18px] flex items-baseline">98<span className="text-[12px]">%</span></div>
-            </div>
-         </div>
+             <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
+                <div className="text-gray-500 text-[11px] mb-1 font-medium">用户评价</div>
+                <div className="text-gray-400 font-bold text-[14px]">暂无</div>
+             </div>
+             <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
+                <div className="text-gray-500 text-[11px] mb-1 font-medium">待服务</div>
+                <div className="text-gray-900 font-bold text-[18px]">3</div>
+             </div>
+             <div className="bg-gray-50/50 border border-gray-100 p-3.5 rounded-2xl flex flex-col items-center">
+                <div className="text-gray-500 text-[11px] mb-1 font-medium">接单率</div>
+                <div className="text-gray-900 font-bold text-[18px] flex items-baseline">98<span className="text-[12px]">%</span></div>
+             </div>
+          </div>
       </div>
 
       <div className="px-5 pt-4 pb-12 w-full">
         <div className="flex space-x-6 mb-4 px-2">
-             <button 
-               onClick={() => setActiveTab("requests")}
-               className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'requests' ? 'text-gray-900' : 'text-[#999999]'}`}
-             >
-               待咨询 <span className="absolute top-1 -right-2 w-[5px] h-[5px] bg-[#FF3B30] rounded-full"></span>
-               {activeTab === 'requests' && (
-                 <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900 rounded-full" />
-               )}
-             </button>
+               <button 
+                 onClick={() => setActiveTab("requests")}
+                 className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'requests' ? 'text-gray-900' : 'text-[#999999]'}`}
+               >
+                 待咨询
+                 <span className="absolute -top-1.5 -right-4 bg-[#FF3B30] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full rounded-bl-none leading-none shadow-sm">3</span>
+                 {activeTab === 'requests' && (
+                   <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900 rounded-full" />
+                 )}
+               </button>
              <button 
                onClick={() => setActiveTab("upcoming")}
                className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'upcoming' ? 'text-gray-900' : 'text-[#999999]'}`}
@@ -159,35 +160,63 @@ export function CounselorWorkbench() {
                className="space-y-4"
              >
                {requests.map(req => (
-                  <div key={req.id} className="bg-white rounded-[20px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#F5F6F8]">
-                     <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center space-x-2">
-                           <span className="text-[18px] font-bold text-gray-900 leading-none">{req.time}</span>
-                           <span className="text-[12px] text-[#999999]">{req.dateLabel}</span>
-                           <span className="text-[#E5E6EB]">|</span>
-                           <img src={req.avatar} alt="user" className="w-[22px] h-[22px] rounded-full object-cover shrink-0" />
-                           <span className="text-[15px] font-bold text-gray-900">{req.userName}</span>
+                     <div 
+                       key={req.id} 
+                       onClick={() => pushView("counselor-order-detail")}
+                       className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8] cursor-pointer active:scale-[0.98] transition-transform"
+                     >
+                        <div className="flex justify-between items-center mb-2">
+                           <div className="flex items-center space-x-2">
+                              <span className="text-[17px] font-bold text-gray-900 leading-none">{req.time}</span>
+                              <span className="text-[12px] text-[#999999]">{req.dateLabel}</span>
+                              <span className="text-[#E5E6EB]">|</span>
+                              <img src={req.avatar} alt="user" className="w-[20px] h-[20px] rounded-full object-cover shrink-0" />
+                              <span className="text-[14px] font-bold text-gray-900">{req.userName}</span>
+                           </div>
+                           <div className={`px-2 py-0.5 rounded-[4px] text-[10px] font-medium flex items-center ${req.type === 'voice' ? 'bg-[#F2F3FF] text-[#5C66FF]' : 'bg-[#E8F8F5] text-[#00BFA5]'}`}>
+                              {req.type === 'voice' ? <Phone size={10} className="mr-1" /> : <Video size={10} className="mr-1" />}
+                              {req.type === 'voice' ? '语音' : '视频'}
+                           </div>
                         </div>
-                        <div className={`px-2 py-1 rounded-[6px] text-[11px] font-medium flex items-center ${req.type === 'voice' ? 'bg-[#F2F3FF] text-[#5C66FF]' : 'bg-[#E8F8F5] text-[#00BFA5]'}`}>
-                           {req.type === 'voice' ? <Phone size={12} className="mr-1" /> : <Video size={12} className="mr-1" />}
-                           {req.type === 'voice' ? '语音' : '视频'}
+                        
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                           {req.tags.map(tag => (
+                              <span key={tag} className="bg-[#F7F8FA] text-[#666666] px-1.5 py-[2px] rounded text-[10px] font-medium">{tag}</span>
+                           ))}
+                        </div>
+ 
+                        <div className="bg-[#F4F9FF] rounded-md py-1.5 px-2.5 flex items-start">
+                           <Sparkles size={12} className="text-[#5C66FF] mr-1 mt-0.5 shrink-0" />
+                           <span className="text-[12px] text-[#333333] leading-snug">{req.summary}</span>
                         </div>
                      </div>
-                     
-                     <div className="flex flex-wrap gap-[6px] mb-3">
-                        {req.tags.map(tag => (
-                           <span key={tag} className="bg-[#F7F8FA] text-[#666666] px-2 py-[3px] rounded text-[11px] font-medium">{tag}</span>
-                        ))}
-                     </div>
-
-                     <div className="bg-[#F4F9FF] rounded-lg p-3 flex items-start">
-                        <Sparkles size={14} className="text-[#5C66FF] mr-1.5 mt-0.5 shrink-0" />
-                        <span className="text-[13px] text-[#333333] leading-snug">{req.summary}</span>
-                     </div>
-                  </div>
-                ))}
+                   ))}
              </motion.div>
-          ) : activeTab === "messages" ? (
+          ) : activeTab === "upcoming" ? (
+               <motion.div
+                 key="upcoming"
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}
+                 className="space-y-3"
+               >
+                 {upcoming.map(req => (
+                   <div key={req.id} className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8]">
+                     <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center space-x-2">
+                           <img src={req.avatar} alt="user" className="w-[20px] h-[20px] rounded-full object-cover shrink-0" />
+                           <span className="text-[14px] font-bold text-gray-900">{req.userName}</span>
+                        </div>
+                        <div className="text-[12px] text-[#999999]">{req.time}</div>
+                     </div>
+                     <div className="bg-[#F9F9F9] rounded-md py-1.5 px-2.5 flex justify-between items-center">
+                        <span className="text-[12px] text-[#666666]">咨询已完成</span>
+                        <button className="text-[12px] font-medium text-[#5C66FF]">查看记录</button>
+                     </div>
+                   </div>
+                 ))}
+               </motion.div>
+           ) : activeTab === "messages" ? (
              <motion.div
                key="messages"
                initial={{ opacity: 0, y: 10 }}
