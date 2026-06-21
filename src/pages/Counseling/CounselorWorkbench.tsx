@@ -60,7 +60,10 @@ export function CounselorWorkbench() {
       userName: "陈小希",
       avatar: "https://i.pravatar.cc/150?img=12",
       type: "voice",
-      time: "今天 20:00 - 20:30",
+      time: "14:00",
+      dateLabel: "昨天",
+      tags: ["25岁·财务", "焦虑依恋", "缺乏安全感"],
+      summary: "亲密关系冲突，缺乏安全感",
       status: "completed",
       counselorAdvice: "建议结合 MBTI 和霍兰德职业兴趣测试做一次深度探索，同时每天保持30分钟的有氧运动以缓解抑郁情绪。"
     }
@@ -202,7 +205,7 @@ export function CounselorWorkbench() {
                  initial={{ opacity: 0, y: 10 }}
                  animate={{ opacity: 1, y: 0 }}
                  exit={{ opacity: 0, y: -10 }}
-                 className="space-y-3"
+                 className="space-y-4"
                >
                  {upcoming.map(req => (
                   <div 
@@ -215,13 +218,29 @@ export function CounselorWorkbench() {
                   >
                     <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center space-x-2">
+                           <span className="text-[17px] font-bold text-gray-900 leading-none">{req.time}</span>
+                           <span className="text-[12px] text-[#999999]">{req.dateLabel}</span>
+                           <span className="text-[#E5E6EB]">|</span>
                            <img src={req.avatar} alt="user" className="w-[20px] h-[20px] rounded-full object-cover shrink-0" />
                            <span className="text-[14px] font-bold text-gray-900">{req.userName}</span>
                         </div>
-                        <div className="text-[12px] text-[#999999]">{req.time}</div>
+                        <div className={`px-2 py-0.5 rounded-[4px] text-[10px] font-medium flex items-center ${req.type === 'voice' ? 'bg-[#F2F3FF] text-[#5C66FF]' : 'bg-[#E8F8F5] text-[#00BFA5]'}`}>
+                           {req.type === 'voice' ? <Phone size={10} className="mr-1" /> : <Video size={10} className="mr-1" />}
+                           {req.type === 'voice' ? '语音' : '视频'}
+                        </div>
                      </div>
-                     <div className="bg-[#F9F9F9] rounded-md py-1.5 px-2.5 flex justify-between items-center">
-                        <span className="text-[12px] text-[#666666]">咨询已完成</span>
+                     
+                     <div className="flex flex-wrap gap-1.5 mb-2">
+                        {req.tags?.map(tag => (
+                           <span key={tag} className="bg-[#F7F8FA] text-[#666666] px-1.5 py-[2px] rounded text-[10px] font-medium">{tag}</span>
+                        ))}
+                     </div>
+
+                     <div className="bg-[#F9F9F9] rounded-md py-1.5 px-2.5 flex justify-between items-center mt-2">
+                        <div className="flex items-center text-[12px] text-[#666666]">
+                           <Sparkles size={12} className="text-[#5C66FF] mr-1" />
+                           咨询已完成
+                        </div>
                         <button className="text-[12px] font-medium text-[#5C66FF]">查看记录</button>
                      </div>
                    </div>
