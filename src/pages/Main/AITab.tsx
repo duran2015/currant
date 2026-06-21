@@ -7,6 +7,7 @@ import {
   ArrowUp,
   Camera,
   Check,
+  ChevronLeft,
   ChevronRight,
   FileText,
   Image as ImageIcon,
@@ -375,26 +376,47 @@ export function AITab() {
           onClick={() => popView()} 
           className={`absolute left-4 top-11 p-2 transition-colors z-10 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
         >
-          <ChevronRight size={24} className="rotate-180" />
+          <ChevronLeft size={24} />
         </button>
-        <div className="flex justify-between items-center mb-2 w-full px-2">
-          <span className={`text-[16px] font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
-            心愈 AI
-          </span>
+        <div className="flex justify-center space-x-8 mb-2 relative w-full px-2">
           <button
-            onClick={() => pushView("counseling-booking")}
-            className={`text-[13px] font-bold transition-all px-3 py-1.5 rounded-full ${
-              isDark 
-                ? "bg-[#20A6A6] text-white hover:bg-[#1C8C8C]" 
-                : "bg-primary text-white hover:bg-[#20A6A6]"
+            onClick={() => setActiveTab("ai")}
+            className={`pb-2 text-[16px] font-bold transition-all relative ${
+              activeTab === "ai"
+                ? (isDark ? "text-white" : "text-gray-900")
+                : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
             }`}
           >
-            预约真人咨询
+            心愈 AI
+            {activeTab === "ai" && (
+              <motion.div
+                layoutId="activeTab"
+                className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-full ${isDark ? "bg-white" : "bg-gray-900"}`}
+              />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("human")}
+            className={`pb-2 text-[16px] font-bold transition-all relative ${
+              activeTab === "human"
+                ? (isDark ? "text-white" : "text-gray-900")
+                : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
+            }`}
+          >
+            真人倾听师
+            {activeTab === "human" && (
+              <motion.div
+                layoutId="activeTab"
+                className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-full ${isDark ? "bg-white" : "bg-gray-900"}`}
+              />
+            )}
           </button>
         </div>
       </div>
 
-      <div className={`backdrop-blur-md px-4 py-3 border-b flex items-center justify-between sticky top-[92px] z-20 transition-colors ${isDark ? 'bg-[#1A1A1A]/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
+      {activeTab === "ai" ? (
+        <>
+          <div className={`backdrop-blur-md px-4 py-3 border-b flex items-center justify-between sticky top-[92px] z-20 transition-colors ${isDark ? 'bg-[#1A1A1A]/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
          <div className="flex items-center space-x-3">
             <div className="relative">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl border overflow-hidden ${isDark ? 'bg-orange-900/20 border-orange-900/50' : 'bg-orange-50 border-orange-100'}`}>
@@ -532,7 +554,7 @@ export function AITab() {
                               </p>
                               <button
                                 onClick={() => {
-                                  pushView("counseling-booking");
+                                  setActiveTab("human");
                                 }}
                                 className={`w-full font-bold py-2 rounded-xl text-[13px] active:scale-[0.98] transition-all flex justify-center items-center ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}
                               >
@@ -798,7 +820,60 @@ export function AITab() {
              </div>
           )}
         </div>
+        </>
+      ) : (
+        <div className={`flex-1 overflow-y-auto p-4 space-y-4 pb-32 min-h-full transition-colors ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}>
+          {mockCounselors.map((counselor) => (
+              <div
+                key={counselor.id}
+                onClick={() => {
+                  setSelectedCounselorId(counselor.id);
+                  pushView("counseling-detail");
+                }}
+                className={`rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border flex active:scale-[0.98] transition-transform cursor-pointer ${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-50'}`}
+              >
+                <div className="relative mr-4 shrink-0 flex items-center">
+                  <img
+                    src={counselor.avatar}
+                    alt={counselor.name}
+                    className={`w-[60px] h-[60px] rounded-full object-cover border-2 ${isDark ? 'border-gray-700' : 'border-gray-50'}`}
+                  />
+                  <div className={`absolute bottom-0 right-0 rounded-full p-[2px] ${isDark ? 'bg-[#2A2A2A]' : 'bg-white'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${counselor.status === "online" ? 'bg-[#00C853]' : 'bg-[#FF3B30]'}`}></div>
+                  </div>
+                </div>
 
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <div className="flex items-center mb-1">
+                    <span className={`font-bold text-[16px] mr-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {counselor.name}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded text-[11px] ${isDark ? 'bg-[#1C1C1E] text-gray-400' : 'bg-[#F5F6F8] text-[#8A8F99]'}`}>
+                      {counselor.type === "pro" ? "专业咨询" : "心理倾听"}
+                    </span>
+                  </div>
+
+                  <div className={`text-[13px] mb-1.5 ${isDark ? 'text-gray-400' : 'text-[#666666]'}`}>
+                    {counselor.title}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className={`flex items-center text-[12px] ${isDark ? 'text-gray-400' : 'text-[#999999]'}`}>
+                      <Star size={12} className="fill-[#D1D5DB] text-[#D1D5DB] mr-1" />
+                      <span>{counselor.rating} · {counselor.reviewsCount}次咨询</span>
+                    </div>
+                    <div className={`flex items-baseline ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      <span className="text-[12px] font-bold mr-0.5">¥</span>
+                      <span className="text-[16px] font-black">{counselor.price}</span>
+                      <span className={`text-[11px] ml-0.5 ${isDark ? 'text-gray-500' : 'text-[#999999]'}`}>/次</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+      
       {/* 危机预警弹窗 (L4 发现风险词拦截) */}
       <AnimatePresence>
         {showCrisisAlert && (

@@ -4,7 +4,6 @@ export type AppView =
   | "ai-interview"
   | "generation"
   | "main"
-  | "counseling-list"
   | "counseling-detail"
   | "counseling-booking"
   | "counseling-payment"
