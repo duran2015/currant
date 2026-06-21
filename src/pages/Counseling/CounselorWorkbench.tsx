@@ -2,15 +2,17 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
 import { 
-  Clock, 
-  MessageSquare,
-  Phone,
-  Target,
-  Repeat2,
-  ChevronRight,
-  TrendingUp,
-  Settings
-} from "lucide-react";
+    Clock, 
+    MessageSquare,
+    Phone,
+    Target,
+    Repeat2,
+    ChevronRight,
+    TrendingUp,
+    Settings,
+    Sparkles,
+    Video
+  } from "lucide-react";
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
@@ -20,25 +22,37 @@ export function CounselorWorkbench() {
 
   // Mock data for requests
   const requests = [
-    {
-      id: "req-1",
-      userName: "匿名用户 0495",
-      type: "voice",
-      duration: "30分钟",
-      price: 159,
-      tags: ["高敏焦虑", "考研压力"],
-      timeRequested: "10分钟前",
-    },
-    {
-      id: "req-2",
-      userName: "小林",
-      type: "text",
-      duration: "30分钟",
-      price: 69,
-      tags: ["情绪低落", "失眠"],
-      timeRequested: "15分钟前",
-    }
-  ];
+      {
+        id: "req-1",
+        time: "14:00",
+        dateLabel: "今天",
+        userName: "匿名用户 0495",
+        avatar: "https://i.pravatar.cc/150?img=47",
+        type: "voice",
+        tags: ["21岁·大学生", "高敏焦虑", "考研压力", "近期失眠", "脆弱敏感"],
+        summary: "职业倦怠，情绪低落，近期压力较大"
+      },
+      {
+        id: "req-2",
+        time: "20:00",
+        dateLabel: "今天",
+        userName: "陈小希",
+        avatar: "https://i.pravatar.cc/150?img=12",
+        type: "voice",
+        tags: ["25岁·财务", "焦虑依恋", "缺乏安全感"],
+        summary: "亲密关系冲突，缺乏安全感"
+      },
+      {
+        id: "req-3",
+        time: "10:00",
+        dateLabel: "明天",
+        userName: "小林",
+        avatar: "https://i.pravatar.cc/150?img=33",
+        type: "video",
+        tags: ["28岁·互联网运营", "职业倦怠", "情绪低落", "讨好型人格"],
+        summary: "长期失眠，人际关系紧张，自我效能感低"
+      }
+    ];
 
   const upcoming = [
     {
@@ -106,34 +120,34 @@ export function CounselorWorkbench() {
 
       <div className="px-5 pt-4 pb-12 w-full">
         <div className="flex space-x-6 mb-4 px-2">
-           <button 
-             onClick={() => setActiveTab("requests")}
-             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'requests' ? 'text-gray-900' : 'text-gray-400'}`}
-           >
-             新派单 <span className="absolute top-1 -right-2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-             {activeTab === 'requests' && (
-               <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
-             )}
-           </button>
-           <button 
-             onClick={() => setActiveTab("upcoming")}
-             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'upcoming' ? 'text-gray-900' : 'text-gray-400'}`}
-           >
-             即将开始
-             {activeTab === 'upcoming' && (
-               <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
-             )}
-           </button>
-           <button 
-             onClick={() => setActiveTab("messages")}
-             className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'messages' ? 'text-gray-900' : 'text-gray-400'}`}
-           >
-             消息
-             {activeTab === 'messages' && (
-               <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900 rounded-full" />
-             )}
-           </button>
-        </div>
+             <button 
+               onClick={() => setActiveTab("requests")}
+               className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'requests' ? 'text-gray-900' : 'text-[#999999]'}`}
+             >
+               待咨询 <span className="absolute top-1 -right-2 w-[5px] h-[5px] bg-[#FF3B30] rounded-full"></span>
+               {activeTab === 'requests' && (
+                 <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900 rounded-full" />
+               )}
+             </button>
+             <button 
+               onClick={() => setActiveTab("upcoming")}
+               className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'upcoming' ? 'text-gray-900' : 'text-[#999999]'}`}
+             >
+               已咨询
+               {activeTab === 'upcoming' && (
+                 <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900 rounded-full" />
+               )}
+             </button>
+             <button 
+               onClick={() => setActiveTab("messages")}
+               className={`pb-2 text-[16px] font-bold transition-all relative ${activeTab === 'messages' ? 'text-gray-900' : 'text-[#999999]'}`}
+             >
+               消息
+               {activeTab === 'messages' && (
+                 <motion.div layoutId="counselorTab" className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-900 rounded-full" />
+               )}
+             </button>
+          </div>
 
         <AnimatePresence mode="wait">
           {activeTab === "requests" ? (
@@ -145,42 +159,33 @@ export function CounselorWorkbench() {
                className="space-y-4"
              >
                {requests.map(req => (
-                 <div key={req.id} className="bg-white rounded-3xl p-5 shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-50 relative overflow-hidden">
-                    <div className="flex justify-between items-start mb-4">
-                       <div className="flex items-center space-x-3">
-                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${req.type === 'voice' ? 'bg-indigo-50/50 text-indigo-500 border-indigo-100' : 'bg-blue-50/50 text-blue-500 border-blue-100'}`}>
-                           {req.type === 'voice' ? <Phone size={16} /> : <MessageSquare size={16} />}
-                         </div>
-                         <div>
-                            <div className="text-[16px] font-bold text-gray-900 mb-0.5">{req.userName}</div>
-                            <div className="text-[12px] text-gray-500">{req.type === 'voice' ? '语音连线' : '文字倾听'} · {req.duration}</div>
-                         </div>
-                       </div>
-                       <div className="text-right">
-                          <div className="text-[18px] font-black tracking-tight text-gray-900 flex items-baseline justify-end"><span className="text-[12px] font-bold mr-0.5">¥</span>{req.price}</div>
-                          <div className="text-[10px] text-gray-400 mt-1 flex items-center"><Clock size={10} className="mr-0.5" />{req.timeRequested}</div>
-                       </div>
-                    </div>
-                    
-                    <div className="flex space-x-2 mb-5">
-                       {req.tags.map(tag => (
-                          <span key={tag} className="bg-gray-50 text-gray-600 border border-gray-100 px-2.5 py-1 rounded-md text-[11px] font-medium">{tag}</span>
-                       ))}
-                    </div>
+                  <div key={req.id} className="bg-white rounded-[20px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#F5F6F8]">
+                     <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center space-x-2">
+                           <span className="text-[18px] font-bold text-gray-900 leading-none">{req.time}</span>
+                           <span className="text-[12px] text-[#999999]">{req.dateLabel}</span>
+                           <span className="text-[#E5E6EB]">|</span>
+                           <img src={req.avatar} alt="user" className="w-[22px] h-[22px] rounded-full object-cover shrink-0" />
+                           <span className="text-[15px] font-bold text-gray-900">{req.userName}</span>
+                        </div>
+                        <div className={`px-2 py-1 rounded-[6px] text-[11px] font-medium flex items-center ${req.type === 'voice' ? 'bg-[#F2F3FF] text-[#5C66FF]' : 'bg-[#E8F8F5] text-[#00BFA5]'}`}>
+                           {req.type === 'voice' ? <Phone size={12} className="mr-1" /> : <Video size={12} className="mr-1" />}
+                           {req.type === 'voice' ? '语音' : '视频'}
+                        </div>
+                     </div>
+                     
+                     <div className="flex flex-wrap gap-[6px] mb-3">
+                        {req.tags.map(tag => (
+                           <span key={tag} className="bg-[#F7F8FA] text-[#666666] px-2 py-[3px] rounded text-[11px] font-medium">{tag}</span>
+                        ))}
+                     </div>
 
-                    <div className="flex space-x-3 pt-4 border-t border-gray-50">
-                       <button className="flex-1 bg-white border border-gray-200 text-gray-600 font-bold py-3 rounded-2xl text-[13px] active:bg-gray-50 transition-colors">
-                         婉拒
-                       </button>
-                       <button 
-                         onClick={() => pushView("counselor-order-detail")}
-                         className="flex-[2] bg-gray-900 text-white font-bold py-3 rounded-2xl text-[13px] hover:bg-gray-800 shadow-sm flex items-center justify-center transition-colors"
-                       >
-                         查看详情接单 <ChevronRight size={14} className="ml-1" />
-                       </button>
-                    </div>
-                 </div>
-               ))}
+                     <div className="bg-[#F4F9FF] rounded-lg p-3 flex items-start">
+                        <Sparkles size={14} className="text-[#5C66FF] mr-1.5 mt-0.5 shrink-0" />
+                        <span className="text-[13px] text-[#333333] leading-snug">{req.summary}</span>
+                     </div>
+                  </div>
+                ))}
              </motion.div>
           ) : activeTab === "messages" ? (
              <motion.div
