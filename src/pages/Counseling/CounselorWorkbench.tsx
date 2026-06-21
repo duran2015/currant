@@ -89,9 +89,9 @@ export function CounselorWorkbench() {
                 <h1 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight">林安 <span className="text-[12px] font-medium text-gray-500 font-normal">高级咨询师</span></h1>
                 <div className="text-gray-600 text-[13px] font-medium flex items-center">
                   {isBusy ? (
-                    <>🟠 忙线中</>
+                    <>忙线中</>
                   ) : (
-                    <>🟢 在线接单</>
+                    <>在线接单</>
                   )}
                 </div>
              </div>
