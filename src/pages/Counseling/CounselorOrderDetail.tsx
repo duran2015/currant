@@ -167,39 +167,50 @@ export function CounselorOrderDetail() {
       </div>
 
       {/* 底部操作栏 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white p-3 pb-8 border-t border-gray-100 flex space-x-2.5">
-         <button 
-           onClick={() => popView()}
-           className="flex-1 bg-gray-50 text-gray-700 font-bold py-3 rounded-xl text-[14px] border border-gray-200 active:scale-95 transition-transform"
-         >
-            返回列表
-         </button>
-         <div className="flex-[2] relative">
-            {/* 加锁和倒计时作为悬浮提示层 */}
-             {isVoiceOrVideo && isLocked && (
-               <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[12px] px-3 py-1.5 rounded-lg whitespace-nowrap flex items-center shadow-lg pointer-events-none z-20">
-                 <Lock size={12} className="mr-1.5 text-gray-300" />
-                 {lockMessage}
-                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+        <div className="absolute bottom-0 left-0 right-0 bg-white p-3 pb-8 border-t border-gray-100 flex space-x-2.5">
+           <button 
+             onClick={() => popView()}
+             className="flex-1 bg-gray-50 text-gray-700 font-bold py-3 rounded-xl text-[14px] border border-gray-200 active:scale-95 transition-transform"
+           >
+              返回列表
+           </button>
+           {selectedCounselorOrder?.status === 'completed' ? (
+             <div className="flex-[2]">
+                <button 
+                  onClick={() => alert("功能开发中")}
+                  className="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all active:scale-95"
+                >
+                   <BookOpen size={16} className="mr-1.5" /> 编写咨询记录
+                </button>
+             </div>
+           ) : (
+             <div className="flex-[2] relative">
+                {/* 加锁和倒计时作为悬浮提示层 */}
+                 {isVoiceOrVideo && isLocked && (
+                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[12px] px-3 py-1.5 rounded-lg whitespace-nowrap flex items-center shadow-lg pointer-events-none z-20">
+                     <Lock size={12} className="mr-1.5 text-gray-300" />
+                     {lockMessage}
+                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+                   </div>
+                 )}
+                 <button 
+                   onClick={handleEnterRoom}
+                   disabled={isLocked}
+                   className={`w-full font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all ${
+                     isLocked 
+                       ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
+                       : "bg-gray-900 text-white active:scale-95"
+                   }`}
+                 >
+                    {isVoiceOrVideo ? (
+                      <><Video size={16} className="mr-1.5" /> 进入视频/语音会议室</>
+                    ) : (
+                      <><MessageSquare size={16} className="mr-1.5" /> 进入文字咨询室</>
+                    )}
+                 </button>
                </div>
-             )}
-             <button 
-               onClick={handleEnterRoom}
-               disabled={isLocked}
-               className={`w-full font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all ${
-                 isLocked 
-                   ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
-                   : "bg-gray-900 text-white active:scale-95"
-               }`}
-             >
-                {isVoiceOrVideo ? (
-                  <><Video size={16} className="mr-1.5" /> 进入视频/语音会议室</>
-                ) : (
-                  <><MessageSquare size={16} className="mr-1.5" /> 进入文字咨询室</>
-                )}
-             </button>
-           </div>
-      </div>
+           )}
+        </div>
     </motion.div>
   );
 }

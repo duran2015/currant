@@ -16,7 +16,7 @@ import {
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-  const { pushView, enterAppMode } = useAppStore();
+    const { pushView, enterAppMode, setSelectedCounselorOrder } = useAppStore();
   const [status, setStatus] = useState<"online" | "busy" | "offline">("online");
   const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
 
@@ -162,7 +162,10 @@ export function CounselorWorkbench() {
                {requests.map(req => (
                      <div 
                        key={req.id} 
-                       onClick={() => pushView("counselor-order-detail")}
+                       onClick={() => {
+                         setSelectedCounselorOrder(req);
+                         pushView("counselor-order-detail");
+                       }}
                        className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8] cursor-pointer active:scale-[0.98] transition-transform"
                      >
                         <div className="flex justify-between items-center mb-2">
@@ -201,8 +204,15 @@ export function CounselorWorkbench() {
                  className="space-y-3"
                >
                  {upcoming.map(req => (
-                   <div key={req.id} className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8]">
-                     <div className="flex justify-between items-center mb-2">
+                  <div 
+                    key={req.id} 
+                    onClick={() => {
+                      setSelectedCounselorOrder({ ...req, status: 'completed' });
+                      pushView("counselor-order-detail");
+                    }}
+                    className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8] cursor-pointer active:scale-[0.98] transition-transform"
+                  >
+                    <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center space-x-2">
                            <img src={req.avatar} alt="user" className="w-[20px] h-[20px] rounded-full object-cover shrink-0" />
                            <span className="text-[14px] font-bold text-gray-900">{req.userName}</span>
