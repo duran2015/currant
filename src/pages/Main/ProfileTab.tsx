@@ -33,17 +33,8 @@ export function ProfileTab() {
       items: [
         { icon: CalendarClock, label: "预约记录" },
         { icon: History, label: "咨询记录" },
-        { icon: WalletCards, label: "订单管理" },
       ],
-    },
-    {
-      title: "设置与安全",
-      items: [
-        { icon: Shield, label: "隐私管理" },
-        { icon: Lock, label: "账号安全" },
-        { icon: Settings, label: "系统设置" },
-      ],
-    },
+    }
   ];
 
   return (
