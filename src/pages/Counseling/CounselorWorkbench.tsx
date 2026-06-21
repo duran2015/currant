@@ -16,9 +16,11 @@ import {
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-    const { pushView, enterAppMode, setSelectedCounselorOrder } = useAppStore();
-  const [status, setStatus] = useState<"online" | "busy" | "offline">("online");
+    const { pushView, enterAppMode, setSelectedCounselorOrder, activeCallSession } = useAppStore();
   const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
+  
+  // Status is now derived automatically: if there's an active call, counselor is busy; otherwise online.
+  const isBusy = !!activeCallSession;
 
   // Mock data for requests
   const requests = [
@@ -81,19 +83,17 @@ export function CounselorWorkbench() {
            <div className="flex items-center space-x-4">
              <div className="relative">
                 <img src={mockUser.avatar} alt="counselor" className="w-14 h-14 rounded-full border border-gray-100 object-cover shadow-sm" />
-                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${status === "online" ? "bg-green-500" : status === "busy" ? "bg-orange-500" : "bg-gray-400"}`}></div>
+                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${isBusy ? "bg-orange-500" : "bg-green-500"}`}></div>
              </div>
              <div>
                 <h1 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight">林安 <span className="text-[12px] font-medium text-gray-500 font-normal">高级咨询师</span></h1>
-                <select 
-                  value={status} 
-                  onChange={(e) => setStatus(e.target.value as any)}
-                  className="bg-transparent text-gray-600 text-[13px] font-medium p-0 border-none outline-none focus:ring-0 active:bg-transparent"
-                >
-                  <option value="online">🟢 在线接单的</option>
-                  <option value="busy">🟠 忙线中</option>
-                  <option value="offline">⚫ 休息中</option>
-                </select>
+                <div className="text-gray-600 text-[13px] font-medium flex items-center">
+                  {isBusy ? (
+                    <>🟠 忙线中</>
+                  ) : (
+                    <>🟢 在线接单</>
+                  )}
+                </div>
              </div>
            </div>
            <button 
