@@ -39,7 +39,7 @@ export function Booking() {
       date: selectedDate,
       time: selectedTime,
       type: selectedMethod,
-      price: counselor.pricing[selectedMethod],
+      price: counselor.price,
       status: "pending",
     };
 
@@ -109,7 +109,7 @@ export function Booking() {
                 </span>
               </div>
               <span className={`font-bold ${selectedMethod === "text" ? "text-primary" : "text-gray-900"}`}>
-                ¥{counselor.pricing.text}
+                ¥{counselor.price}
               </span>
             </button>
             <button
@@ -131,7 +131,7 @@ export function Booking() {
                 </span>
               </div>
               <span className={`font-bold ${selectedMethod === "voice" ? "text-primary" : "text-gray-900"}`}>
-                ¥{counselor.pricing.voice}
+                ¥{counselor.price}
               </span>
             </button>
             <button
@@ -153,7 +153,7 @@ export function Booking() {
                 </span>
               </div>
               <span className={`font-bold ${selectedMethod === "video" ? "text-primary" : "text-gray-900"}`}>
-                ¥{counselor.pricing.video}
+                ¥{counselor.price}
               </span>
             </button>
           </div>
@@ -245,11 +245,11 @@ export function Booking() {
             </div>
           </div>
           <div className="flex items-end">
-            <span className="text-sm font-bold text-gray-900 mr-0.5">¥</span>
-            <span className="text-[26px] font-bold text-gray-900 leading-none">
-              {counselor.pricing[selectedMethod]}
-            </span>
-          </div>
+              <span className="text-sm font-bold text-gray-900 mr-0.5">¥</span>
+              <span className="text-[26px] font-bold text-gray-900 leading-none">
+                {counselor.price}
+              </span>
+            </div>
         </div>
         <button
           onClick={handleConfirm}
