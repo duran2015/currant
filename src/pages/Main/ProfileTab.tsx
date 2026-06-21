@@ -65,32 +65,7 @@ export function ProfileTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-[1.5rem] border border-primary/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full" />
-          <p className="text-gray-600 text-[13px] font-medium mb-1 relative z-10">
-            倾诉时长
-          </p>
-          <div className="flex items-end relative z-10">
-            <span className="text-3xl font-bold text-gray-900 mr-1 tracking-tight">
-              128
-            </span>
-            <span className="text-xs text-gray-500 mb-1">分钟</span>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-orange-50 to-orange-50/50 p-4 rounded-[1.5rem] border border-orange-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-orange-100/50 rounded-bl-full" />
-          <p className="text-gray-600 text-[13px] font-medium mb-1 relative z-10">
-            累积画像
-          </p>
-          <div className="flex items-end relative z-10">
-            <span className="text-3xl font-bold text-gray-900 mr-1 tracking-tight">
-              3
-            </span>
-            <span className="text-xs text-gray-500 mb-1">份</span>
-          </div>
-        </div>
-      </div>
+
 
       <div className="space-y-8 mt-4">
         {user.role === "active" && (
