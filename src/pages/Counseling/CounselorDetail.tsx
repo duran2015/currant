@@ -137,7 +137,7 @@ export function CounselorDetail() {
                   <span className="text-primary mr-1.5">💬</span> 文字沟通
                 </h4>
                 <span className="text-primary font-bold text-[14px]">
-                  ¥{counselor.pricing.text}/次
+                  ¥{counselor.price}/次
                 </span>
               </div>
               <p className="text-[12px] text-gray-600 mb-2 leading-relaxed">
@@ -159,7 +159,7 @@ export function CounselorDetail() {
                   <span className="text-blue-500 mr-1.5">🎙️</span> 语音沟通
                 </h4>
                 <span className="text-gray-900 font-bold text-[14px]">
-                  ¥{counselor.pricing.voice}/50分钟
+                  ¥{counselor.price}/50分钟
                 </span>
               </div>
               <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
@@ -173,7 +173,7 @@ export function CounselorDetail() {
                   <span className="text-green-500 mr-1.5">📹</span> 视频沟通
                 </h4>
                 <span className="text-gray-900 font-bold text-[14px]">
-                  ¥{counselor.pricing.video}/50分钟
+                  ¥{counselor.price}/50分钟
                 </span>
               </div>
               <p className="text-[12px] text-gray-500 mb-2 leading-relaxed">
@@ -316,17 +316,14 @@ export function CounselorDetail() {
               文字/语音/视频支持
             </span>
             <div className="flex items-end">
-              <span className="text-[11px] text-gray-500 mr-1 mb-1">
-                起步价
-              </span>
               <span className="text-sm font-bold text-primary mr-0.5 mb-0.5">
                 ¥
               </span>
               <span className="text-[24px] font-bold text-primary leading-none">
-                {counselor.pricing.text}
+                {counselor.price}
               </span>
-              <span className="text-[11px] text-gray-400 ml-1 mb-1 line-through">
-                ¥{counselor.pricing.video + 200}
+              <span className="text-[12px] text-gray-500 ml-1 mb-1">
+                /次
               </span>
             </div>
           </div>
