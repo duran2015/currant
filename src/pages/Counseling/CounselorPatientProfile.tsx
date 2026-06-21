@@ -30,25 +30,25 @@ export function CounselorPatientProfile() {
            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
            
            <div className="flex items-center space-x-3 mb-4">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="client" className="w-12 h-12 rounded-full border border-gray-200" />
+              <img src={selectedCounselorOrder?.avatar || "https://i.pravatar.cc/150?img=12"} alt="client" className="w-12 h-12 rounded-full border border-gray-200 object-cover" />
               <div>
-                 <h2 className="text-[17px] font-bold text-gray-900 mb-0.5">陈小希</h2>
+                 <h2 className="text-[17px] font-bold text-gray-900 mb-0.5">{selectedCounselorOrder?.userName || "陈小希"}</h2>
                  <p className="text-[12px] text-gray-500">24岁 · 互联网运营</p>
               </div>
            </div>
 
            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-orange-50 text-orange-600 py-2 px-1 rounded-xl border border-orange-100 flex flex-col items-center">
-                 <div className="text-[10px] font-bold mb-0.5 opacity-80">当前风险</div>
-                 <div className="text-[13px] font-black tracking-tight">低/常规</div>
+              <div className="bg-[#FFF8F3] py-2 px-1 rounded-xl border border-orange-100/50 flex flex-col items-center">
+                 <div className="text-[10px] font-bold mb-0.5 text-[#FF8A48]">当前风险</div>
+                 <div className="text-[14px] font-black tracking-tight text-[#FF453A]">低/常规</div>
               </div>
-              <div className="bg-blue-50 text-blue-600 py-2 px-1 rounded-xl border border-blue-100 flex flex-col items-center">
-                 <div className="text-[10px] font-bold mb-0.5 opacity-80">近期测评</div>
-                 <div className="text-[13px] font-black tracking-tight">PHQ-9(5)</div>
+              <div className="bg-[#F4F9FF] py-2 px-1 rounded-xl border border-blue-100/50 flex flex-col items-center">
+                 <div className="text-[10px] font-bold mb-0.5 text-[#5C82FF]">近期测评</div>
+                 <div className="text-[14px] font-black tracking-tight text-[#1A45FF]">PHQ-9(5)</div>
               </div>
-              <div className="bg-primary/10 text-primary py-2 px-1 rounded-xl border border-primary/20 flex flex-col items-center">
-                 <div className="text-[10px] font-bold mb-0.5 opacity-80">心理韧性</div>
-                 <div className="text-[13px] font-black tracking-tight">68/100</div>
+              <div className="bg-[#F2FBF7] py-2 px-1 rounded-xl border border-green-100/50 flex flex-col items-center">
+                 <div className="text-[10px] font-bold mb-0.5 text-[#40B07B]">心理韧性</div>
+                 <div className="text-[14px] font-black tracking-tight text-[#008A4B]">68/100</div>
               </div>
            </div>
          </div>
@@ -61,8 +61,8 @@ export function CounselorPatientProfile() {
                     <Edit3 className="text-blue-500 mr-1.5" size={16} /> 本次咨询建议与总结
                   </h3>
                   {selectedCounselorOrder.counselorAdvice ? (
-                     <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
-                        <p className="text-[12px] text-gray-700 leading-relaxed font-medium">
+                     <div className="bg-[#F8FBFF] p-3.5 rounded-xl border border-[#E8F1FF]">
+                        <p className="text-[13px] text-gray-700 leading-[1.6] font-medium">
                            {selectedCounselorOrder.counselorAdvice}
                         </p>
                      </div>
@@ -82,13 +82,13 @@ export function CounselorPatientProfile() {
 
             <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
                <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">
-                 <BrainCircuit className="text-primary mr-1.5" size={16} /> 主导人格与特质
+                 <BrainCircuit className="text-[#40B07B] mr-1.5" size={16} /> 主导人格与特质
                </h3>
-               <div className="flex flex-wrap gap-1.5">
-                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium border border-gray-100">高敏感</span>
-                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium border border-gray-100">讨好型倾向</span>
-                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium border border-gray-100">成就导向</span>
-                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium border border-gray-100">防御：理智化</span>
+               <div className="flex flex-wrap gap-2">
+                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium">高敏感</span>
+                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium">讨好型倾向</span>
+                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium">成就导向</span>
+                 <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded text-[11px] font-medium">防御：理智化</span>
                </div>
             </div>
 
@@ -132,25 +132,25 @@ export function CounselorPatientProfile() {
             </div>
 
             {/* 新增：过往定性总结（内部记录）区块 */}
-            <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-orange-100">
+            <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-[#FFE8D6]">
                <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">
-                 <ClipboardList className="text-orange-500 mr-1.5" size={16} /> 过往定性总结 (内部)
+                 <ClipboardList className="text-[#FF8A48] mr-1.5" size={16} /> 过往定性总结 (内部)
                </h3>
                <div className="space-y-3">
-                 <div className="bg-orange-50/50 p-3 rounded-xl border border-orange-100/50">
-                    <div className="flex justify-between items-center mb-1.5">
-                       <span className="text-[11px] font-bold text-gray-900">2026年05月20日</span>
-                       <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-sm">文字沟通</span>
+                 <div className="bg-[#FFF9F3] p-3.5 rounded-xl border border-[#FFE8D6]">
+                    <div className="flex justify-between items-center mb-2">
+                       <span className="text-[12px] font-bold text-gray-900">2026年05月20日</span>
+                       <span className="text-[10px] text-[#FF8A48] bg-[#FFE8D6] px-2 py-0.5 rounded-sm font-bold">文字沟通</span>
                     </div>
                     <p className="text-[12px] text-gray-600 leading-relaxed">
                       用户存在明显的回避型依恋特征。在探讨人际冲突时，频繁使用“算了”、“没关系”等词汇来掩饰真实的愤怒。建议在下一次咨询中，尝试引导其直面并表达一次愤怒情绪。
                     </p>
                  </div>
                  
-                 <div className="bg-orange-50/50 p-3 rounded-xl border border-orange-100/50">
-                    <div className="flex justify-between items-center mb-1.5">
-                       <span className="text-[11px] font-bold text-gray-900">2026年05月14日</span>
-                       <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-sm">语音咨询</span>
+                 <div className="bg-[#FFF9F3] p-3.5 rounded-xl border border-[#FFE8D6]">
+                    <div className="flex justify-between items-center mb-2">
+                       <span className="text-[12px] font-bold text-gray-900">2026年05月14日</span>
+                       <span className="text-[10px] text-[#FF8A48] bg-[#FFE8D6] px-2 py-0.5 rounded-sm font-bold">语音咨询</span>
                     </div>
                     <p className="text-[12px] text-gray-600 leading-relaxed">
                       首次建立咨访关系。用户防御机制较强，理智化严重。记录了近期失眠（入睡困难&gt;2h），暂无躯体化或自残倾向。留了行为激活作业（睡前冥想）。

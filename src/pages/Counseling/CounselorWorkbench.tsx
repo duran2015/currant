@@ -61,7 +61,8 @@ export function CounselorWorkbench() {
       avatar: "https://i.pravatar.cc/150?img=12",
       type: "voice",
       time: "今天 20:00 - 20:30",
-      status: "pending_call"
+      status: "completed",
+      counselorAdvice: "建议结合 MBTI 和霍兰德职业兴趣测试做一次深度探索，同时每天保持30分钟的有氧运动以缓解抑郁情绪。"
     }
   ];
 
@@ -208,7 +209,7 @@ export function CounselorWorkbench() {
                     key={req.id} 
                     onClick={() => {
                       setSelectedCounselorOrder({ ...req, status: 'completed' });
-                      pushView("counselor-order-detail");
+                      pushView("counselor-patient-profile");
                     }}
                     className="bg-white rounded-[16px] p-3 shadow-sm border border-[#F5F6F8] cursor-pointer active:scale-[0.98] transition-transform"
                   >

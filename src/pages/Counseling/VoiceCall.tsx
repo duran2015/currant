@@ -139,16 +139,16 @@ export function VoiceCall() {
         </button>
         
         <div className="flex flex-col items-center">
-          <div className="flex bg-white/10 rounded-full px-2.5 py-1 space-x-1.5 items-center backdrop-blur-md mb-1">
-            <ShieldAlert size={12} className="text-green-400" />
-            <span className="text-[10px] text-white/90 font-medium tracking-wide">
-              会议号: 849 201 394
+            <div className="flex bg-white/10 rounded-full px-2.5 py-1 space-x-1.5 items-center backdrop-blur-md mb-1">
+              <ShieldAlert size={12} className="text-green-400" />
+              <span className="text-[10px] text-white/90 font-medium tracking-wide">
+                会议号: 849 201 394
+              </span>
+            </div>
+            <span className="text-[12px] text-white/60 font-medium tracking-widest font-mono mt-0.5">
+              {callState === "connecting" ? "连接中..." : formatTime(duration)}
             </span>
           </div>
-          <span className="text-[12px] text-white/60 font-medium tracking-widest font-mono">
-            {callState === "connecting" ? "连接中..." : formatTime(duration)}
-          </span>
-        </div>
 
         <button className="w-10 h-10 flex items-center justify-center text-white/70 active:bg-white/10 rounded-full">
           {isVideo ? <SwitchCamera size={20} /> : <MoreVertical size={20} />}
@@ -160,68 +160,67 @@ export function VoiceCall() {
         
         {/* Voice Mode Layout */}
         {!isVideo && (
-          <div className="flex flex-col items-center space-y-12">
-            <div className="flex items-center space-x-8">
-              {/* User Avatar */}
-              <div className="relative">
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-20 h-20 rounded-full border-[2px] border-white/20 object-cover shadow-xl relative z-10 grayscale-[0.2]"
-                />
+            <div className="flex flex-col items-center space-y-12 mt-4">
+              <div className="flex items-center space-x-6">
+                {/* User Avatar */}
+                <div className="relative">
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-[84px] h-[84px] rounded-full border-[1.5px] border-white/20 object-cover relative z-10"
+                  />
+                </div>
+                
+                {/* Connection Animation */}
+                <div className="flex space-x-1.5 px-2">
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
+                      className="w-1.5 h-1.5 rounded-full bg-white/40"
+                    />
+                  ))}
+                </div>
+ 
+                {/* Counselor Avatar */}
+                <div className="relative">
+                  <AnimatePresence>
+                    {callState === "in-call" && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: [1, 1.2, 1] }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2.5,
+                          ease: "easeInOut",
+                        }}
+                        className="absolute inset-0 bg-indigo-500/40 rounded-full blur-md"
+                      />
+                    )}
+                  </AnimatePresence>
+                  <img
+                    src={counselor.avatar}
+                    alt={counselor.name}
+                    className="w-[84px] h-[84px] rounded-full border-[2px] border-indigo-400/80 object-cover shadow-[0_0_20px_rgba(99,102,241,0.3)] relative z-10"
+                  />
+                </div>
               </div>
               
-              {/* Connection Animation */}
-              <div className="flex space-x-1.5">
-                {[...Array(3)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
-                    className="w-1.5 h-1.5 rounded-full bg-white/40"
-                  />
-                ))}
-              </div>
-
-              {/* Counselor Avatar */}
-              <div className="relative">
-                <AnimatePresence>
-                  {callState === "in-call" && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: [1, 1.2, 1] }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 2.5,
-                        ease: "easeInOut",
-                      }}
-                      className="absolute inset-0 bg-indigo-500/40 rounded-full blur-md"
-                    />
-                  )}
-                </AnimatePresence>
-                <img
-                  src={counselor.avatar}
-                  alt={counselor.name}
-                  className="w-24 h-24 rounded-full border-[3px] border-indigo-400/50 object-cover shadow-2xl relative z-10"
-                />
+              <div className="text-center">
+                <h1 className="text-[24px] font-bold text-white mb-2">
+                  {isCounselorView ? order?.userName : counselor.name}
+                </h1>
+                {callState === "connecting" && (
+                  <div className="flex items-center justify-center text-white/60 space-x-2 mt-1">
+                    <span className="text-[13px] font-medium tracking-wide">
+                      等待对方加入会议...
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-            
-            <div className="text-center">
-              <h1 className="text-[22px] font-bold text-white mb-2">
-                {isCounselorView ? order?.userName : counselor.name}
-              </h1>
-              {callState === "connecting" && (
-                <div className="flex items-center justify-center text-white/60 space-x-2">
-                  <Loader2 size={14} className="animate-spin" />
-                  <span className="text-[13px] font-medium tracking-wide">
-                    等待对方加入语音会议...
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          )}
 
         {/* Video Mode Layout (PIP) */}
         {isVideo && callState === "in-call" && (
@@ -263,66 +262,70 @@ export function VoiceCall() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="relative z-30 w-full px-8 pb-12 pt-6 bg-gradient-to-t from-black/80 to-transparent">
-        <div className="flex items-center justify-between max-w-sm mx-auto">
-          {/* Mute Button */}
-          <button
-            onClick={() => setMuted(!muted)}
-            className="flex flex-col items-center space-y-2"
-          >
-            <div
-              className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center transition-all ${muted ? "bg-white text-gray-900 shadow-lg shadow-white/20" : "bg-white/15 text-white border border-white/10 backdrop-blur-md hover:bg-white/20"}`}
+        <div className="relative z-30 w-full px-8 pb-12 pt-6 bg-gradient-to-t from-black/80 to-transparent">
+          <div className="flex items-center justify-between max-w-sm mx-auto">
+            {/* Mute Button */}
+            <button
+              onClick={() => setMuted(!muted)}
+              className="flex flex-col items-center space-y-2 w-16"
             >
-              {muted ? <MicOff size={24} /> : <Mic size={24} />}
-            </div>
-            <span className="text-[11px] text-white/70 font-medium">
-              {muted ? "解除静音" : "静音"}
-            </span>
-          </button>
+              <div
+                className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors ${
+                  muted ? "bg-white/90 text-black" : "bg-white/10 text-white backdrop-blur-md border border-white/10"
+                }`}
+              >
+                {muted ? <MicOff size={24} /> : <Mic size={24} />}
+              </div>
+              <span className="text-[12px] text-white/80 font-medium">
+                {muted ? "解除静音" : "静音"}
+              </span>
+            </button>
 
-          {/* Camera Button (Enabled only for Video) */}
-          <button
-            onClick={() => isVideo && setCameraOff(!cameraOff)}
-            className={`flex flex-col items-center space-y-2 ${!isVideo && "opacity-40"}`}
-            disabled={!isVideo}
-          >
-            <div
-              className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center transition-all ${cameraOff ? "bg-white text-gray-900 shadow-lg shadow-white/20" : "bg-white/15 text-white border border-white/10 backdrop-blur-md hover:bg-white/20"}`}
+            {isVideo && (
+              <button
+                onClick={() => setCameraOff(!cameraOff)}
+                className="flex flex-col items-center space-y-2 w-16"
+              >
+                <div
+                  className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors ${
+                    cameraOff ? "bg-white/90 text-black" : "bg-white/10 text-white backdrop-blur-md border border-white/10"
+                  }`}
+                >
+                  {cameraOff ? <VideoOff size={24} /> : <VideoIcon size={24} />}
+                </div>
+                <span className="text-[12px] text-white/80 font-medium">
+                  {cameraOff ? "开启视频" : "关闭视频"}
+                </span>
+              </button>
+            )}
+            
+            {!isVideo && (
+              <button
+                className="flex flex-col items-center space-y-2 w-16"
+              >
+                <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-white/10 text-white backdrop-blur-md border border-white/10">
+                  <Volume2 size={24} />
+                </div>
+                <span className="text-[12px] text-white/80 font-medium">
+                  免提
+                </span>
+              </button>
+            )}
+
+            {/* Hangup Button */}
+            <button
+              onClick={handleHangup}
+              className="flex flex-col items-center space-y-2 w-16"
             >
-              {cameraOff ? <VideoOff size={24} /> : <VideoIcon size={24} />}
-            </div>
-            <span className="text-[11px] text-white/70 font-medium">
-              {cameraOff ? "开启视频" : "关闭视频"}
-            </span>
-          </button>
-
-          {/* Chat / More */}
-          <button
-            onClick={() => {}}
-            className="flex flex-col items-center space-y-2"
-          >
-            <div className="w-14 h-14 rounded-[1.2rem] bg-white/15 text-white border border-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all">
-              <MessageSquare size={22} />
-            </div>
-            <span className="text-[11px] text-white/70 font-medium">
-              聊天
-            </span>
-          </button>
-
-          {/* Hangup Button */}
-          <button
-            onClick={handleHangup}
-            className="flex flex-col items-center space-y-2"
-          >
-            <div className="w-14 h-14 rounded-[1.2rem] bg-[#FF453A] flex items-center justify-center text-white shadow-xl shadow-red-500/30 active:scale-95 transition-transform">
-              <PhoneOff size={24} />
-            </div>
-            <span className="text-[11px] text-[#FF453A]/90 font-bold">
-              离开会议
-            </span>
-          </button>
+              <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-[#FF3B30] text-white shadow-lg shadow-red-500/30 active:scale-95 transition-transform">
+                <PhoneOff size={24} />
+              </div>
+              <span className="text-[12px] text-white/80 font-medium">
+                挂断
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
     </motion.div>
   );
 }
