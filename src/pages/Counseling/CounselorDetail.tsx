@@ -141,7 +141,7 @@ export function CounselorDetail() {
                 </span>
               </div>
               <p className="text-[12px] text-gray-600 mb-2 leading-relaxed">
-                异步或轻量级同步回复，适合不方便接听电话，或需要打字来梳理思绪的阶段。
+                随时留言或轻量级同步回复，适合不方便接听电话，或需要打字来梳理思绪的阶段。
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="text-[10px] bg-white text-gray-500 border border-gray-100 px-2 py-0.5 rounded">

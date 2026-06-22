@@ -23,7 +23,7 @@ export interface AppState {
     phq2Step: number;
   };
   aiSettings: {
-    avatar: "otter" | "cat";
+    avatar: "elephant" | "cat";
     fontSize: "small" | "medium" | "large";
     theme: "light" | "dark";
     voice: "gentle" | "sexy" | "neutral";

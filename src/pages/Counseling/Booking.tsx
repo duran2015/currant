@@ -80,7 +80,7 @@ export function Booking() {
                 {counselor.name}
               </p>
               <p className="text-[11px] font-medium text-gray-500 bg-white border border-gray-100 px-2 py-0.5 rounded-full inline-block mt-1">
-                L2 / L3 心理健康支持支持
+                L2 / L3 心理健康支持
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ export function Booking() {
                   <span className="mr-1.5">💬</span> 文字沟通
                 </span>
                 <span className="text-[11px] text-gray-500">
-                  异步回复，陪伴引导
+                  随时留言，陪伴引导
                 </span>
               </div>
               <span className={`font-bold ${selectedMethod === "text" ? "text-primary" : "text-gray-900"}`}>

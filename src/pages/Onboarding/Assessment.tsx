@@ -125,7 +125,7 @@ export function Assessment() {
   const flow = [
     {
       type: "intro",
-      title: "嗨，我是小愈。",
+      title: "嗨，我是小鹿。",
       desc: "用2分钟，让我认识你。",
       button: "开始",
     },
@@ -141,7 +141,7 @@ export function Assessment() {
     {
       type: "input",
       key: "name",
-      title: "我叫小愈，你呢？",
+      title: "我叫小鹿，你呢？",
       desc: "你的名字将是我对你最温暖的呼唤",
       placeholder: "小名也行...",
     },
@@ -235,7 +235,7 @@ export function Assessment() {
               </p>
               
               <div className="absolute bottom-6 right-6 w-24 h-24 flex items-center justify-center">
-                <span className="text-6xl animate-bounce" style={{ animationDuration: '3s' }}>🦦</span>
+                <span className="text-6xl animate-bounce" style={{ animationDuration: '3s' }}>🦌</span>
               </div>
 
               <div className="mt-16 w-full px-6">
@@ -286,7 +286,7 @@ export function Assessment() {
                 </AnimatePresence>
 
                 <div className="flex justify-center pt-4">
-                  <span className="text-4xl transition-transform duration-500" style={{ transform: phq2Step === 1 ? 'rotate(90deg)' : 'rotate(0deg)' }}>🦦</span>
+                  <span className="text-4xl transition-transform duration-500" style={{ transform: phq2Step === 1 ? 'rotate(90deg)' : 'rotate(0deg)' }}>🦌</span>
                 </div>
               </div>
             </div>
@@ -294,7 +294,7 @@ export function Assessment() {
 
           {currentStep.type === "feedback" && (
             <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
-              <div className="text-7xl mb-8">🦦</div>
+              <div className="text-7xl mb-8">🦌</div>
               <h2 className="text-[24px] font-bold text-gray-900 mb-12 leading-relaxed">
                 "{getFeedback().text}"
               </h2>
@@ -386,7 +386,7 @@ export function Assessment() {
 
             {currentStep.type === "finish" && (
               <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
-                <div className="text-7xl mb-8 animate-pulse">🦦👋</div>
+                <div className="text-7xl mb-8 animate-pulse">🦌👋</div>
                 <h2 className="text-[26px] font-black text-gray-900 mb-4">
                   谢谢你，{answers.name || "新朋友"}。
                 </h2>

@@ -7,7 +7,7 @@ export function BottomNav() {
 
   const tabs = [
     { id: "home", icon: Home, label: "首页" },
-    { id: "ai", icon: MessageCircle, label: "水獭" },
+    { id: "ai", icon: MessageCircle, label: "小鹿" },
     { id: "messages", icon: MessageSquare, label: "消息" },
     { id: "profile", icon: User, label: "我的" },
   ] as const;

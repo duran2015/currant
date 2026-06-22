@@ -5,12 +5,23 @@ import { useAppStore } from "../../store";
 import { mockCounselors, mockConsultationRecords } from "../../data";
 
 export function TextChat() {
-  const { popView, pushView, bookingOrder, selectedCounselorId, selectedConsultationId } =
+  const { popView, pushView, bookingOrder, selectedCounselorId, selectedConsultationId, appMode, selectedCounselorOrder } =
     useAppStore();
+
+  const isCounselorMode = appMode === "counselor";
 
   const record = mockConsultationRecords.find(r => r.id === selectedConsultationId);
   const targetCounselorId = record?.counselorId || bookingOrder?.counselorId || selectedCounselorId;
   const counselor = mockCounselors.find((c) => c.id === targetCounselorId) || mockCounselors[0];
+  
+  // For counselor mode, the "other party" is the user
+  const otherParty = isCounselorMode ? {
+    name: selectedCounselorOrder?.userName || "匿名用户",
+    avatar: selectedCounselorOrder?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+  } : {
+    name: counselor.name,
+    avatar: counselor.avatar,
+  };
 
   const isVoice = record?.type === "voice";
   const defaultMessages = record?.messages && record.messages.length > 0
@@ -21,7 +32,7 @@ export function TextChat() {
           role: "counselor",
           text: isVoice
             ? `我们已经完成了 ${record?.duration || 50} 分钟的语音咨询。以下是本次咨询的摘要：\n\n${record?.summary || "期待下次与你交流。"}\n\n建议：${record?.counselorNotes || "保持好心情。"}`
-            : `你好，我是你的倾听师 ${counselor.name}。我们的文字沟通时间为 30 分钟。在这段时间里，请随时留下你想说的话，我会逐一认真阅读并回复。我可以为你提供情感上的陪伴和倾听。`,
+            : isCounselorMode ? `(系统提示) 用户预约了文字咨询，您可以开始发送消息。` : `你好，我是你的倾听师 ${counselor.name}。我们的文字沟通时间为 30 分钟。在这段时间里，请随时留下你想说的话，我会逐一认真阅读并回复。我可以为你提供情感上的陪伴和倾听。`,
         },
       ];
 
@@ -53,6 +64,9 @@ export function TextChat() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  const myRole = isCounselorMode ? "counselor" : "user";
+  const otherRole = isCounselorMode ? "user" : "counselor";
+
   const handleSend = () => {
     if (!inputValue.trim()) return;
 
@@ -60,18 +74,18 @@ export function TextChat() {
     const newMsgId = Date.now().toString();
     setMessages((prev) => [
       ...prev,
-      { id: newMsgId, role: "user", text: userText },
+      { id: newMsgId, role: myRole, text: userText },
     ]);
     setInputValue("");
 
-    // Simulate counselor reply
+    // Simulate other party reply
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString() + "_2",
-          role: "counselor",
-          text: "我也能感受到你的情绪，慢慢讲，我在这里。",
+          role: otherRole,
+          text: isCounselorMode ? "好的，我明白了。" : "我也能感受到你的情绪，慢慢讲，我在这里。",
         },
       ]);
     }, 1500);
@@ -95,13 +109,13 @@ export function TextChat() {
           </button>
           <div className="ml-2 flex items-center">
             <img
-              src={counselor.avatar}
+              src={otherParty.avatar}
               alt=""
               className="w-8 h-8 rounded-full object-cover mr-2"
             />
             <div>
               <h1 className="text-[15px] font-bold text-gray-900 leading-tight">
-                {counselor.name}
+                {otherParty.name}
               </h1>
               <div className="text-[10px] text-gray-500 bg-white/50 px-2 py-0.5 rounded-full inline-block backdrop-blur-sm shadow-sm border border-gray-100">
                 {!isVoice 
@@ -120,7 +134,7 @@ export function TextChat() {
       {!isVoice && (
         <div className="bg-amber-50/80 backdrop-blur border-b border-amber-100/50 py-2 px-4 flex items-center text-[11px] text-amber-700/80 absolute top-[72px] left-0 w-full z-10 shadow-sm">
           <HelpCircle size={14} className="mr-1.5 shrink-0" />
-          单次文字咨询限时 30 分钟，倾听师手动回复可能需要等待，请不要着急。
+          单次文字咨询限时 30 分钟，对方手动回复可能需要等待，请不要着急。
         </div>
       )}
 
@@ -140,18 +154,18 @@ export function TextChat() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === myRole ? "justify-end" : "justify-start"}`}
           >
-            {msg.role === "counselor" && (
+            {msg.role === otherRole && (
               <img
-                src={counselor.avatar}
+                src={otherParty.avatar}
                 alt=""
                 className="w-8 h-8 rounded-full object-cover mr-2 shrink-0 border border-gray-100 mt-1"
               />
             )}
             <div className="max-w-[75%]">
               <div
-                className={`p-3 text-[14px] leading-relaxed shadow-sm ${msg.role === "user" ? "rounded-2xl rounded-tr-sm bg-primary text-white" : "rounded-2xl rounded-tl-sm bg-white border border-gray-100 text-gray-800"}`}
+                className={`p-3 text-[14px] leading-relaxed shadow-sm ${msg.role === myRole ? "rounded-2xl rounded-tr-sm bg-primary text-white" : "rounded-2xl rounded-tl-sm bg-white border border-gray-100 text-gray-800"}`}
               >
                 {msg.text}
               </div>

@@ -47,10 +47,13 @@ export function MiniAssessmentResult() {
           <p className="text-[13px] leading-relaxed opacity-90 mb-6">
             你的焦虑水平目前处于中等状态，可能有持续几天感到心烦意乱或紧张。可以尝试寻找专业的疏导或进行短时间的放松冥想。
           </p>
-          <div className="flex items-center space-x-2 text-[10px] opacity-60">
-            <span className="bg-white/20 px-2 py-0.5 rounded">
-              心愈助手 生成
+          <div className="absolute -bottom-4 right-4 flex items-center space-x-1.5 opacity-80 mix-blend-overlay">
+            <span className="text-[10px] font-bold text-gray-400 tracking-widest">
+              可鹿助手 生成
             </span>
+            <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px]">
+              🦌
+            </div>
           </div>
         </div>
 
@@ -139,10 +142,10 @@ export function MiniAssessmentResult() {
               className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl relative text-center"
             >
               <div className="w-16 h-16 bg-primary text-white rounded-[1.2rem] flex items-center justify-center mx-auto mb-4 shadow-lg">
-                心愈
+                可鹿
               </div>
               <h2 className="text-[18px] font-bold text-gray-900 mb-2">
-                下载心愈 App
+                下载可鹿 App
               </h2>
               <p className="text-[13px] text-gray-500 mb-6 leading-relaxed">
                 在 App 中解锁完整的 30 页深度心理分析报告，以及 24 小时 AI

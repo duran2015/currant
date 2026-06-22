@@ -43,7 +43,7 @@ export function CounselorOrderDetail() {
   const handleEnterRoom = () => {
     if (!selectedCounselorOrder) return;
     if (isLocked) {
-      alert(`会议室将在开始前10分钟开放，请稍后再试\n（${lockMessage}）`);
+      alert(`咨询室将在开始前10分钟开放，请稍后再试\n（${lockMessage}）`);
       return;
     }
     if (isVoiceOrVideo) {
@@ -203,7 +203,7 @@ export function CounselorOrderDetail() {
                    }`}
                  >
                     {isVoiceOrVideo ? (
-                      <><Video size={16} className="mr-1.5" /> 进入视频/语音会议室</>
+                      <><Video size={16} className="mr-1.5" /> 进入视频/语音咨询室</>
                     ) : (
                       <><MessageSquare size={16} className="mr-1.5" /> 进入文字咨询室</>
                     )}

@@ -47,8 +47,8 @@ export function AITab() {
   const isDark = aiSettings.theme === 'dark';
   // Increase the distinction between font sizes to make it obvious
   const textSize = aiSettings.fontSize === 'small' ? 'text-[13px]' : aiSettings.fontSize === 'large' ? 'text-[18px]' : 'text-[15px]';
-  const avatarEmoji = aiSettings.avatar === 'otter' ? '🦦' : '🐱';
-  const avatarName = aiSettings.avatar === 'otter' ? '心灵水獭 小愈' : '治愈猫咪 小愈';
+  const avatarEmoji = aiSettings.avatar === 'elephant' ? '🦌' : '🐱';
+  const avatarName = aiSettings.avatar === 'elephant' ? '心灵小鹿 可鹿' : '治愈猫咪 小喵';
 
   // AI Chat State
   const [messages, setMessages] = useState<{
@@ -387,7 +387,7 @@ export function AITab() {
                 : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
             }`}
           >
-            心愈 AI
+            可鹿 AI
             {activeTab === "ai" && (
               <motion.div
                 layoutId="activeTab"
@@ -444,7 +444,23 @@ export function AITab() {
          </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto w-full relative pt-4 transition-colors ${isDark ? 'bg-[#121212]' : 'bg-gradient-to-b from-[#EBF0FA] via-[#F8F9FF] to-[#f8f9fa]'}`}>
+      {/* Active Consultation Banner */}
+      {useAppStore().orders.filter(o => o.status === 'paid').length > 0 && (
+        <div className={`mx-4 mt-4 p-3 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer active:scale-[0.98] transition-all border ${isDark ? 'bg-[#2A2A2A] border-gray-700' : 'bg-blue-50 border-blue-100'}`} onClick={() => pushView("orders-list")}>
+           <div className="flex items-center space-x-3">
+             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 shrink-0">
+               <Activity size={20} />
+             </div>
+             <div>
+               <div className={`text-[14px] font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>你有待进行的真人咨询</div>
+               <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>点击进入咨询室</div>
+             </div>
+           </div>
+           <ArrowRight size={16} className={isDark ? 'text-gray-400' : 'text-gray-400'} />
+        </div>
+      )}
+
+      <div className={`flex-1 overflow-y-auto w-full relative pt-2 transition-colors ${isDark ? 'bg-[#121212]' : 'bg-gradient-to-b from-[#EBF0FA] via-[#F8F9FF] to-[#f8f9fa]'}`}>
             {/* Chat Flow */}
             <div className="px-4 pb-[140px] pt-4">
               {messages.map((msg, idx) => (
@@ -619,8 +635,8 @@ export function AITab() {
                                     {rec.level === "L1"
                                       ? "继续跟我聊聊"
                                       : rec.level === "L2"
-                                        ? "查看在线心愈师"
-                                        : rec.level === "L3"
+                                        ? "查看在线可鹿师"
+                                      : rec.level === "L3"
                                           ? "了解专业咨询"
                                           : "获取危机热线"}
                                   </button>

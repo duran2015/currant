@@ -229,7 +229,7 @@ export function Login() {
                   </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  欢迎来到心愈
+                  欢迎来到可鹿
                 </h1>
                 <p className="text-gray-500 text-sm mt-2">
                   在这里，听见自己的声音
@@ -307,7 +307,7 @@ export function Login() {
                   >
                     我已阅读并同意
                     <span className="text-primary px-0.5">
-                      《心愈用户服务协议》
+                      《可鹿用户服务协议》
                     </span>
                     与<span className="text-primary px-0.5">《隐私政策》</span>
                     ， 未注册手机号通过验证后将自动注册

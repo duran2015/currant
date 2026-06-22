@@ -1,5 +1,5 @@
 {
-  "name": "心愈",
+  "name": "可鹿",
   "description": "一个提供温暖陪伴的 AI 心理健康服务平台，协助用户管理情绪与压力，匹配合适的心理支持。",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

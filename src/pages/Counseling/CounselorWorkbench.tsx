@@ -16,7 +16,7 @@ import {
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-    const { pushView, enterAppMode, setSelectedCounselorOrder, activeCallSession } = useAppStore();
+    const { pushView, enterAppMode, setSelectedCounselorOrder, activeCallSession, setActiveCallSession } = useAppStore();
   const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
   
   // Status is now derived automatically: if there's an active call, counselor is busy; otherwise online.
@@ -192,9 +192,40 @@ export function CounselorWorkbench() {
                            ))}
                         </div>
  
-                        <div className="bg-[#F4F9FF] rounded-md py-1.5 px-2.5 flex items-start">
+                        <div className="bg-[#F4F9FF] rounded-md py-1.5 px-2.5 flex items-start mb-3">
                            <Sparkles size={12} className="text-[#5C66FF] mr-1 mt-0.5 shrink-0" />
                            <span className="text-[12px] text-[#333333] leading-snug">{req.summary}</span>
+                        </div>
+
+                        <div className="flex space-x-2 border-t border-[#F5F6F8] pt-3">
+                           <button 
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               setSelectedCounselorOrder(req);
+                               pushView("counselor-order-detail");
+                             }}
+                             className="flex-1 bg-gray-50 text-gray-700 font-bold py-2 rounded-xl text-[12px] flex items-center justify-center border border-gray-100 transition-colors active:bg-gray-100"
+                           >
+                             查看详情
+                           </button>
+                           <button 
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               setSelectedCounselorOrder(req);
+                               if (req.type === 'text') {
+                                 pushView("counseling-text-chat");
+                               } else {
+                                 setActiveCallSession(req);
+                               }
+                             }}
+                             className="flex-1 bg-gray-900 text-white font-bold py-2 rounded-xl text-[12px] shadow-sm flex items-center justify-center transition-colors active:bg-gray-800"
+                           >
+                             {req.type === 'text' ? (
+                              <><MessageSquare size={14} className="mr-1.5" /> 文字聊天</>
+                            ) : (
+                              <><Phone size={14} className="mr-1.5" /> 进入咨询室</>
+                            )}
+                           </button>
                         </div>
                      </div>
                    ))}
@@ -270,56 +301,7 @@ export function CounselorWorkbench() {
                  </div>
                </button>
              </motion.div>
-          ) : (
-             <motion.div
-               key="upcoming"
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -10 }}
-               className="space-y-4"
-             >
-               {upcoming.map(item => (
-                 <div key={item.id} className="bg-white rounded-3xl p-5 shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-50 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1.5 rounded-bl-xl z-10 border-b border-l border-green-100/50">
-                      待接听
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 mb-5 mt-1">
-                       <img src={item.avatar} alt={item.userName} className="w-14 h-14 rounded-full border border-gray-100 object-cover" />
-                       <div>
-                          <div className="text-[18px] font-bold text-gray-900 mb-1">{item.userName}</div>
-                          <div className="flex items-center text-[12px] text-gray-500 font-medium bg-gray-50 px-2 py-0.5 rounded-md w-fit">
-                             <Clock size={12} className="mr-1" /> {item.time}
-                          </div>
-                       </div>
-                    </div>
-
-                    <div className="bg-gray-50/50 p-3.5 rounded-2xl mb-5 border border-gray-100 flex items-center justify-between">
-                       <span className="text-[13px] text-gray-500 font-medium">服务项目</span>
-                       <span className="text-[13px] font-bold text-gray-900 flex items-center">
-                         {item.type === 'voice' ? <Phone size={14} className="mr-1.5 text-indigo-500" /> : <MessageSquare size={14} className="mr-1.5 text-blue-500" />}
-                         {item.type === 'voice' ? '语音倾听' : '文字聊天'} (30分钟)
-                       </span>
-                    </div>
-
-                    <div className="flex space-x-3">
-                       <button 
-                         onClick={() => pushView("counselor-patient-profile")}
-                         className="flex-1 bg-white text-gray-700 font-bold py-3.5 rounded-2xl text-[13px] flex items-center justify-center border border-gray-200 transition-colors active:bg-gray-50"
-                       >
-                         <Target size={16} className="mr-1.5" /> 画像档案
-                       </button>
-                       <button 
-                         onClick={() => pushView("counseling-call")}
-                         className="flex-1 bg-gray-900 text-white font-bold py-3.5 rounded-2xl text-[13px] shadow-sm flex items-center justify-center transition-colors hover:bg-gray-800"
-                       >
-                         <Phone size={16} className="mr-1.5" /> 进入连线
-                       </button>
-                    </div>
-                 </div>
-               ))}
-            </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </motion.div>

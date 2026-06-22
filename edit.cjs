@@ -18,7 +18,7 @@ const oldHeader = `<div className={\`pt-12 pb-2 px-6 sticky top-0 z-20 flex flex
         </button>
         <div className="flex justify-between items-center mb-2 w-full px-2">
           <span className={\`text-[16px] font-bold \${isDark ? "text-white" : "text-gray-900"}\`}>
-            心愈 AI
+            象往 AI
           </span>
           <button
             onClick={() => pushView("counseling-list")}
@@ -49,7 +49,7 @@ const newHeader = `<div className={\`pt-12 pb-2 px-6 sticky top-0 z-20 flex flex
                 : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
             }\`}
           >
-            心愈 AI
+            象往 AI
             {activeTab === "ai" && (
               <motion.div
                 layoutId="activeTab"

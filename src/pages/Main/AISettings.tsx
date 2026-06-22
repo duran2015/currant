@@ -43,9 +43,9 @@ export function AISettings() {
                   <User size={20} />
                 </div>
                 <div className="text-left">
-                  <h3 className={`font-bold text-[15px] ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>水獭形象设置</h3>
+                  <h3 className={`font-bold text-[15px] ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>小鹿形象设置</h3>
                   <p className={`text-[12px] mt-0.5 ${aiSettings.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {aiSettings.avatar === 'otter' ? '心灵水獭 小愈' : '治愈猫咪 小愈'}
+                    {aiSettings.avatar === 'elephant' ? '心灵小鹿 可鹿' : '治愈猫咪 小喵'}
                   </p>
                 </div>
               </div>
@@ -55,12 +55,12 @@ export function AISettings() {
               <div className={`px-4 pb-4 border-t ${aiSettings.theme === 'dark' ? 'border-gray-800' : 'border-gray-50'}`}>
                 <div className="pt-2 space-y-1">
                   {[
-                    { id: 'otter', label: '心灵水獭 🦦' },
+                    { id: 'elephant', label: '心灵小鹿 🦌' },
                     { id: 'cat', label: '治愈猫咪 🐱' }
                   ].map(opt => (
                     <button
                       key={opt.id}
-                      onClick={() => updateAISettings({ avatar: opt.id as 'otter' | 'cat' })}
+                      onClick={() => updateAISettings({ avatar: opt.id as 'elephant' | 'cat' })}
                       className={`w-full flex items-center justify-between py-3 px-2 rounded-lg transition-colors ${aiSettings.avatar === opt.id ? (aiSettings.theme === 'dark' ? 'bg-gray-800/50' : 'bg-blue-50/50') : ''}`}
                     >
                       <span className={`text-[14px] font-medium ${aiSettings.theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>{opt.label}</span>

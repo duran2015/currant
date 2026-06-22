@@ -289,19 +289,32 @@ export function Payment() {
               时间：{bookingOrder.date} {bookingOrder.time}
               <br />
               <span className="inline-block mt-4 text-[12px] bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full">
-                请提前 5 分钟进入{bookingOrder.type === 'text' ? '文字咨询室' : '会议室'}准备
+                请提前 5 分钟进入咨询室准备
               </span>
             </p>
 
             <div className="w-full max-w-xs space-y-4">
-              <button
-                onClick={() => {
-                  pushView("orders-list");
-                }}
-                className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform"
-              >
-                查看我的订单
-              </button>
+              {bookingOrder.type === 'text' ? (
+                <button
+                  onClick={() => {
+                    pushView("counseling-text-chat");
+                  }}
+                  className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center"
+                >
+                  <FileText size={18} className="mr-2" /> 立即进入文字咨询
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    // Check if it's within 10 minutes to allow direct entry
+                    // For simplicity, we just go to orders list where they can enter
+                    pushView("orders-list");
+                  }}
+                  className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform"
+                >
+                  查看订单与咨询室
+                </button>
+              )}
               <button
                 onClick={() => resetToView("main")}
                 className="w-full bg-gray-50 text-gray-700 font-bold py-4 rounded-full active:scale-95 transition-transform"

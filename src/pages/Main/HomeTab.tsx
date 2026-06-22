@@ -60,7 +60,7 @@ export function HomeTab() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCalendarDetail, setShowCalendarDetail] = useState<{date: number | string, emoji: string, tags: string[], color: string} | null>(null);
   
-  // IP Status (小愈状态)
+  // IP Status (小鹿状态)
   const getIpStatus = () => {
     if (!hasRecordedToday) return { status: 'curious', text: '今天感觉怎么样？' };
     if (selectedEmoji && selectedEmoji >= 4) return { status: 'happy', text: '太棒啦～' };
@@ -183,12 +183,12 @@ export function HomeTab() {
       exit={{ opacity: 0 }}
       className="flex flex-col h-full bg-[#f8f9fa] relative pb-24 overflow-y-auto w-full"
     >
-      {/* 顶部栏 & 小愈状态区 (IP Status) */}
+      {/* 顶部栏 & 小鹿状态区 (IP Status) */}
       <div className="px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-10">
         <div className="flex items-center">
           <div className="relative mr-3">
             <div className="w-10 h-10 bg-gradient-to-br from-orange-50 to-orange-100 rounded-full flex items-center justify-center text-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-white z-10 relative">
-              🦦
+              🦌
             </div>
             {/* 对话气泡小红点提示 */}
             {!hasRecordedToday && (
@@ -196,7 +196,7 @@ export function HomeTab() {
             )}
           </div>
           <div>
-            <h1 className="text-[16px] font-black text-gray-900 tracking-tight leading-tight">心愈</h1>
+            <h1 className="text-[16px] font-black text-gray-900 tracking-tight leading-tight">可鹿</h1>
             <p className="text-[11px] font-medium text-gray-500">{ipStatus.text}</p>
           </div>
         </div>
@@ -213,6 +213,24 @@ export function HomeTab() {
           )}
         </div>
       </div>
+
+      {/* Active Consultation Banner */}
+      {useAppStore().orders.filter((o: any) => o.status === 'paid').length > 0 && (
+        <div className="px-5 mb-2 mt-1">
+          <div className="bg-blue-50 border border-blue-100 p-3 rounded-[1.25rem] flex items-center justify-between shadow-sm cursor-pointer active:scale-[0.98] transition-transform" onClick={() => pushView("orders-list")}>
+             <div className="flex items-center space-x-3">
+               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 shrink-0">
+                 <Activity size={20} />
+               </div>
+               <div>
+                 <div className="text-[14px] font-bold text-gray-900">你有待进行的真人咨询</div>
+                 <div className="text-[11px] text-gray-500">点击查看订单与咨询室</div>
+               </div>
+             </div>
+             <ChevronRight size={16} className="text-gray-400" />
+          </div>
+        </div>
+      )}
 
       {/* 情绪追踪综合模块 */}
       <div className="px-5 mb-8 mt-2">
@@ -287,28 +305,7 @@ export function HomeTab() {
             )}
           </AnimatePresence>
 
-          {/* 次要数据区：连续记录、宽容剩余、洞察 */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100/80">
-            <div className="flex space-x-4">
-              <div className="flex items-center">
-                <span className="text-[14px] mr-1">🔥</span>
-                <span className="text-[12px] font-bold text-gray-700">{streakDays}<span className="text-[10px] font-normal text-gray-500 ml-0.5">天连续</span></span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-[14px] mr-1">🛡️</span>
-                <span className="text-[12px] font-bold text-gray-700">{graceDays}<span className="text-[10px] font-normal text-gray-500 ml-0.5">次宽容</span></span>
-              </div>
-            </div>
-            
-            <div className="flex items-center bg-gray-50 px-2.5 py-1.5 rounded-lg cursor-pointer active:scale-95 transition-transform">
-              <Lock size={12} className="text-gray-400 mr-1.5" />
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-gray-600 leading-none mb-0.5">本周洞察</span>
-                <span className="text-[9px] text-gray-400 leading-none">再记2天</span>
-              </div>
-              <ChevronRight size={12} className="text-gray-300 ml-1" />
-            </div>
-          </div>
+
         </div>
       </div>
 

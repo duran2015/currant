@@ -90,7 +90,7 @@ export function AssessmentRecords() {
                 评估 Agent 提示
               </h3>
               <p className="text-[12px] text-gray-600 leading-relaxed">
-                心愈的量表评估主要用于动态追踪你的心理数值变迁，不可替代专业医疗诊断。如遇严重不适，请及时就医。
+                可鹿的量表评估主要用于动态追踪你的心理数值变迁，不可替代专业医疗诊断。如遇严重不适，请及时就医。
               </p>
             </div>
           </div>

@@ -56,7 +56,7 @@ export function OrdersList() {
 
   const handleEnterConsultation = (order: any, isLocked: boolean, lockMessage: string) => {
     if (isLocked) {
-      alert(`会议室将在开始前10分钟开放，请稍后再试\n（${lockMessage}）`);
+      alert(`咨询室将在开始前10分钟开放，请稍后再试\n（${lockMessage}）`);
       return;
     }
     setBookingOrder(order);
@@ -124,7 +124,7 @@ export function OrdersList() {
                       </div>
                     </div>
                     <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[11px] font-bold">
-                      {order.status === "paid" ? "待履约" : order.status}
+                      {order.status === "paid" ? "待咨询" : order.status}
                     </span>
                   </div>
 
@@ -145,7 +145,7 @@ export function OrdersList() {
                         <Video size={16} className="mr-2 text-gray-400" />
                       )}
                       <span className="font-medium">
-                        {order.type === "text" ? "全天异步可留言" : "50 分钟"}
+                        {order.type === "text" ? "全天随时可留言" : "50 分钟"}
                       </span>
                     </div>
                   </div>
@@ -174,7 +174,7 @@ export function OrdersList() {
                           {order.type === "text" ? (
                             <>进入文字咨询室 <MessageSquare size={16} className="ml-2" /></>
                           ) : (
-                            <>进入视频/语音会议室 <Video size={16} className="ml-2" /></>
+                            <>进入视频/语音咨询室 <Video size={16} className="ml-2" /></>
                           )}
                         </button>
                       </div>
