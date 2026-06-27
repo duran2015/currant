@@ -27,51 +27,11 @@ export function AISettings() {
         >
           <ChevronLeft size={24} />
         </button>
-        <h1 className={`text-[17px] font-bold mx-auto ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>AI 偏好设置</h1>
+        <h1 className={`text-[17px] font-bold mx-auto ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>小鹿偏好设置</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-8">
         <div className="px-4 py-6 space-y-6">
-          {/* Avatar Section */}
-          <div className={`rounded-2xl overflow-hidden shadow-sm border ${aiSettings.theme === 'dark' ? 'bg-[#1C1C1E] border-gray-800' : 'bg-white border-gray-100'}`}>
-            <button 
-              onClick={() => toggleSection('avatar')}
-              className={`w-full flex items-center justify-between p-4 transition-colors ${aiSettings.theme === 'dark' ? 'active:bg-gray-800' : 'active:bg-gray-50'}`}
-            >
-              <div className="flex items-center">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 ${aiSettings.theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-500'}`}>
-                  <User size={20} />
-                </div>
-                <div className="text-left">
-                  <h3 className={`font-bold text-[15px] ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>小鹿形象设置</h3>
-                  <p className={`text-[12px] mt-0.5 ${aiSettings.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {aiSettings.avatar === 'elephant' ? '心灵小鹿 可鹿' : '治愈猫咪 小喵'}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight size={20} className={`transition-transform ${activeSection === 'avatar' ? 'rotate-90' : ''} ${aiSettings.theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
-            </button>
-            {activeSection === 'avatar' && (
-              <div className={`px-4 pb-4 border-t ${aiSettings.theme === 'dark' ? 'border-gray-800' : 'border-gray-50'}`}>
-                <div className="pt-2 space-y-1">
-                  {[
-                    { id: 'elephant', label: '心灵小鹿 🦌' },
-                    { id: 'cat', label: '治愈猫咪 🐱' }
-                  ].map(opt => (
-                    <button
-                      key={opt.id}
-                      onClick={() => updateAISettings({ avatar: opt.id as 'elephant' | 'cat' })}
-                      className={`w-full flex items-center justify-between py-3 px-2 rounded-lg transition-colors ${aiSettings.avatar === opt.id ? (aiSettings.theme === 'dark' ? 'bg-gray-800/50' : 'bg-blue-50/50') : ''}`}
-                    >
-                      <span className={`text-[14px] font-medium ${aiSettings.theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>{opt.label}</span>
-                      {aiSettings.avatar === opt.id && <Check size={16} className="text-blue-500" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Display Section */}
           <div className={`rounded-2xl overflow-hidden shadow-sm border ${aiSettings.theme === 'dark' ? 'bg-[#1C1C1E] border-gray-800' : 'bg-white border-gray-100'}`}>
             <h2 className={`text-[13px] font-bold uppercase tracking-wider px-4 pt-4 pb-2 ${aiSettings.theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -178,7 +138,7 @@ export function AISettings() {
                   <Mic size={20} />
                 </div>
                 <div className="text-left">
-                  <h3 className={`font-bold text-[15px] ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>AI 语音设置</h3>
+                  <h3 className={`font-bold text-[15px] ${aiSettings.theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>小鹿语音设置</h3>
                   <p className={`text-[12px] mt-0.5 ${aiSettings.theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {aiSettings.voice === 'gentle' ? '温柔知性' : aiSettings.voice === 'sexy' ? '性感细腻' : '中性建议'}
                   </p>

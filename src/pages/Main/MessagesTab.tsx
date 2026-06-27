@@ -1,13 +1,15 @@
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { mockCounselors, mockConsultationRecords } from "../../data";
-import { ChevronRight, Bell, ShieldAlert, Mic, MessageSquare } from "lucide-react";
+import { mockCounselors, mockConsultationRecords, mockNotifications } from "../../data";
+import { ChevronRight, Bell, ShieldAlert, Mic, MessageSquare, Video, ArrowRight } from "lucide-react";
 
 export function MessagesTab() {
-  const { pushView, setTab, user, setSelectedConsultationId } = useAppStore();
+  const { pushView, setTab, user, setSelectedConsultationId, setActiveCallSession, setIsCallMinimized, setBookingOrder, setSelectedCounselorOrder, orders, appMode } = useAppStore();
 
-  // Load chat list from consultation records
-  const chats = mockConsultationRecords.map(record => {
+  const isCounselorMode = appMode === "counselor";
+
+  // Load chat list from valid orders (paid or completed)
+  const chats = orders.filter(o => o.status === "paid" || o.status === "completed").map(record => {
     const counselor = mockCounselors.find(c => c.id === record.counselorId);
     return { record, counselor };
   }).filter(item => item.counselor);
@@ -24,30 +26,42 @@ export function MessagesTab() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {/* System Notifications Entry (Secondary visual weight) */}
-        <div className="mb-6">
+        {/* Chats List (Primary visual weight) */}
+        <div>
+          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">最近消息</h2>
+
+          {/* System Notifications Chat */}
           <button
             onClick={() => pushView("notifications-list")}
-            className="w-full bg-white p-3 rounded-2xl flex items-center justify-between shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
           >
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mr-3 shrink-0">
-                <Bell size={18} />
+            <div className="relative mr-4 shrink-0">
+              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-inner">
+                <Bell size={24} />
               </div>
-              <div className="text-left">
-                <h3 className="font-bold text-gray-900 text-[15px]">系统通知</h3>
-                <p className="text-[12px] text-gray-500 line-clamp-1">
-                  查看预约提醒与系统广播
+              {mockNotifications.some(n => !n.isRead) && (
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full" />
+              )}
+            </div>
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex justify-between items-center mb-1">
+                <div className="flex items-center space-x-2 truncate">
+                  <h3 className="font-bold text-gray-900 text-[16px] truncate">系统通知</h3>
+                  <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-medium shrink-0">
+                    官方
+                  </span>
+                </div>
+                <span className="text-[11px] text-gray-400 shrink-0 ml-2">
+                  {mockNotifications.length > 0 ? mockNotifications[0].date.split(" ")[0] : "今天"}
+                </span>
+              </div>
+              <div className="flex items-center text-[13px] text-gray-500">
+                <p className="line-clamp-1">
+                  {mockNotifications.length > 0 ? mockNotifications[0].preview : "暂无新通知"}
                 </p>
               </div>
             </div>
-            <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
           </button>
-        </div>
-
-        {/* Chats List (Primary visual weight) */}
-        <div>
-          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">对话</h2>
 
           {/* Crisis Intervention Channel (Highest Priority) */}
           {user.hasRisk && (
@@ -74,42 +88,42 @@ export function MessagesTab() {
           {/* Human Counselors Chats */}
           {chats.map(({ record, counselor }) => {
             const isText = record.type === "text";
-            const lastMsg = record.messages && record.messages.length > 0 
-              ? record.messages[record.messages.length - 1].content 
-              : record.type === "voice" ? "已结束语音咨询" : "已结束视频咨询";
+            let lastMsg = "";
+            if (record.status === "paid" && (record.type === "voice" || record.type === "video")) {
+               lastMsg = record.type === "voice" ? "语音咨询待履约..." : "视频咨询待履约...";
+            } else {
+               lastMsg = record.messages && record.messages.length > 0 
+                ? record.messages[record.messages.length - 1].content 
+                : record.type === "voice" ? "已结束语音咨询" : record.type === "video" ? "已结束视频咨询" : "随时留言，我会认真回复";
+            }
+            
+            const displayAvatar = isCounselorMode ? (record.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix") : counselor?.avatar;
+            const displayName = isCounselorMode ? (record.userName || "匿名用户") : counselor?.name;
               
             return (
               <button
                 key={record.id}
                 onClick={() => {
-                  setSelectedConsultationId(record.id);
-                  if (record.type === "text") {
-                    pushView("counseling-text-chat");
+                  if (isCounselorMode) {
+                    setSelectedCounselorOrder(record);
                   } else {
-                    pushView("consultation-detail");
+                    setBookingOrder(record);
                   }
+                  setSelectedConsultationId(record.id);
+                  pushView("counseling-text-chat");
                 }}
                 className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
               >
                 <div className="relative mr-4 shrink-0">
-                  <img src={counselor?.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                  {counselor?.status === "online" && (
+                  <img src={displayAvatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+                  {!isCounselorMode && counselor?.status === "online" && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                   )}
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center space-x-2 truncate">
-                      <h3 className="font-bold text-gray-900 text-[16px] truncate">{counselor?.name}</h3>
-                      {counselor?.type === "pro" ? (
-                        <span className="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded border border-amber-100 font-medium shrink-0">
-                          L3 心理咨询
-                        </span>
-                      ) : (
-                        <span className="text-[10px] bg-teal-50 text-teal-600 px-1.5 py-0.5 rounded border border-teal-100 font-medium shrink-0">
-                          L2 倾听服务
-                        </span>
-                      )}
+                      <h3 className="font-bold text-gray-900 text-[16px] truncate">{displayName}</h3>
                     </div>
                     <span className="text-[11px] text-gray-400 shrink-0 ml-2">
                       {isText ? "今天" : record.date}

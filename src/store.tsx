@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { AppView, AppTab, UserProfile, BlackboardState } from "./types";
-import { mockUser } from "./data";
+import { mockUser, mockOrders, mockAssessmentRecords } from "./data";
 
 export interface AppState {
   viewStack: AppView[];
@@ -14,11 +14,12 @@ export interface AppState {
   selectedCounselorOrder: any;
   bookingOrder: any;
   orders: any[];
+  assessmentRecords: any[];
   activeCallSession: any | null;
   isCallMinimized: boolean;
   assessmentState: {
     step: number;
-    answers: { name: string; stage: string; domain: string };
+    answers: { stage: string; domain: string };
     phq2Scores: number[];
     phq2Step: number;
   };
@@ -44,9 +45,14 @@ export interface AppState {
   setSelectedConsultationId: (id: string) => void;
   setSelectedCounselorOrder: (order: any) => void;
   setBookingOrder: (order: any) => void;
+  setOrders: (orders: any[]) => void;
   addOrder: (order: any) => void;
+  updateOrder: (orderId: string, data: any) => void;
+  setAssessmentRecords: (records: any[]) => void;
   setActiveCallSession: (session: any | null) => void;
   setIsCallMinimized: (minimized: boolean) => void;
+  isSessionCounselorDetail: boolean;
+  setIsSessionCounselorDetail: (isSession: boolean) => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -76,12 +82,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedConsultationId, setSelectedConsultationId] = useState<string>("");
   const [selectedCounselorOrder, setSelectedCounselorOrder] = useState<any>(null);
   const [bookingOrder, setBookingOrder] = useState<any>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>(mockOrders);
+  const [assessmentRecords, setAssessmentRecords] = useState<any[]>(mockAssessmentRecords);
   const [activeCallSession, setActiveCallSession] = useState<any | null>(null);
   const [isCallMinimized, setIsCallMinimized] = useState<boolean>(false);
+  const [isSessionCounselorDetail, setIsSessionCounselorDetail] = useState<boolean>(false);
   const [assessmentState, setAssessmentState] = useState({
     step: 0,
-    answers: { name: "", stage: "", domain: "" },
+    answers: { stage: "", domain: "" },
     phq2Scores: [-1, -1],
     phq2Step: 0,
   });
@@ -99,6 +107,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addOrder = (order: any) => {
     setOrders((prev) => [order, ...prev]);
+  };
+
+  const updateOrder = (orderId: string, data: any) => {
+    setOrders((prev) => prev.map(o => o.id === orderId ? { ...o, ...data } : o));
+    if (selectedCounselorOrder?.id === orderId) {
+      setSelectedCounselorOrder((prev: any) => ({ ...prev, ...data }));
+    }
+    if (bookingOrder?.id === orderId) {
+      setBookingOrder((prev: any) => ({ ...prev, ...data }));
+    }
   };
 
   const pushView = (view: AppView) => {
@@ -159,6 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         selectedCounselorOrder,
         bookingOrder,
         orders,
+        assessmentRecords,
         activeCallSession,
         isCallMinimized,
         assessmentState,
@@ -178,9 +197,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSelectedConsultationId,
         setSelectedCounselorOrder,
         setBookingOrder,
+        setOrders,
         addOrder,
+        updateOrder,
+        setAssessmentRecords,
         setActiveCallSession,
         setIsCallMinimized,
+        isSessionCounselorDetail,
+        setIsSessionCounselorDetail,
       }}
     >
       {children}

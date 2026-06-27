@@ -1,10 +1,12 @@
 import { motion } from "motion/react";
+import { useState } from "react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, CheckCircle2, Circle, MessageSquare, Mic, User, Headphones } from "lucide-react";
 import { mockConsultationRecords, mockCounselors } from "../../data";
 
 export function ConsultationDetail() {
   const { popView, selectedConsultationId } = useAppStore();
+  const [activeTab, setActiveTab] = useState<"summary" | "chat">("summary");
 
   const record = mockConsultationRecords.find(r => r.id === selectedConsultationId) || mockConsultationRecords[0];
   const counselor = mockCounselors.find((c) => c.id === record.counselorId) || mockCounselors[0];
@@ -29,9 +31,9 @@ export function ConsultationDetail() {
         </h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto flex flex-col">
         {/* Header Info */}
-        <div className="bg-white px-6 py-6 mb-2">
+        <div className="bg-white px-6 pt-6">
           <div className="flex items-center space-x-4 mb-6">
             <img
               src={counselor.avatar}
@@ -51,82 +53,114 @@ export function ConsultationDetail() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-[15px] font-bold text-gray-900 mb-2 flex items-center">
-                <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
-                沟通摘要
-              </h3>
-              <p className="text-[14px] text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl">
-                {record.summary}
-              </p>
+          {/* Tabs */}
+          {record.messages && record.messages.length > 0 && (
+            <div className="flex space-x-6 border-b border-gray-100">
+              <button
+                onClick={() => setActiveTab("summary")}
+                className={`pb-3 text-[15px] font-medium transition-colors relative ${
+                  activeTab === "summary" ? "text-primary" : "text-gray-500"
+                }`}
+              >
+                咨询摘要
+                {activeTab === "summary" && (
+                  <motion.div
+                    layoutId="detailTab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"
+                  />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("chat")}
+                className={`pb-3 text-[15px] font-medium transition-colors relative ${
+                  activeTab === "chat" ? "text-primary" : "text-gray-500"
+                }`}
+              >
+                {record.type === "voice" ? "会议聊天记录" : "聊天记录"}
+                {activeTab === "chat" && (
+                  <motion.div
+                    layoutId="detailTab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"
+                  />
+                )}
+              </button>
             </div>
+          )}
+        </div>
 
-            <div>
-              <h3 className="text-[15px] font-bold text-gray-900 mb-2 flex items-center">
-                <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
-                咨询师建议
-              </h3>
-              <p className="text-[14px] text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl">
-                {record.counselorNotes}
-              </p>
-            </div>
-
-            {record.actionItems.length > 0 && (
+        {/* Tab Content */}
+        <div className="flex-1 bg-[#f8f9fa] mt-2">
+          {activeTab === "summary" ? (
+            <div className="bg-white px-6 py-6 space-y-6">
               <div>
                 <h3 className="text-[15px] font-bold text-gray-900 mb-2 flex items-center">
                   <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
-                  行动计划 (Action Items)
+                  沟通摘要
                 </h3>
-                <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-                  {record.actionItems.map((item, idx) => (
-                    <div key={idx} className="flex items-center px-4 py-3 border-b border-gray-50 last:border-0">
-                      {item.completed ? (
-                        <CheckCircle2 size={18} className="text-green-500 mr-3 shrink-0" />
-                      ) : (
-                        <Circle size={18} className="text-gray-300 mr-3 shrink-0" />
-                      )}
-                      <span className={`text-[14px] ${item.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                        {item.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-[14px] text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl">
+                  {record.summary}
+                </p>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Chat History Section (if applicable) */}
-        {record.messages && record.messages.length > 0 && (
-          <div className="bg-white px-6 py-6 mb-8">
-            <h3 className="text-[15px] font-bold text-gray-900 mb-4 flex items-center">
-              <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
-              历史聊天记录片段
-            </h3>
-            <div className="space-y-4">
-              {record.messages.map((msg, idx) => {
-                const isCounselor = msg.role === "counselor";
-                return (
-                  <div key={idx} className={`flex ${isCounselor ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[80%] ${isCounselor ? 'order-1' : 'order-2'}`}>
-                      <div className={`flex items-end mb-1 ${isCounselor ? 'justify-start' : 'justify-end'}`}>
-                        <span className="text-[11px] text-gray-400 mx-2">{msg.timestamp}</span>
+              <div>
+                <h3 className="text-[15px] font-bold text-gray-900 mb-2 flex items-center">
+                  <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
+                  咨询师建议
+                </h3>
+                <p className="text-[14px] text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl">
+                  {record.counselorNotes}
+                </p>
+              </div>
+
+              {record.actionItems?.length > 0 && (
+                <div>
+                  <h3 className="text-[15px] font-bold text-gray-900 mb-2 flex items-center">
+                    <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
+                    行动计划 (Action Items)
+                  </h3>
+                  <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+                    {record.actionItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center px-4 py-3 border-b border-gray-50 last:border-0">
+                        {item.completed ? (
+                          <CheckCircle2 size={18} className="text-green-500 mr-3 shrink-0" />
+                        ) : (
+                          <Circle size={18} className="text-gray-300 mr-3 shrink-0" />
+                        )}
+                        <span className={`text-[14px] ${item.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                          {item.text}
+                        </span>
                       </div>
-                      <div className={`p-3 rounded-2xl text-[14px] leading-relaxed ${
-                        isCounselor 
-                          ? 'bg-gray-100 text-gray-800 rounded-tl-sm' 
-                          : 'bg-primary text-white rounded-tr-sm'
-                      }`}>
-                        {msg.content}
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white px-6 py-6">
+              <div className="space-y-4">
+                {record.messages?.map((msg, idx) => {
+                  const isCounselor = msg.role === "counselor";
+                  return (
+                    <div key={idx} className={`flex ${isCounselor ? 'justify-start' : 'justify-end'}`}>
+                      <div className={`max-w-[80%] ${isCounselor ? 'order-1' : 'order-2'}`}>
+                        <div className={`flex items-end mb-1 ${isCounselor ? 'justify-start' : 'justify-end'}`}>
+                          <span className="text-[11px] text-gray-400 mx-2">{msg.timestamp}</span>
+                        </div>
+                        <div className={`p-3 rounded-2xl text-[14px] leading-relaxed ${
+                          isCounselor 
+                            ? 'bg-gray-100 text-gray-800 rounded-tl-sm' 
+                            : 'bg-primary text-white rounded-tr-sm'
+                        }`}>
+                          {msg.content}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </motion.div>
   );

@@ -6,6 +6,7 @@ import { ArrowLeft, Clock, MessageSquare, AlertTriangle, User2, BookOpen, Sparkl
 export function CounselorOrderDetail() {
   const { popView, pushView, selectedCounselorOrder, setActiveCallSession, setIsCallMinimized } = useAppStore();
   const [now, setNow] = useState(new Date());
+  const [isRecordsExpanded, setIsRecordsExpanded] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
@@ -106,7 +107,7 @@ export function CounselorOrderDetail() {
             </button>
          </div>
 
-         {/* 临床档案 / 主诉与 AI 解读 */}
+         {/* 临床档案 / 主诉与小鹿解读 */}
          <h3 className="font-bold text-[13px] text-gray-500 mb-2 px-1">就诊档案</h3>
          <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100 mb-3">
             
@@ -129,10 +130,10 @@ export function CounselorOrderDetail() {
             
             <div className="bg-blue-50/40 rounded-xl p-3 border border-blue-100/50">
                <div className="text-[11px] font-bold text-blue-500 mb-1.5 flex items-center">
-                 <Sparkles size={12} className="mr-1" /> AI 情绪初判摘要
-               </div>
-               <p className="text-[12px] text-gray-700 leading-relaxed font-medium">
-                 {selectedCounselorOrder?.aiSummary || "用户与 AI 对话时表现出较高的焦虑感，提及“考研复习进度落后”、“每天晚上愁得睡不着想哭”。目前判定处于中度压力状态，主要诉求点为考研压力导致的焦虑与失眠，无自伤自杀风险倾向。"}
+                 <Sparkles size={12} className="mr-1" /> 小鹿初判摘要
+              </div>
+              <p className="text-[13px] text-gray-700 leading-relaxed">
+                {selectedCounselorOrder?.aiSummary || "用户与小鹿对话时表现出较高的焦虑感，提及“考研复习进度落后”、“每天晚上愁得睡不着想哭”。目前判定处于中度压力状态，主要诉求点为考研压力导致的焦虑与失眠，无自伤自杀风险倾向。"}
                </p>
             </div>
          </div>
@@ -143,7 +144,13 @@ export function CounselorOrderDetail() {
                <div className="flex items-center text-[13px] font-bold text-gray-700">
                  <BookOpen size={14} className="mr-1.5 text-gray-400" /> 过往接待记录 <span className="text-[11px] text-gray-400 font-normal ml-1">(2)</span>
                </div>
-               <button className="text-[11px] text-blue-500 font-bold active:opacity-70 transition-opacity">查看全部</button>
+               <button 
+                 onClick={() => setIsRecordsExpanded(!isRecordsExpanded)}
+                 className="text-[11px] text-blue-500 font-bold active:opacity-70 transition-opacity flex items-center"
+               >
+                 {isRecordsExpanded ? '收起全部' : '查看全部'}
+                 <ChevronRight size={12} className={`ml-0.5 transition-transform ${isRecordsExpanded ? '-rotate-90' : 'rotate-90'}`} />
+               </button>
             </div>
             
             <div className="space-y-2">
@@ -152,7 +159,14 @@ export function CounselorOrderDetail() {
                      <span className="text-[12px] font-bold text-gray-900">2026年05月20日</span>
                      <span className="text-[10px] bg-white border border-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-medium">文字沟通</span>
                   </div>
-                  <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">上次咨询主要围绕期中考试压力展开，用户情绪平稳，布置了放松呼吸作业。</p>
+                  <p className={`text-[11px] text-gray-500 leading-relaxed ${!isRecordsExpanded ? 'line-clamp-2' : ''}`}>
+                    上次咨询主要围绕期中考试压力展开，用户情绪平稳，布置了放松呼吸作业。
+                    {isRecordsExpanded && (
+                      <span className="block mt-1 pt-1 border-t border-gray-200/50">
+                        【补充记录】：用户提到在宿舍容易受室友噪音影响，建议尝试沟通或者使用白噪音工具。需要在此次咨询中跟进沟通效果。
+                      </span>
+                    )}
+                  </p>
                </div>
                
                <div className="bg-gray-50 rounded-xl p-2.5 border border-gray-100">
@@ -160,7 +174,14 @@ export function CounselorOrderDetail() {
                      <span className="text-[12px] font-bold text-gray-900">2026年05月12日</span>
                      <span className="text-[10px] bg-white border border-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-medium">语音咨询</span>
                   </div>
-                  <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">首次接触，建立咨访关系。用户倾诉了宿舍人际关系带来的困扰，进行了共情与倾听。</p>
+                  <p className={`text-[11px] text-gray-500 leading-relaxed ${!isRecordsExpanded ? 'line-clamp-2' : ''}`}>
+                    首次接触，建立咨访关系。用户倾诉了宿舍人际关系带来的困扰，进行了共情与倾听。
+                    {isRecordsExpanded && (
+                      <span className="block mt-1 pt-1 border-t border-gray-200/50">
+                        【补充记录】：评估初步判断无重度抑郁或自杀倾向。用户属于高敏感人群，容易内耗。布置了每日写情绪日记的任务。
+                      </span>
+                    )}
+                  </p>
                </div>
             </div>
          </div>
@@ -177,37 +198,33 @@ export function CounselorOrderDetail() {
            {selectedCounselorOrder?.status === 'completed' ? (
              <div className="flex-[2]">
                 <button 
-                  onClick={() => alert("功能开发中")}
-                  className="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all active:scale-95"
+                  onClick={() => {
+                    if (selectedCounselorOrder.counselorNotesWritten) {
+                      alert("您已完成本次会话的总结与评估。");
+                    } else {
+                      pushView("counselor-session-notes" as any);
+                    }
+                  }}
+                  className={`w-full font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all active:scale-95 ${
+                    selectedCounselorOrder.counselorNotesWritten
+                      ? "bg-gray-100 text-gray-400 border border-gray-200"
+                      : "bg-gray-900 text-white"
+                  }`}
                 >
-                   <BookOpen size={16} className="mr-1.5" /> 编写咨询记录
+                   <BookOpen size={16} className="mr-1.5" /> 
+                   {selectedCounselorOrder.counselorNotesWritten ? "已填写会话总结" : "填写会话总结"}
                 </button>
              </div>
            ) : (
              <div className="flex-[2] relative">
-                {/* 加锁和倒计时作为悬浮提示层 */}
-                 {isVoiceOrVideo && isLocked && (
-                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[12px] px-3 py-1.5 rounded-lg whitespace-nowrap flex items-center shadow-lg pointer-events-none z-20">
-                     <Lock size={12} className="mr-1.5 text-gray-300" />
-                     {lockMessage}
-                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
-                   </div>
-                 )}
-                 <button 
-                   onClick={handleEnterRoom}
-                   disabled={isLocked}
-                   className={`w-full font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all ${
-                     isLocked 
-                       ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
-                       : "bg-gray-900 text-white active:scale-95"
-                   }`}
-                 >
-                    {isVoiceOrVideo ? (
-                      <><Video size={16} className="mr-1.5" /> 进入视频/语音咨询室</>
-                    ) : (
-                      <><MessageSquare size={16} className="mr-1.5" /> 进入文字咨询室</>
-                    )}
-                 </button>
+                 <div className="flex w-full space-x-2">
+                   <button 
+                     onClick={() => pushView("counseling-text-chat")}
+                     className={`w-full font-bold py-3 rounded-xl text-[14px] shadow-sm flex items-center justify-center transition-all bg-gray-900 text-white active:scale-95`}
+                   >
+                     <MessageSquare size={16} className="mr-1.5" /> 联系用户
+                   </button>
+                 </div>
                </div>
            )}
         </div>

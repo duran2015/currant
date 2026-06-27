@@ -14,6 +14,7 @@ import {
   Keyboard,
   Lightbulb,
   Mic,
+  Smile,
   MoreHorizontal,
   Phone,
   PlusCircle,
@@ -47,8 +48,8 @@ export function AITab() {
   const isDark = aiSettings.theme === 'dark';
   // Increase the distinction between font sizes to make it obvious
   const textSize = aiSettings.fontSize === 'small' ? 'text-[13px]' : aiSettings.fontSize === 'large' ? 'text-[18px]' : 'text-[15px]';
-  const avatarEmoji = aiSettings.avatar === 'elephant' ? '🦌' : '🐱';
-  const avatarName = aiSettings.avatar === 'elephant' ? '心灵小鹿 可鹿' : '治愈猫咪 小喵';
+  const avatarEmoji = '🦌';
+  const avatarName = '小鹿';
 
   // AI Chat State
   const [messages, setMessages] = useState<{
@@ -126,8 +127,11 @@ export function AITab() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
+  const [showEmojiMenu, setShowEmojiMenu] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const commonEmojis = ["😀","😂","😊","😍","🥰","😘","😎","🤔","🙄","😣","😪","😫","😌","😛","😜","🤤","😓","😔","🙃","😭","😱","😡","🤯","🤡","👻","💩","👍","👎","❤️","💔","✨","🎉","🔥","🌟","💯"];
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,6 +142,7 @@ export function AITab() {
     if (!newMsg.trim()) return;
     setInput("");
     setShowPlusMenu(false);
+    setShowEmojiMenu(false);
     
     // reset textarea height
     const ta = document.querySelector('textarea');
@@ -316,7 +321,7 @@ export function AITab() {
               id: Date.now().toString() + "_ref1",
               role: "ai",
               type: "text",
-              text: "我听到了，当前的状况确实让人感到有些无助。AI的陪伴有时候可能不够，如果你愿意的话，我可以帮你对接一位专业的真人倾听师。他们经验丰富，能给你更温暖、更深度的支持。",
+              text: "我听到了，当前的状况确实让人感到有些无助。小鹿的陪伴有时候可能不够，如果你愿意的话，我可以帮你对接一位专业的真人倾听师。他们经验丰富，能给你更温暖、更深度的支持。",
               time: responseTime,
             },
             {
@@ -338,7 +343,7 @@ export function AITab() {
               recommendations: [
                 {
                   level: "L1",
-                  title: "AI 心理疏导",
+                  title: "小鹿陪伴",
                   desc: "适合较轻的情绪压力，随时陪伴，无等待。",
                   type: "ai",
                 },
@@ -387,7 +392,7 @@ export function AITab() {
                 : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
             }`}
           >
-            可鹿 AI
+            小鹿
             {activeTab === "ai" && (
               <motion.div
                 layoutId="activeTab"
@@ -444,21 +449,7 @@ export function AITab() {
          </div>
       </div>
 
-      {/* Active Consultation Banner */}
-      {useAppStore().orders.filter(o => o.status === 'paid').length > 0 && (
-        <div className={`mx-4 mt-4 p-3 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer active:scale-[0.98] transition-all border ${isDark ? 'bg-[#2A2A2A] border-gray-700' : 'bg-blue-50 border-blue-100'}`} onClick={() => pushView("orders-list")}>
-           <div className="flex items-center space-x-3">
-             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 shrink-0">
-               <Activity size={20} />
-             </div>
-             <div>
-               <div className={`text-[14px] font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>你有待进行的真人咨询</div>
-               <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>点击进入咨询室</div>
-             </div>
-           </div>
-           <ArrowRight size={16} className={isDark ? 'text-gray-400' : 'text-gray-400'} />
-        </div>
-      )}
+      {/* Active Consultation Banner Removed */}
 
       <div className={`flex-1 overflow-y-auto w-full relative pt-2 transition-colors ${isDark ? 'bg-[#121212]' : 'bg-gradient-to-b from-[#EBF0FA] via-[#F8F9FF] to-[#f8f9fa]'}`}>
             {/* Chat Flow */}
@@ -635,7 +626,7 @@ export function AITab() {
                                     {rec.level === "L1"
                                       ? "继续跟我聊聊"
                                       : rec.level === "L2"
-                                        ? "查看在线可鹿师"
+                                        ? "查看在线倾听师"
                                       : rec.level === "L3"
                                           ? "了解专业咨询"
                                           : "获取危机热线"}
@@ -681,40 +672,48 @@ export function AITab() {
 
                {inputMode === "text" ? (
                  <>
-                   <textarea
-                     value={input}
-                     onChange={(e) => {
-                       setInput(e.target.value);
-                       e.target.style.height = 'auto';
-                       e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-                       if (showPlusMenu) setShowPlusMenu(false);
-                     }}
-                     onFocus={() => {
-                       setIsFocused(true);
-                       if (showPlusMenu) setShowPlusMenu(false);
-                     }}
-                     onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                     onKeyDown={(e) => { 
-                       if(e.key === "Enter" && !e.shiftKey) { 
-                         e.preventDefault();
-                         handleSend(); 
-                       } 
-                     }}
-                     rows={1}
-                     className={`flex-1 bg-transparent border-none outline-none text-[15px] px-2 py-2 resize-none max-h-[120px] self-center leading-relaxed ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'}`}
-                     placeholder="发消息..."
-                   />
-                   {!input.trim() && (
-                     <button onClick={() => setInputMode("voice")} className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
-                       <Mic size={22} strokeWidth={1.5} />
-                     </button>
-                   )}
-                 </>
+                <textarea
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                    if (showPlusMenu) setShowPlusMenu(false);
+                    if (showEmojiMenu) setShowEmojiMenu(false);
+                  }}
+                  onFocus={() => {
+                    setIsFocused(true);
+                    if (showPlusMenu) setShowPlusMenu(false);
+                    if (showEmojiMenu) setShowEmojiMenu(false);
+                  }}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  onKeyDown={(e) => { 
+                    if(e.key === "Enter" && !e.shiftKey) { 
+                      e.preventDefault();
+                      handleSend(); 
+                    } 
+                  }}
+                  rows={1}
+                  className={`flex-1 bg-transparent border-none outline-none text-[15px] px-2 py-2 resize-none max-h-[120px] self-center leading-relaxed ${isDark ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'}`}
+                  placeholder="发消息..."
+                />
+                <button 
+                  onClick={() => { setShowEmojiMenu(!showEmojiMenu); setShowPlusMenu(false); }} 
+                  className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}
+                >
+                  <Smile size={22} strokeWidth={1.5} className={showEmojiMenu ? 'text-primary' : ''} />
+                </button>
+                {!input.trim() && (
+                  <button onClick={() => setInputMode("voice")} className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                    <Mic size={22} strokeWidth={1.5} />
+                  </button>
+                )}
+              </>
                ) : (
                  <div className="flex-1 flex items-center h-[36px] mt-0.5 pr-1">
-                   <button onClick={() => setInputMode("text")} className={`pl-1 pr-3 transition-colors flex items-center h-full shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
-                     <Keyboard size={20} strokeWidth={1.5} />
-                   </button>
+                <button onClick={() => { setInputMode("text"); setShowEmojiMenu(false); }} className={`pl-1 pr-3 transition-colors flex items-center h-full shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                  <Keyboard size={20} strokeWidth={1.5} />
+                </button>
                    <div 
                      className={`flex-1 h-[32px] rounded-full flex items-center justify-center font-bold text-[14px] select-none transition-colors cursor-pointer ${isRecording ? "bg-primary text-white" : (isDark ? "bg-[#1C1C1E] text-gray-300" : "bg-gray-100 text-gray-700")}`}
                      onPointerDown={() => setIsRecording(true)}
@@ -751,6 +750,34 @@ export function AITab() {
                )}
              </AnimatePresence>
           </div>
+
+          {/* Expandable Emoji Menu */}
+          <AnimatePresence>
+            {showEmojiMenu && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className={`overflow-hidden z-10 relative transition-colors ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}
+              >
+                <div className={`p-4 border-t mt-3 mx-auto ${isDark ? 'border-gray-800' : 'border-gray-200/50'}`}>
+                  <div className="grid grid-cols-7 gap-2">
+                    {commonEmojis.map((emoji, i) => (
+                      <button 
+                        key={i} 
+                        onClick={() => {
+                          setInput(prev => prev + emoji);
+                        }}
+                        className="text-[24px] flex items-center justify-center h-10 hover:bg-gray-100 active:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Expandable Plus Menu */}
           <AnimatePresence>
@@ -854,13 +881,10 @@ export function AITab() {
                     alt={counselor.name}
                     className={`w-[60px] h-[60px] rounded-full object-cover border-2 ${isDark ? 'border-gray-700' : 'border-gray-50'}`}
                   />
-                  <div className={`absolute bottom-0 right-0 rounded-full p-[2px] ${isDark ? 'bg-[#2A2A2A]' : 'bg-white'}`}>
-                    <div className={`w-2.5 h-2.5 rounded-full ${counselor.status === "online" ? 'bg-[#00C853]' : 'bg-[#FF3B30]'}`}></div>
-                  </div>
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center mb-1">
+                  <div className="flex items-center mb-2">
                     <span className={`font-bold text-[16px] mr-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {counselor.name}
                     </span>
@@ -869,14 +893,28 @@ export function AITab() {
                     </span>
                   </div>
 
-                  <div className={`text-[13px] mb-1.5 ${isDark ? 'text-gray-400' : 'text-[#666666]'}`}>
-                    {counselor.title}
+                  {/* 统一的咨询师标签展示 */}
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {counselor.specialties?.slice(0, 1).map((spec, i) => (
+                      <span key={`spec-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                        擅长: {spec}
+                      </span>
+                    ))}
+                    {counselor.styles?.slice(0, 1).map((style, i) => (
+                      <span key={`style-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-purple-400' : 'bg-purple-50 text-purple-600'}`}>
+                        风格: {style}
+                      </span>
+                    ))}
+                    {counselor.credentials?.slice(0, 1).map((cred, i) => (
+                      <span key={`cred-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
+                        资质: {cred}
+                      </span>
+                    ))}
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-auto">
                     <div className={`flex items-center text-[12px] ${isDark ? 'text-gray-400' : 'text-[#999999]'}`}>
-                      <Star size={12} className="fill-[#D1D5DB] text-[#D1D5DB] mr-1" />
-                      <span>{counselor.rating} · {counselor.reviewsCount}次咨询</span>
+                      <span>累计服务 {counselor.serviceHours || 1000}+ 小时</span>
                     </div>
                     <div className={`flex items-baseline ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       <span className="text-[12px] font-bold mr-0.5">¥</span>

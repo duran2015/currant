@@ -60,7 +60,7 @@ export function AIChatRecords() {
           <ChevronLeft size={24} />
         </button>
         <h1 className="text-[17px] font-bold text-gray-900 ml-2">
-          AI 倾听记录
+          小鹿陪伴记录
         </h1>
       </div>
 
@@ -94,7 +94,7 @@ export function AIChatRecords() {
           </div>
 
           <h2 className="text-[13px] font-bold text-gray-500 px-2 pt-2 mb-2">
-            历史对话历史
+            历史记录
           </h2>
 
           <div className="space-y-3">

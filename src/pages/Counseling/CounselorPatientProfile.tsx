@@ -30,7 +30,7 @@ export function CounselorPatientProfile() {
            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
            
            <div className="flex items-center space-x-3 mb-4">
-              <img src={selectedCounselorOrder?.avatar || "https://i.pravatar.cc/150?img=12"} alt="client" className="w-12 h-12 rounded-full border border-gray-200 object-cover" />
+              <img src={selectedCounselorOrder?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Chen"} alt="client" className="w-12 h-12 rounded-full border border-gray-200 object-cover" />
               <div>
                  <h2 className="text-[17px] font-bold text-gray-900 mb-0.5">{selectedCounselorOrder?.userName || "陈小希"}</h2>
                  <p className="text-[12px] text-gray-500">24岁 · 互联网运营</p>
@@ -94,12 +94,12 @@ export function CounselorPatientProfile() {
 
             <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
                <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">
-                 <ClipboardList className="text-green-500 mr-1.5" size={16} /> AI 近期重点关注
+                 <ClipboardList className="text-green-500 mr-1.5" size={16} /> 小鹿近期重点关注
                </h3>
                <ul className="space-y-2.5">
                  <li className="flex items-start text-[12px] text-gray-600 leading-relaxed">
                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 shrink-0"></div>
-                   用户在最近的三次 AI 树洞沟通中，反复提及“工作做不完觉得会对不起同事”，有明显的职场人际边界问题。
+                   用户在最近的三次小鹿陪伴沟通中，反复提及“工作做不完觉得会对不起同事”，有明显的职场人际边界问题。
                  </li>
                  <li className="flex items-start text-[12px] text-gray-600 leading-relaxed">
                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 shrink-0"></div>

@@ -10,7 +10,6 @@ import {
   MessageSquare,
   CalendarClock,
   History,
-  Edit3,
   Repeat2,
   Briefcase
 } from "lucide-react";
@@ -25,14 +24,13 @@ export function ProfileTab() {
       items: [
         { icon: User, label: "心理画像", tag: "NEW" },
         { icon: FileText, label: "量表记录" },
-        { icon: MessageSquare, label: "AI 倾听记录" },
       ],
     },
     {
       title: "预约与服务",
       items: [
         { icon: CalendarClock, label: "预约记录" },
-        { icon: History, label: "咨询记录" },
+        { icon: FileText, label: "小结与建议" },
       ],
     }
   ];
@@ -52,17 +50,20 @@ export function ProfileTab() {
               alt="avatar"
               className="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover"
             />
-            <button className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
-              <Edit3 size={12} className="text-gray-600" />
-            </button>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
               {user.name}
             </h1>
             <p className="text-gray-500 text-sm">在这里，关注最真实的自己</p>
           </div>
         </div>
+        <button 
+          onClick={() => pushView("profile-edit")}
+          className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500 shadow-sm border border-gray-100 active:scale-95 transition-transform"
+        >
+          <Settings size={20} />
+        </button>
       </div>
 
 
@@ -104,8 +105,8 @@ export function ProfileTab() {
                         pushView("profile-report");
                       } else if (item.label === "量表记录") {
                         pushView("assessment-records");
-                      } else if (item.label === "AI 倾听记录") {
-                        pushView("ai-chat-records");
+                      } else if (item.label === "小结与建议") {
+                        pushView("counseling-summary-list");
                       }
                     }}
                     className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 group"

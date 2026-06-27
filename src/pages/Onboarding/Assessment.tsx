@@ -4,7 +4,7 @@ import { useAppStore } from "../../store";
 import { ChevronRight, ArrowRight } from "lucide-react";
 
 export function Assessment() {
-  const { pushView, resetToView, updateUser, updateBlackboard, assessmentState, setAssessmentState } = useAppStore();
+  const { pushView, resetToView, updateUser, updateBlackboard, assessmentState, setAssessmentState, user } = useAppStore();
   const { step, answers, phq2Scores, phq2Step } = assessmentState;
 
   const setStep = (val: number | ((prev: number) => number)) => {
@@ -23,18 +23,9 @@ export function Assessment() {
     setAssessmentState((prev: any) => ({ ...prev, phq2Step: typeof val === 'function' ? val(prev.phq2Step) : val }));
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (step === 1) {
-      inputRef.current?.focus();
-    }
-  }, [step]);
-
   const handleSkip = () => {
     // 如果用户跳过，依然保存当前已填写的信息并标记为新用户
     updateUser({
-      name: answers.name || "新用户",
       isNewUser: true,
     });
 
@@ -62,14 +53,11 @@ export function Assessment() {
   };
 
   const handleNext = () => {
-    if (step === 3 && !answers.name.trim()) return;
-
     if (step < flow.length - 1) {
       setStep(step + 1);
     } else {
       // 完成所有流程
       updateUser({
-        name: answers.name || "新朋友",
         isNewUser: false,
       });
 
@@ -83,7 +71,7 @@ export function Assessment() {
           crisis: phq2Scores.some(s => s === 3)
         },
         domain: {
-          primary: (answers.domain && answers.domain !== "跳过" ? answers.domain : "未分类") as any
+          primary: (answers.domain && answers.domain !== "不想说" ? answers.domain : "未分类") as any
         },
         phase: 1,
         recommendation: {
@@ -98,7 +86,7 @@ export function Assessment() {
   };
 
   const handleSelect = (key: keyof typeof answers, val: string) => {
-    if (val === "跳过") {
+    if (val === "不想说") {
       setAnswers((prev) => ({ ...prev, [key]: "" }));
     } else {
       setAnswers((prev) => ({ ...prev, [key]: val }));
@@ -139,13 +127,6 @@ export function Assessment() {
       // feedback content is generated dynamically
     },
     {
-      type: "input",
-      key: "name",
-      title: "我叫小鹿，你呢？",
-      desc: "你的名字将是我对你最温暖的呼唤",
-      placeholder: "小名也行...",
-    },
-    {
       type: "select",
       key: "stage",
       title: "你现在是在...",
@@ -157,7 +138,7 @@ export function Assessment() {
       key: "domain",
       title: "最近主要烦什么？（可选）",
       desc: "",
-      options: ["学业", "工作", "感情", "人际", "说不清", "跳过"],
+      options: ["学业", "工作", "感情", "人际", "说不清", "不想说"],
     },
     {
       type: "finish",
@@ -310,46 +291,6 @@ export function Assessment() {
                   <span>继续</span>
                   <ArrowRight size={18} />
                 </button>
-                <button
-                  onClick={handleSkip}
-                  className="w-full py-4 text-gray-400 font-medium active:text-gray-600 transition-colors"
-                >
-                  跳过
-                </button>
-              </div>
-            </div>
-          )}
-
-          {currentStep.type === "input" && (
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
-                {currentStep.title}
-              </h2>
-              <p className="text-gray-500 text-[15px] mb-10 leading-relaxed">
-                {currentStep.desc}
-              </p>
-              <input
-                ref={inputRef}
-                type="text"
-                value={answers[currentStep.key as keyof typeof answers]}
-                onChange={(e) =>
-                  setAnswers({ ...answers, [currentStep.key]: e.target.value })
-                }
-                placeholder={currentStep.placeholder}
-                className="w-full bg-surface border border-gray-100 px-5 py-5 rounded-2xl outline-none focus:border-primary text-gray-900 text-lg placeholder-gray-300 font-medium transition-colors"
-              />
-              <div className="mt-auto pb-10">
-                <button
-                  onClick={handleNext}
-                  className={`w-full py-4 rounded-xl font-bold flex justify-center items-center space-x-2 transition-all ${
-                    answers.name.trim()
-                      ? "bg-gray-900 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  <span>继续</span>
-                  <ArrowRight size={18} />
-                </button>
               </div>
             </div>
           )}
@@ -388,7 +329,7 @@ export function Assessment() {
               <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
                 <div className="text-7xl mb-8 animate-pulse">🦌👋</div>
                 <h2 className="text-[26px] font-black text-gray-900 mb-4">
-                  谢谢你，{answers.name || "新朋友"}。
+                  谢谢你，{user.name || "新朋友"}。
                 </h2>
                 <p className="text-[16px] text-gray-500 leading-relaxed mb-12">
                   我已经记住你啦。<br/>下次来，我会在这里等你。

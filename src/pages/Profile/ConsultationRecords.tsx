@@ -31,7 +31,7 @@ export function ConsultationRecords() {
           <ChevronLeft size={24} />
         </button>
         <h1 className="text-[17px] font-bold text-gray-900 ml-2">
-          对话沟通记录
+          消息沟通记录
         </h1>
       </div>
 
@@ -65,11 +65,6 @@ export function ConsultationRecords() {
                           <h3 className="font-bold text-gray-900 text-[16px] truncate">
                             {counselor.name}
                           </h3>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border shrink-0 ${
-                            isPro ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-teal-50 text-teal-600 border-teal-100'
-                          }`}>
-                            {isPro ? 'L3 咨询师' : 'L2 倾听师'}
-                          </span>
                         </div>
                         <p className="text-[12px] text-gray-500 flex items-center mt-1 truncate">
                           <CalendarClock size={12} className="mr-1 shrink-0" />

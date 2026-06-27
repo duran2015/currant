@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
 import {
@@ -7,7 +7,6 @@ import {
   Loader2,
   Smartphone,
   ShieldCheck,
-  Clock,
   XCircle,
   AlertCircle,
   FileText,
@@ -29,36 +28,28 @@ export function Payment() {
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">(
     "wechat",
   );
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
 
   const counselor = mockCounselors.find(
     (c) => c.id === bookingOrder?.counselorId,
   );
 
-  useEffect(() => {
-    if (status !== "checkout") return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setStatus("failed");
-          setBookingOrder((order) =>
-            order ? { ...order, status: "failed" } : null,
-          );
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [status, setBookingOrder]);
+  // Helper to format time as a 50-minute range
+  const formatTimeRange = (startTime: string) => {
+    if (!startTime || !startTime.includes(':')) return startTime;
+    const [hourStr, minStr] = startTime.split(':');
+    let hour = parseInt(hourStr, 10);
+    let min = parseInt(minStr, 10);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+    min += 50;
+    if (min >= 60) {
+      hour += 1;
+      min -= 60;
+    }
+
+    const endHour = hour.toString().padStart(2, '0');
+    const endMin = min.toString().padStart(2, '0');
+
+    return `${startTime}-${endHour}:${endMin}`;
   };
 
   const handlePay = () => {
@@ -129,27 +120,38 @@ export function Payment() {
             className="flex-1 overflow-y-auto pb-32"
           >
             <div className="p-5">
-              {/* Payment Timer */}
-              <div className="bg-orange-50 text-orange-600 rounded-xl p-3 mb-6 flex items-center justify-center space-x-2">
-                <Clock size={16} />
-                <span className="text-sm font-medium">
-                  支付剩余时间 {formatTime(timeLeft)}
-                </span>
-              </div>
-
               {/* Order Info Card */}
               <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 mb-6">
-                <div className="flex items-center space-x-3 pb-6 border-b border-gray-50 mb-6">
+                <div className="flex items-start space-x-4 pb-6 border-b border-gray-50 mb-6">
                   <img
                     src={counselor.avatar}
                     alt=""
-                    className="w-12 h-12 rounded-full object-cover shadow-sm"
+                    className="w-14 h-14 rounded-[1.25rem] object-cover shadow-sm shrink-0"
                   />
-                  <div>
-                    <p className="font-bold text-gray-900">{counselor.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {counselor.title}
-                    </p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-bold text-gray-900 text-[16px]">{counselor.name}</p>
+                      <div className="flex items-center text-[11px] font-medium text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                        累计服务 {counselor.serviceHours || (counselor.type === "pro" ? 5000 : 1000)}+ 小时
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                      {counselor.specialties?.slice(0, 1).map((spec, i) => (
+                        <span key={`spec-${i}`} className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100/50 px-1.5 py-0.5 rounded font-medium mb-1">
+                          擅长: {spec}
+                        </span>
+                      ))}
+                      {counselor.styles?.slice(0, 1).map((style, i) => (
+                        <span key={`style-${i}`} className="text-[10px] bg-purple-50 text-purple-600 border border-purple-100/50 px-1.5 py-0.5 rounded font-medium mb-1">
+                          风格: {style}
+                        </span>
+                      ))}
+                      {counselor.credentials?.slice(0, 1).map((cred, i) => (
+                        <span key={`cred-${i}`} className="text-[10px] bg-amber-50 text-amber-600 border border-amber-100/50 px-1.5 py-0.5 rounded font-medium mb-1">
+                          资质: {cred}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -167,7 +169,7 @@ export function Payment() {
                   <div className="flex justify-between">
                     <span className="text-gray-500">预约时间</span>
                     <span className="font-bold text-primary">
-                      {bookingOrder.date} {bookingOrder.time}
+                      {bookingOrder.date} {bookingOrder.type === "text" ? bookingOrder.time : formatTimeRange(bookingOrder.time)}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -286,7 +288,7 @@ export function Payment() {
               您已成功预约{" "}
               <span className="font-bold text-gray-700">{counselor.name}</span>
               <br />
-              时间：{bookingOrder.date} {bookingOrder.time}
+              时间：{bookingOrder.date} {bookingOrder.type === "text" ? bookingOrder.time : formatTimeRange(bookingOrder.time)}
               <br />
               <span className="inline-block mt-4 text-[12px] bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full">
                 请提前 5 分钟进入咨询室准备
@@ -294,27 +296,14 @@ export function Payment() {
             </p>
 
             <div className="w-full max-w-xs space-y-4">
-              {bookingOrder.type === 'text' ? (
-                <button
-                  onClick={() => {
-                    pushView("counseling-text-chat");
-                  }}
-                  className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center"
-                >
-                  <FileText size={18} className="mr-2" /> 立即进入文字咨询
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    // Check if it's within 10 minutes to allow direct entry
-                    // For simplicity, we just go to orders list where they can enter
-                    pushView("orders-list");
-                  }}
-                  className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform"
-                >
-                  查看订单与咨询室
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  pushView("counseling-text-chat");
+                }}
+                className="w-full bg-gray-900 text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center"
+              >
+                <FileText size={18} className="mr-2" /> 进入专属沟通通道
+              </button>
               <button
                 onClick={() => resetToView("main")}
                 className="w-full bg-gray-50 text-gray-700 font-bold py-4 rounded-full active:scale-95 transition-transform"

@@ -16,7 +16,7 @@ import {
 import { mockUser } from "../../data";
 
 export function CounselorWorkbench() {
-    const { pushView, enterAppMode, setSelectedCounselorOrder, activeCallSession, setActiveCallSession } = useAppStore();
+      const { pushView, enterAppMode, setSelectedCounselorOrder, setSelectedConsultationId, activeCallSession, setActiveCallSession } = useAppStore();
   const [activeTab, setActiveTab] = useState<"upcoming" | "requests" | "messages">("requests");
   
   // Status is now derived automatically: if there's an active call, counselor is busy; otherwise online.
@@ -29,8 +29,9 @@ export function CounselorWorkbench() {
         time: "14:00",
         dateLabel: "今天",
         userName: "匿名用户 0495",
-        avatar: "https://i.pravatar.cc/150?img=47",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anon",
         type: "voice",
+        status: "paid",
         tags: ["21岁·大学生", "高敏焦虑", "考研压力", "近期失眠", "脆弱敏感"],
         summary: "职业倦怠，情绪低落，近期压力较大"
       },
@@ -39,8 +40,9 @@ export function CounselorWorkbench() {
         time: "20:00",
         dateLabel: "今天",
         userName: "陈小希",
-        avatar: "https://i.pravatar.cc/150?img=12",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Chen",
         type: "voice",
+        status: "paid",
         tags: ["25岁·财务", "焦虑依恋", "缺乏安全感"],
         summary: "亲密关系冲突，缺乏安全感"
       },
@@ -49,8 +51,9 @@ export function CounselorWorkbench() {
         time: "10:00",
         dateLabel: "明天",
         userName: "小林",
-        avatar: "https://i.pravatar.cc/150?img=33",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lin",
         type: "video",
+        status: "paid",
         tags: ["28岁·互联网运营", "职业倦怠", "情绪低落", "讨好型人格"],
         summary: "长期失眠，人际关系紧张，自我效能感低"
       }
@@ -58,16 +61,31 @@ export function CounselorWorkbench() {
 
   const upcoming = [
     {
+      id: "ord_1007",
+      userName: "张三",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ZhangSan",
+      type: "text",
+      time: "15:00",
+      dateLabel: "今天",
+      tags: ["职场人际", "自我认同感"],
+      summary: "探讨了职场人际压力与自我认同感低的问题",
+      status: "completed",
+      counselorNotesWritten: false,
+      counselorId: "c1"
+    },
+    {
       id: "ord-8890",
       userName: "陈小希",
-      avatar: "https://i.pravatar.cc/150?img=12",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Chen",
       type: "voice",
       time: "14:00",
       dateLabel: "昨天",
       tags: ["25岁·财务", "焦虑依恋", "缺乏安全感"],
       summary: "亲密关系冲突，缺乏安全感",
       status: "completed",
-      counselorAdvice: "建议结合 MBTI 和霍兰德职业兴趣测试做一次深度探索，同时每天保持30分钟的有氧运动以缓解抑郁情绪。"
+      counselorAdvice: "建议结合 MBTI 和霍兰德职业兴趣测试做一次深度探索，同时每天保持30分钟的有氧运动以缓解抑郁情绪。",
+      counselorNotesWritten: true,
+      counselorId: "c1"
     }
   ];
 
@@ -83,16 +101,11 @@ export function CounselorWorkbench() {
            <div className="flex items-center space-x-4">
              <div className="relative">
                 <img src={mockUser.avatar} alt="counselor" className="w-14 h-14 rounded-full border border-gray-100 object-cover shadow-sm" />
-                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${isBusy ? "bg-orange-500" : "bg-green-500"}`}></div>
              </div>
              <div>
-                <h1 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight">林安 <span className="text-[12px] font-medium text-gray-500 font-normal">高级咨询师</span></h1>
-                <div className="text-gray-600 text-[13px] font-medium flex items-center">
-                  {isBusy ? (
-                    <>忙线中</>
-                  ) : (
-                    <>在线接单</>
-                  )}
+                <h1 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight">林安</h1>
+                <div className="text-gray-500 text-[13px] font-medium flex items-center">
+                  高级咨询师
                 </div>
              </div>
            </div>
@@ -212,19 +225,12 @@ export function CounselorWorkbench() {
                              onClick={(e) => {
                                e.stopPropagation();
                                setSelectedCounselorOrder(req);
-                               if (req.type === 'text') {
-                                 pushView("counseling-text-chat");
-                               } else {
-                                 setActiveCallSession(req);
-                               }
+                               setSelectedConsultationId(req.id);
+                               pushView("counseling-text-chat");
                              }}
                              className="flex-1 bg-gray-900 text-white font-bold py-2 rounded-xl text-[12px] shadow-sm flex items-center justify-center transition-colors active:bg-gray-800"
                            >
-                             {req.type === 'text' ? (
-                              <><MessageSquare size={14} className="mr-1.5" /> 文字聊天</>
-                            ) : (
-                              <><Phone size={14} className="mr-1.5" /> 进入咨询室</>
-                            )}
+                             <MessageSquare size={14} className="mr-1.5" /> 联系用户
                            </button>
                         </div>
                      </div>
@@ -272,7 +278,17 @@ export function CounselorWorkbench() {
                            <Sparkles size={12} className="text-[#5C66FF] mr-1" />
                            咨询已完成
                         </div>
-                        <button className="text-[12px] font-medium text-[#5C66FF]">查看记录</button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCounselorOrder({ ...req, status: 'completed' });
+                            setSelectedConsultationId(req.id);
+                            pushView("counseling-text-chat");
+                          }}
+                          className="text-[12px] font-bold text-[#5C66FF] bg-[#F2F3FF] px-3 py-1 rounded-full active:scale-95 transition-transform"
+                        >
+                          {req.counselorNotesWritten ? "查看记录" : "写小结与建议"}
+                        </button>
                      </div>
                    </div>
                  ))}
@@ -289,7 +305,7 @@ export function CounselorWorkbench() {
                  onClick={() => pushView("counseling-text-chat")}
                  className="w-full bg-white p-4 rounded-3xl flex items-center shadow-sm border border-gray-50 active:scale-[0.98] transition-transform"
                >
-                 <img src="https://i.pravatar.cc/150?img=12" alt="" className="w-12 h-12 rounded-full object-cover mr-4 shrink-0" />
+                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lin" alt="" className="w-12 h-12 rounded-full object-cover mr-4 shrink-0" />
                  <div className="flex-1 text-left">
                    <div className="flex justify-between items-center mb-1">
                      <h3 className="font-bold text-gray-900 text-[16px]">小林</h3>

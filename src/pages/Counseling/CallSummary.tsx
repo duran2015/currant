@@ -149,11 +149,11 @@ export function CallSummary() {
             </div>
           )}
 
-          {/* AI Generated Notes (双方可见，文案稍有不同) */}
+          {/* 小鹿 Generated Notes (双方可见，文案稍有不同) */}
           <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
             <h2 className="font-bold text-[16px] text-gray-900 mb-4 flex items-center">
               <Sparkles size={20} className="mr-2 text-primary" /> 
-              {isCounselorView ? "AI 预整理咨询纪要" : "AI 整理的咨询纪要"}
+              {isCounselorView ? "小鹿预整理咨询纪要" : "小鹿整理的咨询纪要"}
             </h2>
             <div className="space-y-4 text-[14px] text-gray-700 leading-loose tracking-wide">
               <div className="bg-primary/5 p-4 rounded-2xl">

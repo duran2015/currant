@@ -22,7 +22,13 @@ export type AppView =
   | "counselor-workbench"
   | "counselor-order-detail"
   | "counselor-patient-profile"
-  | "counselor-earnings";
+  | "counselor-earnings"
+  | "user-order-detail"
+  | "user-evaluation"
+  | "counseling-summary-list"
+  | "counseling-summary-detail"
+  | "counselor-session-notes"
+  | "profile-edit";
 
 export type AppTab = "home" | "counseling" | "messages" | "profile";
 
@@ -57,6 +63,8 @@ export interface BookingOrder {
     | "cancelled"
     | "failed"
     | "refunded";
+  isEvaluated?: boolean;
+  counselorNotesWritten?: boolean;
 }
 
 export interface CounselorSchedule {
@@ -112,7 +120,7 @@ export interface Counselor {
   name: string;
   avatar: string;
   title: string;
-  tags: string[];
+  tags: string[]; // Keep for legacy if needed, or remove
   price: number;
   pricing?: {
     text: number;
@@ -126,6 +134,10 @@ export interface Counselor {
   schedules: CounselorSchedule[];
   type?: "pro" | "listener";
   status?: "online" | "busy" | "offline";
+  styles?: string[];
+  credentials?: string[];
+  consultationCount?: number;
+  serviceHours?: number;
 }
 
 export interface ChatMessage {

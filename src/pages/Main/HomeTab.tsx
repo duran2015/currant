@@ -17,7 +17,9 @@ import {
   Smile,
   Activity,
   HeartPulse,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  FileText
 } from "lucide-react";
 import { useAppStore } from "../../store";
 import { mockUser } from "../../data";
@@ -44,7 +46,7 @@ const TAGS = [
 ];
 
 export function HomeTab() {
-  const { user, pushView, setCurrentTab } = useAppStore() as any;
+  const { user, pushView, setCurrentTab, assessmentRecords } = useAppStore() as any;
 
   const isNewUser = user.isNewUser || false;
   const hasRisk = user.hasRisk || false;
@@ -190,10 +192,6 @@ export function HomeTab() {
             <div className="w-10 h-10 bg-gradient-to-br from-orange-50 to-orange-100 rounded-full flex items-center justify-center text-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-white z-10 relative">
               🦌
             </div>
-            {/* 对话气泡小红点提示 */}
-            {!hasRecordedToday && (
-              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white z-20"></div>
-            )}
           </div>
           <div>
             <h1 className="text-[16px] font-black text-gray-900 tracking-tight leading-tight">可鹿</h1>
@@ -318,7 +316,7 @@ export function HomeTab() {
             </div>
             <div>
               <div className="text-[14px] font-bold text-gray-800 mb-0.5">完善你的心理画像</div>
-              <div className="text-[11px] text-gray-500">获取更精准的AI疏导方案</div>
+              <div className="text-[11px] text-gray-500">获取更精准的小鹿陪伴方案</div>
             </div>
           </div>
           <button className="bg-indigo-500 text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm">
@@ -339,38 +337,32 @@ export function HomeTab() {
           </span>
         </div>
         <div className="flex space-x-3 overflow-x-auto pb-2 -mx-5 px-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div 
-            className="min-w-[140px] bg-blue-50 rounded-[1.25rem] p-4 border border-blue-100/50 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
-            onClick={() => pushView('mini-assessment-test')}
-          >
-            <div className="w-8 h-8 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-3">
-              <Activity size={16} />
-            </div>
-            <div className="text-[14px] font-bold text-gray-800 mb-1">GAD-7焦虑测评</div>
-            <div className="text-[11px] text-gray-500">国际通用量表</div>
-          </div>
-          
-          <div 
-            className="min-w-[140px] bg-orange-50 rounded-[1.25rem] p-4 border border-orange-100/50 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
-            onClick={() => pushView('mini-assessment-test')}
-          >
-            <div className="w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-3">
-              <HeartPulse size={16} />
-            </div>
-            <div className="text-[14px] font-bold text-gray-800 mb-1">压力自评量表</div>
-            <div className="text-[11px] text-gray-500">了解近期压力值</div>
-          </div>
-
-          <div 
-            className="min-w-[140px] bg-teal-50 rounded-[1.25rem] p-4 border border-teal-100/50 flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
-            onClick={() => pushView('mini-assessment-test')}
-          >
-            <div className="w-8 h-8 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center mb-3">
-              <Sparkles size={16} />
-            </div>
-            <div className="text-[14px] font-bold text-gray-800 mb-1">MBTI人格测评</div>
-            <div className="text-[11px] text-gray-500">发现真实的自己</div>
-          </div>
+          {[
+            { id: 'PHQ-9', title: '抑郁自评量表', desc: '了解近期情绪状态', icon: <HeartPulse size={16} />, color: 'bg-orange-100 text-orange-500', wrapper: 'bg-orange-50 border-orange-100/50' },
+            { id: 'GAD-7', title: 'GAD-7焦虑测评', desc: '国际通用量表', icon: <Activity size={16} />, color: 'bg-blue-100 text-blue-500', wrapper: 'bg-blue-50 border-blue-100/50' },
+            { id: 'MBTI', title: 'MBTI人格测评', desc: '发现真实的自己', icon: <Sparkles size={16} />, color: 'bg-teal-100 text-teal-500', wrapper: 'bg-teal-50 border-teal-100/50' }
+          ].map((scale) => {
+            const record = assessmentRecords?.find((r: any) => r.assessmentId === scale.id);
+            
+            return (
+              <div 
+                key={scale.id}
+                className={`min-w-[140px] relative ${scale.wrapper} rounded-[1.25rem] p-4 border flex-shrink-0 cursor-pointer active:scale-95 transition-transform`}
+                onClick={() => record ? pushView('assessment-report-detail') : pushView('mini-assessment-test')}
+              >
+                {record && (
+                  <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-bl-lg rounded-tr-[1.25rem]">
+                    已测
+                  </div>
+                )}
+                <div className={`w-8 h-8 ${scale.color} rounded-full flex items-center justify-center mb-3`}>
+                  {scale.icon}
+                </div>
+                <div className="text-[14px] font-bold text-gray-800 mb-1">{scale.title}</div>
+                <div className="text-[11px] text-gray-500">{scale.desc}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

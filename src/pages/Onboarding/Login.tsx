@@ -200,7 +200,7 @@ export function Login() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg">我是用户</h3>
-                    <p className="text-gray-500 text-sm">寻找咨询师、体验AI服务</p>
+                    <p className="text-gray-500 text-sm">寻找咨询师、体验小鹿陪伴</p>
                   </div>
                 </button>
               </div>

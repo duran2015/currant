@@ -12,8 +12,10 @@ import { AIInterview } from "./pages/Onboarding/AIInterview";
 import { ProfileGeneration } from "./pages/Onboarding/ProfileGeneration";
 import { MainLayout } from "./components/MainLayout";
 import { AITab } from "./pages/Main/AITab";
-import { Booking } from "./pages/Counseling/Booking";
 import { Payment } from "./pages/Counseling/Payment";
+import { UserEvaluation } from "./pages/Counseling/UserEvaluation";
+import { CounselorSessionNotes } from "./pages/Counseling/CounselorSessionNotes";
+import { Booking } from "./pages/Counseling/Booking";
 import { VoiceCall } from "./pages/Counseling/VoiceCall";
 import { CallSummary } from "./pages/Counseling/CallSummary";
 import { OrdersList } from "./pages/Counseling/OrdersList";
@@ -45,8 +47,11 @@ import { CounselorWorkbench } from "./pages/Counseling/CounselorWorkbench";
 import { CounselorOrderDetail } from "./pages/Counseling/CounselorOrderDetail";
 import { CounselorPatientProfile } from "./pages/Counseling/CounselorPatientProfile";
 import { CounselorDetail } from "./pages/Counseling/CounselorDetail";
-
-
+import { UserOrderDetail } from "./pages/Counseling/UserOrderDetail";
+import { AssessmentReportDetail } from "./pages/Profile/AssessmentReportDetail";
+import { CounselingSummaryList } from "./pages/Profile/CounselingSummaryList";
+import { CounselingSummaryDetail } from "./pages/Profile/CounselingSummaryDetail";
+import { ProfileEdit } from "./pages/Profile/ProfileEdit";
 
 function ViewManager() {
   const { viewStack, activeCallSession } = useAppStore();
@@ -65,10 +70,13 @@ function ViewManager() {
         currentView.startsWith("counseling-") ||
         currentView === "ai-chat" ||
         currentView === "orders-list" ||
+        currentView === "user-order-detail" ||
         currentView === "notifications-list" ||
         currentView === "notification-detail" ||
         currentView === "consultation-records" ||
-        currentView === "consultation-detail" ||
+        currentView === "assessment-records" ||
+        currentView === "assessment-report-detail" ||
+        currentView === "ai-chat-records" ||
         currentView === "profile-report" ||
         currentView === "assessment-records" ||
         currentView === "ai-chat-records") && <MainLayout key="main" />}
@@ -85,15 +93,18 @@ function ViewManager() {
         </div>
       )}
       {currentView === "counseling-detail" && <CounselorDetail key="cdetail" />}
-      {currentView === "counseling-booking" && <Booking key="cbooking" />}
       {currentView === "counseling-payment" && <Payment key="cpayment" />}
       {currentView === "counseling-text-chat" && <TextChat key="tchat" />}
       {currentView === "counseling-summary" && <CallSummary key="csummary" />}
       {currentView === "orders-list" && <OrdersList key="orders" />}
+      {currentView === "user-order-detail" && <UserOrderDetail key="u_order_detail" />}
       {currentView === "profile-report" && <ProfileReport key="preport" />}
+      {currentView === "user-evaluation" && <UserEvaluation key="ueval" />}
+      {currentView === "counselor-session-notes" && <CounselorSessionNotes key="csnotes" />}
       {currentView === "assessment-records" && (
         <AssessmentRecords key="arecords" />
       )}
+      {currentView === "assessment-report-detail" && <AssessmentReportDetail key="areport_detail" />}
       {currentView === "ai-chat-records" && <AIChatRecords key="achat_rec" />}
       {currentView === "tree-hole" && <TreeHole key="tree_hole" />}
       {currentView === "mini-assessment-home" && (
@@ -112,6 +123,9 @@ function ViewManager() {
       {currentView === "counselor-order-detail" && <CounselorOrderDetail key="c_order_detail" />}
       {currentView === "counselor-patient-profile" && <CounselorPatientProfile key="c_pt_profile" />}
       {currentView === "ai-settings" && <AISettings key="ai_settings" />}
+      {currentView === "counseling-summary-list" && <CounselingSummaryList key="c_summary_list" />}
+      {currentView === "counseling-summary-detail" && <CounselingSummaryDetail key="c_summary_detail" />}
+      {currentView === "profile-edit" && <ProfileEdit key="p_edit" />}
       
       {currentView === "breathing" && <BreathingTool key="tool_breathing" />}
       {currentView === "white-noise" && <WhiteNoiseTool key="tool_white_noise" />}

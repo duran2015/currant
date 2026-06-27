@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../../store";
 import {
@@ -13,14 +13,16 @@ import {
   Loader2,
   MoreVertical,
   SwitchCamera,
-  Minimize2
+  Minimize2,
+  Send,
+  X
 } from "lucide-react";
 import { mockCounselors, mockUser } from "../../data";
 
 type CallState = "connecting" | "in-call";
 
 export function VoiceCall() {
-  const { pushView, bookingOrder, selectedCounselorOrder, selectedCounselorId, isCallMinimized, setIsCallMinimized, setActiveCallSession } = useAppStore();
+  const { popView, pushView, bookingOrder, selectedCounselorOrder, selectedCounselorId, isCallMinimized, setIsCallMinimized, setActiveCallSession, updateOrder } = useAppStore();
   
   // Determine roles and order context
   const isCounselorView = !!selectedCounselorOrder;
@@ -35,6 +37,16 @@ export function VoiceCall() {
   const [cameraOff, setCameraOff] = useState(!isVideo);
   const [speaker, setSpeaker] = useState(true);
   const [duration, setDuration] = useState(0);
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState<{ id: string; sender: "me" | "other"; text: string; time: string }[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, showChat]);
 
   useEffect(() => {
     // Simulate connection delay
@@ -65,8 +77,36 @@ export function VoiceCall() {
 
   const handleHangup = () => {
     setActiveCallSession(null);
+    if (order) {
+      updateOrder(order.id, { status: "completed" });
+    }
     setIsCallMinimized(false);
-    pushView("counseling-summary");
+    popView();
+  };
+
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+    const newMsg = {
+      id: Date.now().toString(),
+      sender: "me" as const,
+      text: inputValue.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages([...messages, newMsg]);
+    setInputValue("");
+    
+    // Simulate reply
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "other",
+          text: isCounselorView ? "收到，请继续讲。" : "好的，我看到了。",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    }, 1000);
   };
 
   if (isCallMinimized) {
@@ -312,6 +352,22 @@ export function VoiceCall() {
               </button>
             )}
 
+            {/* Chat Button */}
+            <button
+              onClick={() => setShowChat(true)}
+              className="flex flex-col items-center space-y-2 w-16 relative"
+            >
+              <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-white/10 text-white backdrop-blur-md border border-white/10 relative">
+                <MessageSquare size={24} />
+                {messages.length > 0 && messages[messages.length - 1].sender === "other" && !showChat && (
+                  <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1a1c23]" />
+                )}
+              </div>
+              <span className="text-[12px] text-white/80 font-medium">
+                聊天
+              </span>
+            </button>
+
             {/* Hangup Button */}
             <button
               onClick={handleHangup}
@@ -326,6 +382,82 @@ export function VoiceCall() {
             </button>
           </div>
         </div>
+
+      {/* Chat Overlay */}
+      <AnimatePresence>
+        {showChat && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="absolute inset-0 z-[110] bg-[#1a1c23]/95 backdrop-blur-lg flex flex-col"
+          >
+            {/* Chat Header */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+              <h2 className="text-white font-medium">会议聊天</h2>
+              <button
+                onClick={() => setShowChat(false)}
+                className="w-8 h-8 flex items-center justify-center text-white/70 active:bg-white/10 rounded-full"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Messages List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
+              {messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-white/40">
+                  <MessageSquare size={32} className="mb-2 opacity-50" />
+                  <span className="text-[13px]">暂无聊天记录</span>
+                  <span className="text-[11px] mt-1">这里发送的消息仅在会议中可见</span>
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}
+                  >
+                    <span className="text-[10px] text-white/40 mb-1 px-1">{msg.sender === "me" ? "我" : (isCounselorView ? order?.userName : counselor.name)} {msg.time}</span>
+                    <div
+                      className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed ${
+                        msg.sender === "me"
+                          ? "bg-indigo-500 text-white rounded-tr-sm"
+                          : "bg-white/10 text-white/90 rounded-tl-sm"
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Chat Input */}
+            <div className="p-4 bg-black/20 border-t border-white/5">
+              <div className="flex items-center bg-white/10 rounded-full p-1 border border-white/10">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  placeholder="输入消息..."
+                  className="flex-1 bg-transparent text-white placeholder-white/40 px-4 text-[14px] outline-none"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim()}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0 ${
+                    inputValue.trim() ? "bg-indigo-500 text-white" : "bg-white/5 text-white/30"
+                  }`}
+                >
+                  <Send size={16} className={inputValue.trim() ? "ml-0.5" : ""} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

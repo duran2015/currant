@@ -17,7 +17,7 @@ export function AIInterview() {
   >([
     {
       role: "ai",
-      text: "你好，感谢你完成量表。我是你的专属 AI 咨询助手。\n\n我注意到你刚才填写量表时，提到了情绪有些低落。现在的你，感觉还好吗？",
+      text: "你好，感谢你完成量表。我是小鹿。\n\n我注意到你刚才填写量表时，提到了情绪有些低落。现在的你，感觉还好吗？",
     },
   ]);
   const [input, setInput] = useState("");
@@ -72,7 +72,7 @@ export function AIInterview() {
           </div>
           <div>
             <h2 className="font-semibold text-gray-900 border-none">
-              AI 倾听师
+              小鹿
             </h2>
             <div className="flex items-center space-x-1.5 mt-0.5">
               <span className="flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
@@ -155,7 +155,7 @@ export function AIInterview() {
                   handleSend();
                 }
               }}
-              placeholder={isTyping ? "AI 正在回复..." : "和我聊聊..."}
+              placeholder={isTyping ? "小鹿正在回复..." : "和我聊聊..."}
               disabled={isTyping}
               className="w-full bg-transparent outline-none text-[15px] text-gray-700 resize-none placeholder-gray-400 leading-relaxed block"
               rows={
