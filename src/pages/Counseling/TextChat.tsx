@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, Info, HelpCircle, ArrowRight, ArrowUp, Camera, Image as ImageIcon, Keyboard, Mic, Smile, PlayCircle, Video, FileText, Plus, PlusCircle, ClipboardList } from "lucide-react";
+import { ChevronLeft, Info, HelpCircle, ArrowRight, ArrowUp, Camera, Image as ImageIcon, Keyboard, Mic, Smile, PlayCircle, Video, FileText, Plus, PlusCircle, ClipboardList, Wind, Bell, Headphones, Moon, Sparkles, CircleDashed } from "lucide-react";
 import { useAppStore } from "../../store";
 import { mockCounselors, mockConsultationRecords } from "../../data";
 
@@ -95,7 +95,7 @@ export function TextChat() {
   ];
 
   // Provide initial mock messages for the completed order
-  const [messages, setMessages] = useState<{ id: string; role: "user" | "counselor" | "system"; text: string; type?: "text" | "scale" | "system" | "booking_success" | "room_invite" | "counselor_notes" | "evaluation_prompt" }[]>(() => {
+  const [messages, setMessages] = useState<{ id: string; role: "user" | "counselor" | "system"; text: string; type?: "text" | "scale" | "system" | "booking_success" | "room_invite" | "counselor_notes" | "evaluation_prompt" | "tool" }[]>(() => {
     if (order?.id === "req-1" || order?.status === "completed") {
       return [
         ...defaultMessages,
@@ -191,6 +191,14 @@ export function TextChat() {
     setMessages((prev) => [
       ...prev,
       { id: newMsgId, role: myRole, text: "【PHQ-9 抑郁症状评估】量表", type: "scale" },
+    ]);
+  };
+
+  const handleSendTool = (toolName: string) => {
+    const newMsgId = Date.now().toString();
+    setMessages((prev) => [
+      ...prev,
+      { id: newMsgId, role: myRole, text: toolName, type: "tool" },
     ]);
   };
 
@@ -349,6 +357,45 @@ export function TextChat() {
                       className={`w-full py-2 rounded-xl text-[13px] font-bold transition-colors ${isCounselorMode ? 'bg-gray-50 text-gray-400 cursor-default' : 'bg-primary/10 text-primary active:bg-primary/20'}`}
                     >
                       {isCounselorMode ? "等待用户填写" : "点击填写"}
+                    </button>
+                  </div>
+                </div>
+                {msg.role === myRole && (
+                  <img
+                    src={myParty.avatar}
+                    alt=""
+                    className="w-8 h-8 rounded-full object-cover ml-2 shrink-0 border border-gray-100 mt-1"
+                  />
+                )}
+              </div>
+            );
+          }
+
+          if (msg.type === "tool") {
+            return (
+              <div
+                key={msg.id}
+                className={`flex ${msg.role === myRole ? "justify-end" : "justify-start"}`}
+              >
+                {msg.role === otherRole && (
+                  <img
+                    src={otherParty.avatar}
+                    alt=""
+                    onClick={handleAvatarClick}
+                    className={`w-8 h-8 rounded-full object-cover mr-2 shrink-0 border border-gray-100 mt-1 ${!isCounselorMode ? 'cursor-pointer active:scale-95' : ''}`}
+                  />
+                )}
+                <div className="max-w-[75%]">
+                  <div className="bg-white border border-gray-100 p-3 rounded-2xl shadow-sm text-left w-56">
+                    <div className="flex items-center text-indigo-500 mb-1.5">
+                      <Sparkles size={16} className="mr-1.5" />
+                      <span className="font-bold text-[14px]">小工具推荐</span>
+                    </div>
+                    <p className="text-[13px] text-gray-600 mb-3 leading-snug">咨询师向您推荐了【{msg.text}】小工具，帮助您平复心情。</p>
+                    <button 
+                      className={`w-full py-2 rounded-xl text-[13px] font-bold transition-colors ${isCounselorMode ? 'bg-gray-50 text-gray-400 cursor-default' : 'bg-indigo-50 text-indigo-600 active:bg-indigo-100'}`}
+                    >
+                      {isCounselorMode ? "已发送" : "去体验"}
                     </button>
                   </div>
                 </div>
@@ -579,21 +626,35 @@ export function TextChat() {
               exit={{ height: 0, opacity: 0 }}
               className={`overflow-hidden z-10 relative transition-colors bg-[#f8f9fa]`}
             >
-              <div className={`pt-4 pb-6 px-8 flex justify-center space-x-6 border-t mt-3 mx-auto border-gray-200/50`}>
+              <div className={`pt-5 pb-8 px-6 grid grid-rows-2 grid-flow-col gap-x-8 gap-y-5 overflow-x-auto no-scrollbar border-t mt-3 border-gray-200/50 auto-cols-max`} style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <style>{`
+                  .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
                 {[
                   { icon: ImageIcon, label: "相册", color: "text-blue-500", onClick: () => setShowPlusMenu(false) },
                   { icon: Camera, label: "拍摄", color: "text-gray-400", onClick: () => setShowPlusMenu(false) },
                   ...(isCounselorMode && order?.status === "paid" ? [
                     { icon: ClipboardList, label: "发送量表", color: "text-primary", onClick: () => { handleSendScale(); setShowPlusMenu(false); } }
-                  ] : [
+                  ] : []),
+                  ...(!isCounselorMode || order?.status !== "paid" ? [
                     { icon: FileText, label: "文件", color: "text-orange-500", onClick: () => setShowPlusMenu(false) }
-                  ])
+                  ] : []),
+                  ...(isCounselorMode ? [
+                    { icon: Wind, label: "深呼吸", color: "text-sky-500", onClick: () => { handleSendTool("深呼吸放松"); setShowPlusMenu(false); } },
+                    { icon: Bell, label: "敲木鱼", color: "text-amber-600", onClick: () => { handleSendTool("电子木鱼"); setShowPlusMenu(false); } },
+                    { icon: Headphones, label: "白噪音", color: "text-indigo-400", onClick: () => { handleSendTool("白噪音助眠"); setShowPlusMenu(false); } },
+                    { icon: Moon, label: "助眠指引", color: "text-violet-500", onClick: () => { handleSendTool("助眠指引"); setShowPlusMenu(false); } },
+                    { icon: Sparkles, label: "冥想", color: "text-fuchsia-500", onClick: () => { handleSendTool("正念冥想"); setShowPlusMenu(false); } },
+                    { icon: CircleDashed, label: "捏泡泡", color: "text-pink-400", onClick: () => { handleSendTool("捏泡泡解压"); setShowPlusMenu(false); } }
+                  ] : [])
                 ].map((item, i) => (
-                  <button key={i} onClick={item.onClick} className="flex flex-col items-center active:scale-95 transition-transform w-16">
+                  <button key={i} onClick={item.onClick} className="flex flex-col items-center active:scale-95 transition-transform w-14 shrink-0">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border mb-2 bg-white border-gray-100`}>
                       <item.icon size={26} strokeWidth={1.5} className={item.color} />
                     </div>
-                    <span className={`text-[11px] font-medium text-gray-500`}>{item.label}</span>
+                    <span className={`text-[11px] font-medium text-gray-500 whitespace-nowrap`}>{item.label}</span>
                   </button>
                 ))}
               </div>
