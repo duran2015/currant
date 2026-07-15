@@ -59,7 +59,11 @@ export function Payment() {
     setTimeout(() => {
       if (paymentMethod === "alipay") {
         setStatus("failed");
-        setBookingOrder(bookingOrder ? { ...bookingOrder, status: "failed" } : null);
+        if (bookingOrder) {
+          const updated = { ...bookingOrder, status: "failed" };
+          updateOrder(bookingOrder.id, updated);
+          setBookingOrder(updated);
+        }
       } else {
         setStatus("success");
         if (bookingOrder) {
