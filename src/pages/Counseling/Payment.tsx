@@ -299,19 +299,19 @@ export function Payment() {
 
             <div className="w-full max-w-xs space-y-4">
               <button
-                onClick={() => {
-                  pushView("pre-questionnaire");
-                }}
-                className="w-full bg-gray-900 text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center shadow-md shadow-gray-900/20"
-              >
-                <FileText size={18} className="mr-2" /> 填写咨询前问卷
-              </button>
+                  onClick={() => {
+                    pushView("counseling-precounseling-questionnaire");
+                  }}
+                  className="w-full bg-gray-900 text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center shadow-md shadow-gray-900/20"
+                >
+                  <FileText size={18} className="mr-2" /> 填写咨询前问卷
+                </button>
               <button
-                onClick={() => resetToView("main")}
-                className="w-full bg-gray-50 text-gray-700 font-bold py-4 rounded-full active:scale-95 transition-transform"
-              >
-                稍后填写并返回首页
-              </button>
+                  onClick={() => resetToView("main")}
+                  className="w-full bg-gray-50 text-gray-700 font-bold py-4 rounded-full active:scale-95 transition-transform"
+                >
+                  稍后填写并返回首页
+                </button>
             </div>
 
             <button
