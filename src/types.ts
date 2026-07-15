@@ -6,6 +6,7 @@ export type AppView =
   | "main"
   | "counseling-detail"
   | "counseling-booking"
+  | "counseling-booking-confirm"
   | "counseling-payment"
   | "counseling-call"
   | "counseling-text-chat"
@@ -13,6 +14,7 @@ export type AppView =
   | "orders-list"
   | "profile-report"
   | "assessment-records"
+  | "assessment-report-detail"
   | "ai-chat-records"
   | "ai-chat"
   | "tree-hole"
@@ -36,7 +38,20 @@ export type AppView =
   | "counselor-user-card"
   | "counselor-risk-report"
   | "counselor-evaluations"
-  | "counselor-service-chat";
+  | "counselor-service-chat"
+  | "counselor-clients-tab"
+  | "counselor-profile-tab"
+  | "notifications-list"
+  | "notification-detail"
+  | "consultation-records"
+  | "consultation-detail"
+  | "breathing"
+  | "white-noise"
+  | "muyu"
+  | "meditation"
+  | "sleep-guide"
+  | "bubble-wrap"
+  | "ai-settings";
 
 export type AppTab = "home" | "counseling" | "messages" | "profile" | "appointments" | "clients" | "earnings";
 

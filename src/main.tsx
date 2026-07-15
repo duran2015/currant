@@ -110,8 +110,8 @@ function ViewManager() {
       {currentView === "counseling-text-chat" && <TextChat key="tchat" />}
       {currentView === "counseling-summary" && <CallSummary key="csummary" />}
       {currentView === "orders-list" && (
-        useAppStore().appMode === "counselor" ? <CounselorOrdersList key="c_orders" /> : <OrdersList key="orders" />
-      )}
+          useAppStore.getState().appMode === "counselor" ? <CounselorOrdersList key="c_orders" /> : <OrdersList key="orders" />
+        )}
       {currentView === "user-order-detail" && <UserOrderDetail key="u_order_detail" />}
       {currentView === "profile-report" && <ProfileReport key="preport" />}
       {currentView === "user-evaluation" && <UserEvaluation key="ueval" />}

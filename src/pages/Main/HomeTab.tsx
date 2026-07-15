@@ -46,7 +46,7 @@ const TAGS = [
 ];
 
 export function HomeTab() {
-  const { user, pushView, setCurrentTab, assessmentRecords, orders } = useAppStore() as any;
+  const { user, pushView, setTab, assessmentRecords, orders } = useAppStore();
 
   const isNewUser = user.isNewUser || false;
   const hasRisk = user.hasRisk || false;
@@ -378,7 +378,7 @@ export function HomeTab() {
             { name: '敲木鱼', icon: <Bell size={20} />, color: 'bg-amber-50 text-amber-600', action: () => pushView('muyu') },
             { name: '冥想放松', icon: <Cloud size={20} />, color: 'bg-sky-50 text-sky-600', action: () => pushView('meditation') },
             { name: '睡眠引导', icon: <Moon size={20} />, color: 'bg-blue-50 text-blue-600', action: () => pushView('sleep-guide') },
-            { name: '情绪日记', icon: <Book size={20} />, color: 'bg-rose-50 text-rose-600', action: () => setCurrentTab('diary') },
+            { name: '情绪日记', icon: <Book size={20} />, color: 'bg-rose-50 text-rose-600', action: () => pushView('ai-chat') },
             { name: '捏泡泡', icon: <Smile size={20} />, color: 'bg-fuchsia-50 text-fuchsia-600', action: () => pushView('bubble-wrap') },
           ].map((tool, idx) => (
             <div 
