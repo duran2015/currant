@@ -46,7 +46,7 @@ const TAGS = [
 ];
 
 export function HomeTab() {
-  const { user, pushView, setCurrentTab, assessmentRecords } = useAppStore() as any;
+  const { user, pushView, setCurrentTab, assessmentRecords, orders } = useAppStore() as any;
 
   const isNewUser = user.isNewUser || false;
   const hasRisk = user.hasRisk || false;
@@ -213,7 +213,7 @@ export function HomeTab() {
       </div>
 
       {/* Active Consultation Banner */}
-      {useAppStore().orders.filter((o: any) => o.status === 'paid').length > 0 && (
+      {orders.filter((o: any) => o.status === 'paid').length > 0 && (
         <div className="px-5 mb-2 mt-1">
           <div className="bg-blue-50 border border-blue-100 p-3 rounded-[1.25rem] flex items-center justify-between shadow-sm cursor-pointer active:scale-[0.98] transition-transform" onClick={() => pushView("orders-list")}>
              <div className="flex items-center space-x-3">
