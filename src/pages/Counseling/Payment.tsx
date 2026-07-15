@@ -59,25 +59,19 @@ export function Payment() {
     setTimeout(() => {
       if (paymentMethod === "alipay") {
         setStatus("failed");
-        setBookingOrder((prev) =>
-          prev ? { ...prev, status: "failed" } : null,
-        );
+        setBookingOrder(bookingOrder ? { ...bookingOrder, status: "failed" } : null);
       } else {
         setStatus("success");
-        setBookingOrder((prev) => {
-          if (prev) {
-            // Check if order already exists
-            const existingOrder = orders.find((o: any) => o.id === prev.id);
-            const updated = { ...prev, status: "paid" };
-            if (!existingOrder) {
-              addOrder(updated);
-            } else {
-              updateOrder(prev.id, updated);
-            }
-            return updated;
+        if (bookingOrder) {
+          const updated = { ...bookingOrder, status: "paid" };
+          const existingOrder = orders.find((o: any) => o.id === bookingOrder.id);
+          if (!existingOrder) {
+            addOrder(updated);
+          } else {
+            updateOrder(bookingOrder.id, updated);
           }
-          return null;
-        });
+          setBookingOrder(updated);
+        }
       }
     }, 1500);
   };
@@ -88,7 +82,7 @@ export function Payment() {
   };
 
   const handleRefund = () => {
-    setBookingOrder((prev) => (prev ? { ...prev, status: "refunded" } : null));
+    setBookingOrder(bookingOrder ? { ...bookingOrder, status: "refunded" } : null);
     resetToView("main");
   };
 
