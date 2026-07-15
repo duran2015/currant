@@ -31,7 +31,7 @@ import { useAppStore } from "../../store";
 import { mockCounselors } from "../../data";
 
 export function AITab() {
-  const { currentTab, pushView, popView, setSelectedCounselorId, user, blackboard, aiSettings, updateAISettings } = useAppStore();
+  const { currentTab, pushView, popView, setSelectedCounselorId, user, blackboard, aiSettings, updateAISettings, counselorStatus } = useAppStore();
   const [activeTab, setActiveTab] = useState<"ai" | "human">("ai");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [sortBy, setSortBy] = useState("recommended");
@@ -881,6 +881,7 @@ export function AITab() {
                     alt={counselor.name}
                     className={`w-[60px] h-[60px] rounded-full object-cover border-2 ${isDark ? 'border-gray-700' : 'border-gray-50'}`}
                   />
+                  <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 rounded-full ${isDark ? 'border-[#2A2A2A]' : 'border-white'} ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -888,8 +889,8 @@ export function AITab() {
                     <span className={`font-bold text-[16px] mr-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {counselor.name}
                     </span>
-                    <span className={`px-1.5 py-0.5 rounded text-[11px] ${isDark ? 'bg-[#1C1C1E] text-gray-400' : 'bg-[#F5F6F8] text-[#8A8F99]'}`}>
-                      {counselor.type === "pro" ? "专业咨询" : "心理倾听"}
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}`}>
+                      {(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? '在线' : '离线'}
                     </span>
                   </div>
 

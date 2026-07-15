@@ -111,7 +111,7 @@ export function Login() {
       
       if (thirdPartyProvider) {
         console.log("[Event Analytics] User authenticated via Third Party + Phone Binding");
-        updateUser({ name: thirdPartyProvider === "wechat" ? "微信用户" : "Apple 授权用户", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" });
+        updateUser({ name: thirdPartyProvider === "wechat" ? "微信用户" : "Apple 授权用户", avatar: "https://ui-avatars.com/api/?name=User&background=random" });
         pushView("assessment");
       } else {
         console.log("[Event Analytics] User authenticated via Phone & OTP");

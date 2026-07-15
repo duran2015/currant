@@ -28,9 +28,17 @@ export type AppView =
   | "counseling-summary-list"
   | "counseling-summary-detail"
   | "counselor-session-notes"
-  | "profile-edit";
+  | "profile-edit"
+  | "counselor-boundary"
+  | "counselor-onboarding"
+  | "counselor-services"
+  | "counselor-schedule"
+  | "counselor-user-card"
+  | "counselor-risk-report"
+  | "counselor-evaluations"
+  | "counselor-service-chat";
 
-export type AppTab = "home" | "counseling" | "messages" | "profile";
+export type AppTab = "home" | "counseling" | "messages" | "profile" | "appointments" | "clients" | "earnings";
 
 export interface UserProfile {
   id: string;

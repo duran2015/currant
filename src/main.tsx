@@ -16,6 +16,8 @@ import { Payment } from "./pages/Counseling/Payment";
 import { UserEvaluation } from "./pages/Counseling/UserEvaluation";
 import { CounselorSessionNotes } from "./pages/Counseling/CounselorSessionNotes";
 import { Booking } from "./pages/Counseling/Booking";
+import { BookingConfirm } from "./pages/Counseling/BookingConfirm";
+import { PreCounselingQuestionnaire } from "./pages/Counseling/PreCounselingQuestionnaire";
 import { VoiceCall } from "./pages/Counseling/VoiceCall";
 import { CallSummary } from "./pages/Counseling/CallSummary";
 import { OrdersList } from "./pages/Counseling/OrdersList";
@@ -52,6 +54,15 @@ import { AssessmentReportDetail } from "./pages/Profile/AssessmentReportDetail";
 import { CounselingSummaryList } from "./pages/Profile/CounselingSummaryList";
 import { CounselingSummaryDetail } from "./pages/Profile/CounselingSummaryDetail";
 import { ProfileEdit } from "./pages/Profile/ProfileEdit";
+import { CounselorOnboarding } from "./pages/Counseling/CounselorOnboarding";
+import { CounselorBoundary } from "./pages/Counseling/CounselorBoundary";
+import { CounselorServices } from "./pages/Counseling/CounselorServices";
+import { CounselorSchedule } from "./pages/Counseling/CounselorSchedule";
+import { CounselorOrdersList } from "./pages/Counseling/CounselorOrdersList";
+import { CounselorServiceChat } from "./pages/Counseling/CounselorServiceChat";
+import { CounselorEvaluations } from "./pages/Counseling/CounselorEvaluations";
+import { CounselorEarnings } from "./pages/Counseling/CounselorEarnings";
+import { CounselorRiskReport } from "./pages/Counseling/CounselorRiskReport";
 
 function ViewManager() {
   const { viewStack, activeCallSession } = useAppStore();
@@ -87,6 +98,8 @@ function ViewManager() {
 
 
       {/* Sub views stacked above Main Layout absolutely */}
+      {currentView === "booking-confirm" && <BookingConfirm key="booking_confirm" />}
+      {currentView === "pre-questionnaire" && <PreCounselingQuestionnaire key="pre_q" />}
       {currentView === "ai-chat" && (
         <div className="absolute inset-0 z-50 bg-white">
           <AITab />
@@ -96,7 +109,9 @@ function ViewManager() {
       {currentView === "counseling-payment" && <Payment key="cpayment" />}
       {currentView === "counseling-text-chat" && <TextChat key="tchat" />}
       {currentView === "counseling-summary" && <CallSummary key="csummary" />}
-      {currentView === "orders-list" && <OrdersList key="orders" />}
+      {currentView === "orders-list" && (
+        useAppStore().appMode === "counselor" ? <CounselorOrdersList key="c_orders" /> : <OrdersList key="orders" />
+      )}
       {currentView === "user-order-detail" && <UserOrderDetail key="u_order_detail" />}
       {currentView === "profile-report" && <ProfileReport key="preport" />}
       {currentView === "user-evaluation" && <UserEvaluation key="ueval" />}
@@ -122,6 +137,14 @@ function ViewManager() {
       {currentView === "consultation-detail" && <ConsultationDetail key="cons_detail" />}
       {currentView === "counselor-order-detail" && <CounselorOrderDetail key="c_order_detail" />}
       {currentView === "counselor-patient-profile" && <CounselorPatientProfile key="c_pt_profile" />}
+      {currentView === "counselor-onboarding" && <CounselorOnboarding key="c_onboarding" />}
+      {currentView === "counselor-boundary" && <CounselorBoundary key="c_boundary" />}
+      {currentView === "counselor-services" && <CounselorServices key="c_services" />}
+      {currentView === "counselor-schedule" && <CounselorSchedule key="c_schedule" />}
+      {currentView === "counselor-service-chat" && <CounselorServiceChat key="c_service_chat" />}
+      {currentView === "counselor-evaluations" && <CounselorEvaluations key="c_evaluations" />}
+      {currentView === "counselor-earnings" && <CounselorEarnings key="c_earnings" />}
+      {currentView === "counselor-risk-report" && <CounselorRiskReport key="c_risk_report" />}
       {currentView === "ai-settings" && <AISettings key="ai_settings" />}
       {currentView === "counseling-summary-list" && <CounselingSummaryList key="c_summary_list" />}
       {currentView === "counseling-summary-detail" && <CounselingSummaryDetail key="c_summary_detail" />}

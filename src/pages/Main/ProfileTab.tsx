@@ -72,13 +72,13 @@ export function ProfileTab() {
         {user.role === "active" && (
           <button 
             onClick={() => enterAppMode("counselor")}
-            className="w-full flex items-center justify-between p-4 bg-white rounded-2xl mb-6 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+            className="w-full flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
           >
             <div className="flex items-center space-x-3 text-primary">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Briefcase size={18} />
               </div>
-              <span className="font-medium text-[15px]">切换为咨询师身份</span>
+              <span className="font-bold text-[15px]">切换为咨询师身份</span>
             </div>
             <ChevronRight size={20} className="text-gray-300" />
           </button>

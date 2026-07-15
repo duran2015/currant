@@ -1,19 +1,31 @@
 import { useAppStore } from "../store";
-import { Home, MessageCircle, MessageSquare, User } from "lucide-react";
+import { Home, MessageCircle, MessageSquare, User, Briefcase, CalendarClock, Users, Wallet } from "lucide-react";
 import { motion } from "motion/react";
 
 export function BottomNav() {
-  const { currentTab, setTab, pushView } = useAppStore();
+  const { currentTab, setTab, pushView, appMode } = useAppStore();
 
-  const tabs = [
+  const isCounselorMode = appMode === "counselor";
+
+  const userTabs = [
     { id: "home", icon: Home, label: "首页" },
     { id: "ai", icon: MessageCircle, label: "小鹿" },
     { id: "messages", icon: MessageSquare, label: "消息" },
     { id: "profile", icon: User, label: "我的" },
   ] as const;
 
+  const counselorTabs = [
+    { id: "home", icon: Briefcase, label: "工作台" },
+    { id: "appointments", icon: CalendarClock, label: "预约" },
+    { id: "clients", icon: Users, label: "客户" },
+    { id: "earnings", icon: Wallet, label: "收入" },
+    { id: "profile", icon: User, label: "我的" },
+  ] as const;
+
+  const tabs = isCounselorMode ? counselorTabs : userTabs;
+
   return (
-    <div className="w-full shrink-0 h-20 bg-white/95 backdrop-blur-md border-t border-gray-100 flex pb-4 items-center justify-around z-50">
+    <div className="w-full shrink-0 h-20 bg-white/95 backdrop-blur-md border-t border-gray-100 flex pb-4 items-center justify-around z-30 relative">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = currentTab === tab.id;

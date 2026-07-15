@@ -30,7 +30,7 @@ export function CounselorPatientProfile() {
            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
            
            <div className="flex items-center space-x-3 mb-4">
-              <img src={selectedCounselorOrder?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Chen"} alt="client" className="w-12 h-12 rounded-full border border-gray-200 object-cover" />
+              <img src={selectedCounselorOrder?.avatar || "https://ui-avatars.com/api/?name=Chen&background=random"} alt="client" className="w-12 h-12 rounded-full border border-gray-200 object-cover" />
               <div>
                  <h2 className="text-[17px] font-bold text-gray-900 mb-0.5">{selectedCounselorOrder?.userName || "陈小希"}</h2>
                  <p className="text-[12px] text-gray-500">24岁 · 互联网运营</p>
@@ -43,7 +43,7 @@ export function CounselorPatientProfile() {
                  <div className="text-[14px] font-black tracking-tight text-[#FF453A]">低/常规</div>
               </div>
               <div className="bg-[#F4F9FF] py-2 px-1 rounded-xl border border-blue-100/50 flex flex-col items-center">
-                 <div className="text-[10px] font-bold mb-0.5 text-[#5C82FF]">近期测评</div>
+                 <div className="text-[10px] font-bold mb-0.5 text-[#5C82FF]">近期量表</div>
                  <div className="text-[14px] font-black tracking-tight text-[#1A45FF]">PHQ-9(5)</div>
               </div>
               <div className="bg-[#F2FBF7] py-2 px-1 rounded-xl border border-green-100/50 flex flex-col items-center">
@@ -54,7 +54,32 @@ export function CounselorPatientProfile() {
          </div>
 
          <div className="p-3 space-y-3">
-            {/* 针对已咨询用户的建议与总结区 */}
+            {/* 咨询前问卷 SOP 摘要 */}
+            <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
+               <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">
+                 <Target className="text-blue-500 mr-1.5" size={16} /> 本次服务预约摘要
+               </h3>
+               <div className="space-y-2">
+                 <div className="flex items-start text-[13px]">
+                   <span className="text-gray-400 w-16 shrink-0">主要诉求</span>
+                   <span className="text-gray-800 font-medium">{selectedCounselorOrder?.preQuestionnaire?.mainTopic || "希望梳理工作带来的焦虑感，找回状态"}</span>
+                 </div>
+                 <div className="flex items-start text-[13px]">
+                   <span className="text-gray-400 w-16 shrink-0">持续时间</span>
+                   <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.duration || "1-3个月"}</span>
+                 </div>
+                 <div className="flex items-start text-[13px]">
+                   <span className="text-gray-400 w-16 shrink-0">影响事件</span>
+                   <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.event || "上周被调到了新项目组，觉得领导在针对我"}</span>
+                 </div>
+                 <div className="flex items-start text-[13px]">
+                   <span className="text-gray-400 w-16 shrink-0">自伤倾向</span>
+                   <span className={selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
+                     {selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "有风险" : "无"}
+                   </span>
+                 </div>
+               </div>
+            </div>
             {selectedCounselorOrder?.status === "completed" && (
                <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
                   <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">

@@ -1,20 +1,86 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, Star, Heart, CheckCircle2, CalendarPlus, ActivitySquare } from "lucide-react";
 import { mockCounselors } from "../../data";
 
 export function UserEvaluation() {
-  const { popView, bookingOrder, updateOrder } = useAppStore();
+  const { popView, bookingOrder, updateOrder, pushView, selectedCounselorId } = useAppStore();
   const [rating, setRating] = useState(5);
   const [tags, setTags] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+  
+  // SOP Structured Evaluation State
+  const [structuredEval, setStructuredEval] = useState({
+    feltUnderstood: null as boolean | null,
+    wasHelpful: null as boolean | null,
+    willBookAgain: null as boolean | null
+  });
+
+  const [submitted, setSubmitted] = useState(false);
 
   const availableTags = ["温柔耐心", "专业见解深", "认知行为学派", "倾听者", "一针见血"];
 
   if (!bookingOrder) return null;
 
   const counselor = mockCounselors.find((c) => c.id === bookingOrder.counselorId);
+
+  if (submitted) {
+    return (
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="absolute inset-0 bg-[#f8f9fa] z-50 flex flex-col items-center justify-center p-6"
+      >
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle2 size={40} className="text-green-500" />
+        </div>
+        <h2 className="text-[20px] font-bold text-gray-900 mb-2">评价提交成功</h2>
+        <p className="text-[14px] text-gray-500 text-center mb-10">
+          感谢你的反馈，这有助于我们提供更好的服务。
+        </p>
+
+        <div className="w-full space-y-3">
+          <button 
+            onClick={() => { popView(); pushView("counseling-booking"); }}
+            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+          >
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mr-4">
+              <CalendarPlus size={24} className="text-blue-500" />
+            </div>
+            <div className="text-left flex-1">
+              <div className="text-[15px] font-bold text-gray-900 mb-1">继续预约该咨询师</div>
+              <div className="text-[12px] text-gray-500">保持连续的咨询节奏</div>
+            </div>
+            <ArrowLeft size={16} className="text-gray-400 rotate-180" />
+          </button>
+
+          <button 
+            onClick={() => { popView(); pushView("ai-chat"); }}
+            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+          >
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4">
+              <ActivitySquare size={24} className="text-primary" />
+            </div>
+            <div className="text-left flex-1">
+              <div className="text-[15px] font-bold text-gray-900 mb-1">使用 AI 情绪记录</div>
+              <div className="text-[12px] text-gray-500">日常巩固咨询效果</div>
+            </div>
+            <ArrowLeft size={16} className="text-gray-400 rotate-180" />
+          </button>
+
+          <button 
+            onClick={popView}
+            className="w-full py-4 text-[14px] font-bold text-gray-500 active:text-gray-900"
+          >
+            暂不继续，返回工作台
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   const toggleTag = (tag: string) => {
     setTags((prev) =>
@@ -23,8 +89,13 @@ export function UserEvaluation() {
   };
 
   const handleSubmit = () => {
+    if (!structuredEval.feltUnderstood || !structuredEval.wasHelpful) {
+      alert("请完成核心评价选项");
+      return;
+    }
     updateOrder(bookingOrder.id, { isEvaluated: true });
     alert("评价提交成功，感谢您的反馈！");
+    setSubmitted(true);
     popView();
   };
 
@@ -48,6 +119,66 @@ export function UserEvaluation() {
       </div>
 
       <div className="flex-1 overflow-y-auto w-full pb-32 p-4">
+        <div className="bg-white p-5 rounded-2xl mb-4 shadow-sm border border-gray-100">
+          <h2 className="font-bold text-[16px] text-gray-900 mb-4 text-center">本次服务反馈</h2>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-[14px] font-bold text-gray-900 mb-3">你是否感觉被咨询师理解了？<span className="text-red-500 ml-1">*</span></label>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, feltUnderstood: true})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.feltUnderstood === true ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  是
+                </button>
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, feltUnderstood: false})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.feltUnderstood === false ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  否
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[14px] font-bold text-gray-900 mb-3">你觉得本次服务有帮助吗？<span className="text-red-500 ml-1">*</span></label>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, wasHelpful: true})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.wasHelpful === true ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  有帮助
+                </button>
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, wasHelpful: false})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.wasHelpful === false ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  没感觉
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[14px] font-bold text-gray-900 mb-3">你愿意再次预约这位咨询师吗？</label>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, willBookAgain: true})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.willBookAgain === true ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  愿意
+                </button>
+                <button
+                  onClick={() => setStructuredEval({...structuredEval, willBookAgain: false})}
+                  className={`flex-1 py-2.5 rounded-xl border text-[14px] font-medium transition-colors ${structuredEval.willBookAgain === false ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-600'}`}
+                >
+                  不愿意
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-[1.25rem] p-6 shadow-sm border border-gray-100 mb-4 text-center">
           <img
             src={counselor?.avatar}

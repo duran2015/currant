@@ -97,7 +97,7 @@ export function CounselorOrderDetail() {
                className="w-full flex items-center justify-between pt-4 border-t border-gray-50 active:opacity-70 transition-opacity text-left"
             >
                <div className="flex items-center space-x-2.5">
-                 <img src={selectedCounselorOrder?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+                 <img src={selectedCounselorOrder?.avatar || "https://ui-avatars.com/api/?name=User&background=random"} alt="" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                  <div>
                     <div className="text-[15px] font-bold text-gray-900 mb-0.5">{selectedCounselorOrder?.userName || "匿名用户 0495"}</div>
                     <div className="text-[11px] text-gray-500 font-medium">{selectedCounselorOrder?.userProfile || "21岁 · 大学生"}</div>

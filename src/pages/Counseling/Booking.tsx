@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ArrowLeft, CheckCircle2, X } from "lucide-react";
+import { ChevronLeft, CheckCircle2, X } from "lucide-react";
 import { mockCounselors } from "../../data";
 import { BookingOrder } from "../../types";
 
@@ -55,18 +55,21 @@ export function Booking({ onClose }: BookingProps) {
   const handleConfirm = () => {
     if (!selectedTime) return;
 
-    const newOrder: BookingOrder = {
+    // Set draft booking order to store so BookingConfirm page can use it
+    const draftOrder = {
       id: `ord_${Date.now()}`,
       counselorId: counselor.id,
       date: selectedDate,
       time: selectedTime,
       type: selectedMethod,
       price: counselor.price,
-      status: "pending",
+      status: "draft",
     };
-
-    setBookingOrder(newOrder);
-    pushView("counseling-payment");
+    
+    setBookingOrder(draftOrder);
+    
+    if (onClose) onClose();
+    pushView("booking-confirm");
   };
 
   return (

@@ -3,7 +3,7 @@ import { Counselor, TodayTask, UserProfile, AssessmentRecord } from "./types";
 export const mockUser: UserProfile = {
   id: "u1",
   name: "新用户",
-  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+  avatar: "https://ui-avatars.com/api/?name=User&background=random",
   statusScore: 72,
   statusTrend: 8,
   statusSummary: "最近压力有所下降，睡眠质量有待提高。",
@@ -115,7 +115,7 @@ export const mockCounselors: Counselor[] = [
   {
     id: "c1",
     name: "林静",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=LinJing",
+    avatar: "https://ui-avatars.com/api/?name=Lin&background=random",
     title: "国家二级心理咨询师",
     tags: ["情绪管理", "学业焦虑", "人际关系"],
     price: 300,
@@ -126,10 +126,10 @@ export const mockCounselors: Counselor[] = [
     about:
       "从业8年，擅长使用认知行为疗法（CBT）和正念疗法，帮助大学生群体缓解考试焦虑、就业迷茫和人际关系冲突，陪伴你走过人生的低谷。",
     specialties: [
-      "考试焦虑缓解",
-      "宿舍人际冲突处理",
-      "恋爱边界感建立",
-      "早期抑郁倾向干预",
+      "情绪压力",
+      "职场心理",
+      "个人成长",
+      "睡眠困扰",
     ],
     styles: ["温柔耐心", "专业见解深", "认知行为学派"],
     credentials: [
@@ -160,7 +160,7 @@ export const mockCounselors: Counselor[] = [
   {
     id: "c2",
     name: "张宇",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ZhangYu",
+    avatar: "https://ui-avatars.com/api/?name=Zhang&background=random",
     title: "临床心理学硕士",
     tags: ["失眠困扰", "抑郁情绪", "原生家庭"],
     price: 450,
@@ -170,7 +170,7 @@ export const mockCounselors: Counselor[] = [
     serviceHours: 1200,
     about:
       "致力于解决由于原生家庭带来的心理创伤，以及长期高压导致的睡眠障碍。通过精神分析与人本主义结合的方式，带你重新认识自己。",
-    specialties: ["原生家庭创伤疗愈", "长期失眠改善", "自我认同感提升"],
+    specialties: ["家庭关系", "睡眠困扰", "个人成长"],
     styles: ["一针见血", "精神分析", "人本主义"],
     credentials: [
       "临床心理学硕士",

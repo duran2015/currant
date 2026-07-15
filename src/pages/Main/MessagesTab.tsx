@@ -4,7 +4,7 @@ import { mockCounselors, mockConsultationRecords, mockNotifications } from "../.
 import { ChevronRight, Bell, ShieldAlert, Mic, MessageSquare, Video, ArrowRight } from "lucide-react";
 
 export function MessagesTab() {
-  const { pushView, setTab, user, setSelectedConsultationId, setActiveCallSession, setIsCallMinimized, setBookingOrder, setSelectedCounselorOrder, orders, appMode } = useAppStore();
+  const { pushView, setTab, user, setSelectedConsultationId, setActiveCallSession, setIsCallMinimized, setBookingOrder, setSelectedCounselorOrder, orders, appMode, counselorStatus } = useAppStore();
 
   const isCounselorMode = appMode === "counselor";
 
@@ -97,7 +97,7 @@ export function MessagesTab() {
                 : record.type === "voice" ? "已结束语音咨询" : record.type === "video" ? "已结束视频咨询" : "随时留言，我会认真回复";
             }
             
-            const displayAvatar = isCounselorMode ? (record.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix") : counselor?.avatar;
+            const displayAvatar = isCounselorMode ? (record.avatar || "https://ui-avatars.com/api/?name=User&background=random") : counselor?.avatar;
             const displayName = isCounselorMode ? (record.userName || "匿名用户") : counselor?.name;
               
             return (
@@ -116,8 +116,11 @@ export function MessagesTab() {
               >
                 <div className="relative mr-4 shrink-0">
                   <img src={displayAvatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                  {!isCounselorMode && counselor?.status === "online" && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  {!isCounselorMode && (counselor?.id === 'c1' ? counselorStatus === 'active' : counselor?.status === 'online') && (
+                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                  )}
+                  {!isCounselorMode && !(counselor?.id === 'c1' ? counselorStatus === 'active' : counselor?.status === 'online') && (
+                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-gray-400 border-2 border-white rounded-full"></div>
                   )}
                 </div>
                 <div className="flex-1 text-left min-w-0">

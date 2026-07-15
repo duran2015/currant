@@ -53,6 +53,10 @@ export interface AppState {
   setIsCallMinimized: (minimized: boolean) => void;
   isSessionCounselorDetail: boolean;
   setIsSessionCounselorDetail: (isSession: boolean) => void;
+  counselorStatus: "active" | "paused";
+  setCounselorStatus: (status: "active" | "paused") => void;
+  activeOrderTab: "all" | "pending" | "completed" | "cancelled";
+  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled") => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -61,8 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [viewStack, setViewStack] = useState<AppView[]>(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) return ["login"];
-    const mode = localStorage.getItem("appMode");
-    return mode === "counselor" ? ["counselor-workbench"] : ["main"];
+    return ["main"];
   });
   const [currentTab, setCurrentTab] = useState<AppTab>("home");
   const [appMode, setAppMode] = useState<"user" | "counselor">((localStorage.getItem("appMode") as any) || "user");
@@ -87,6 +90,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activeCallSession, setActiveCallSession] = useState<any | null>(null);
   const [isCallMinimized, setIsCallMinimized] = useState<boolean>(false);
   const [isSessionCounselorDetail, setIsSessionCounselorDetail] = useState<boolean>(false);
+  const [counselorStatus, setCounselorStatus] = useState<"active" | "paused">("active");
+  const [activeOrderTab, setActiveOrderTab] = useState<"all" | "pending" | "completed" | "cancelled">("all");
   const [assessmentState, setAssessmentState] = useState({
     step: 0,
     answers: { stage: "", domain: "" },
@@ -147,12 +152,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const enterAppMode = (mode: "user" | "counselor") => {
     handleSetAppMode(mode);
-    if (mode === "user") {
-      setCurrentTab("home");
-      resetToView("main");
-      return;
-    }
-    resetToView("counselor-workbench");
+    setCurrentTab("home");
+    resetToView("main");
   };
 
   const updateUser = (data: Partial<UserProfile>) => {
@@ -205,6 +206,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsCallMinimized,
         isSessionCounselorDetail,
         setIsSessionCounselorDetail,
+        counselorStatus,
+        setCounselorStatus,
+        activeOrderTab,
+        setActiveOrderTab,
       }}
     >
       {children}

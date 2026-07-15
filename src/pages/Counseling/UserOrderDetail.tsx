@@ -203,6 +203,20 @@ export function UserOrderDetail() {
             </div>
           </div>
         </div>
+
+        {bookingOrder.status === "completed" && bookingOrder.counselorAdvice && (
+          <div className="bg-white rounded-[1.25rem] p-5 shadow-sm border border-gray-100 mb-4">
+            <h3 className="text-[15px] font-bold text-gray-900 flex items-center mb-3">
+              <MessageSquare size={16} className="text-primary mr-1.5" />
+              本次服务总结与建议
+            </h3>
+            <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+              <p className="text-[13px] text-gray-700 leading-relaxed font-medium">
+                {bookingOrder.counselorAdvice}
+              </p>
+            </div>
+          </div>
+        )}
         
         {(bookingOrder.status === "paid" || bookingOrder.status === "pending") && (
           <div className="bg-orange-50 rounded-[1rem] p-4 flex items-start space-x-2">

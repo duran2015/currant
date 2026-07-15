@@ -5,7 +5,7 @@ import { useAppStore } from "../../store";
 import { mockCounselors, mockConsultationRecords } from "../../data";
 
 export function TextChat() {
-    const { popView, pushView, bookingOrder, selectedCounselorId, setSelectedCounselorId, selectedConsultationId, appMode, selectedCounselorOrder, setActiveCallSession, setIsSessionCounselorDetail } =
+    const { popView, pushView, bookingOrder, selectedCounselorId, setSelectedCounselorId, selectedConsultationId, appMode, selectedCounselorOrder, setActiveCallSession, setIsSessionCounselorDetail, counselorStatus } =
       useAppStore();
 
   const isCounselorMode = appMode === "counselor";
@@ -21,19 +21,19 @@ export function TextChat() {
   // For counselor mode, the "other party" is the user
   const otherParty = isCounselorMode ? {
     name: order?.userName || "匿名用户",
-    avatar: order?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+    avatar: order?.avatar || "https://ui-avatars.com/api/?name=User&background=random", 
   } : {
     name: counselor.name,
     avatar: counselor.avatar,
   };
 
   const myParty = isCounselorMode ? {
-    name: counselor.name,
-    avatar: counselor.avatar,
-  } : {
-    name: "我",
-    avatar: order?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-  };
+      name: counselor.name,
+      avatar: counselor.avatar,
+    } : {
+      name: "我",
+      avatar: order?.avatar || "https://ui-avatars.com/api/?name=User&background=random",
+    };
 
   const handleAvatarClick = () => {
     if (!isCounselorMode) {
@@ -229,23 +229,33 @@ export function TextChat() {
             <ChevronLeft size={24} />
           </button>
           <div className="ml-2 flex items-center">
-            <img
-              src={otherParty.avatar}
-              alt=""
-              onClick={handleAvatarClick}
-              className={`w-8 h-8 rounded-full object-cover mr-2 ${!isCounselorMode ? 'cursor-pointer active:scale-95' : ''}`}
-            />
+            <div className="relative mr-2">
+              <img
+                src={otherParty.avatar}
+                alt=""
+                onClick={handleAvatarClick}
+                className={`w-8 h-8 rounded-full object-cover ${!isCounselorMode ? 'cursor-pointer active:scale-95' : ''}`}
+              />
+              {!isCounselorMode && (
+                <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-[1.5px] border-white rounded-full ${(targetCounselorId === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+              )}
+            </div>
             {order?.status === "completed" ? (
               <span className="text-[13px] font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                 已结束本次咨询
               </span>
             ) : (
               <div>
-                <h1 className="text-[15px] font-bold text-gray-900 leading-tight">
+                <h1 className="text-[15px] font-bold text-gray-900 leading-tight flex items-center">
                   {otherParty.name}
+                  {!isCounselorMode && (
+                    <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-normal ${(targetCounselorId === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}`}>
+                      {(targetCounselorId === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? '在线' : '离线'}
+                    </span>
+                  )}
                 </h1>
                 <div className="text-[10px] text-gray-500 bg-white/50 px-2 py-0.5 rounded-full inline-block backdrop-blur-sm shadow-sm border border-gray-100 mt-0.5">
-                  {!isCounselorMode ? (counselor.type === "pro" ? "专业心理咨询师" : "专业心理倾听师") : "抑郁倾向 / 睡眠障碍"}
+                  {!isCounselorMode ? counselor.title : "抑郁倾向 / 睡眠障碍"}
                 </div>
               </div>
             )}

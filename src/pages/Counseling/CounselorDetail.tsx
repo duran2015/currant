@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export function CounselorDetail() {
-  const { popView, pushView, selectedCounselorId, isSessionCounselorDetail, setIsSessionCounselorDetail } = useAppStore();
+    const { popView, pushView, selectedCounselorId, isSessionCounselorDetail, setIsSessionCounselorDetail, counselorStatus } = useAppStore();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const counselor =
     mockCounselors.find((c) => c.id === selectedCounselorId) ||
@@ -101,12 +101,16 @@ export function CounselorDetail() {
                 alt={counselor.name}
                 className="w-24 h-24 rounded-[2rem] border border-gray-100 shadow-sm object-cover"
               />
+              <div className={`absolute bottom-0 right-0 w-5 h-5 border-2 border-white rounded-full ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
             </div>
 
             <div className="flex-1 pt-2">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-1.5 mb-2">
-                <span>{counselor.name}</span>
-                <BadgeCheck size={20} className="text-primary" />
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center mb-2">
+                <span className="mr-1.5">{counselor.name}</span>
+                <BadgeCheck size={20} className="text-primary mr-2" />
+                <span className={`px-2 py-0.5 rounded text-[12px] font-normal ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}`}>
+                  {(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? '在线' : '离线'}
+                </span>
               </h2>
 
               <div className="flex items-center space-x-1.5 flex-wrap">
