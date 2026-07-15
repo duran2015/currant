@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { create } from "zustand";
 import { AppView, AppTab, UserProfile, BlackboardState } from "./types";
 import { mockUser, mockOrders, mockAssessmentRecords } from "./data";
 
@@ -59,18 +59,16 @@ export interface AppState {
   setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled") => void;
 }
 
-const AppContext = createContext<AppState | undefined>(undefined);
-
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [viewStack, setViewStack] = useState<AppView[]>(() => {
+export const useAppStore = create<AppState>((set, get) => ({
+  viewStack: (() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) return ["login"];
     return ["main"];
-  });
-  const [currentTab, setCurrentTab] = useState<AppTab>("home");
-  const [appMode, setAppMode] = useState<"user" | "counselor">((localStorage.getItem("appMode") as any) || "user");
-  const [user, setUser] = useState<UserProfile>(mockUser);
-  const [blackboard, setBlackboard] = useState<BlackboardState>({
+  })(),
+  currentTab: "home",
+  appMode: (localStorage.getItem("appMode") as any) || "user",
+  user: mockUser,
+  blackboard: {
     clinical: null,
     domain: null,
     phase: 1,
@@ -79,148 +77,84 @@ export function AppProvider({ children }: { children: ReactNode }) {
       firstTool: "呼吸引导",
       persona: "温暖陪伴"
     }
-  });
-  const [selectedCounselorId, setSelectedCounselorId] = useState<string>("c1");
-  const [selectedNotificationId, setSelectedNotificationId] = useState<string>("n1");
-  const [selectedConsultationId, setSelectedConsultationId] = useState<string>("");
-  const [selectedCounselorOrder, setSelectedCounselorOrder] = useState<any>(null);
-  const [bookingOrder, setBookingOrder] = useState<any>(null);
-  const [orders, setOrders] = useState<any[]>(mockOrders);
-  const [assessmentRecords, setAssessmentRecords] = useState<any[]>(mockAssessmentRecords);
-  const [activeCallSession, setActiveCallSession] = useState<any | null>(null);
-  const [isCallMinimized, setIsCallMinimized] = useState<boolean>(false);
-  const [isSessionCounselorDetail, setIsSessionCounselorDetail] = useState<boolean>(false);
-  const [counselorStatus, setCounselorStatus] = useState<"active" | "paused">("active");
-  const [activeOrderTab, setActiveOrderTab] = useState<"all" | "pending" | "completed" | "cancelled">("all");
-  const [assessmentState, setAssessmentState] = useState({
+  },
+  selectedCounselorId: "c1",
+  selectedNotificationId: "n1",
+  selectedConsultationId: "",
+  selectedCounselorOrder: null,
+  bookingOrder: null,
+  orders: mockOrders,
+  assessmentRecords: mockAssessmentRecords,
+  activeCallSession: null,
+  isCallMinimized: false,
+  isSessionCounselorDetail: false,
+  counselorStatus: "active",
+  activeOrderTab: "all",
+  assessmentState: {
     step: 0,
     answers: { stage: "", domain: "" },
     phq2Scores: [-1, -1],
     phq2Step: 0,
-  });
-  const [aiSettings, setAISettings] = useState<AppState["aiSettings"]>({
+  },
+  aiSettings: {
     avatar: "otter",
     fontSize: "medium",
     theme: "light",
     voice: "gentle",
     autoPlayVoice: false,
-  });
+  },
 
-  const updateAISettings = (settings: Partial<AppState["aiSettings"]>) => {
-    setAISettings((prev) => ({ ...prev, ...settings }));
-  };
+  setAssessmentState: (state: any) => set({ assessmentState: state }),
+  updateAISettings: (settings: Partial<AppState["aiSettings"]>) => 
+    set((state) => ({ aiSettings: { ...state.aiSettings, ...settings } })),
+  
+  addOrder: (order: any) => set((state) => ({ orders: [order, ...state.orders] })),
+  
+  updateOrder: (orderId: string, data: any) => set((state) => {
+    const newOrders = state.orders.map(o => o.id === orderId ? { ...o, ...data } : o);
+    const newSelectedOrder = state.selectedCounselorOrder?.id === orderId ? { ...state.selectedCounselorOrder, ...data } : state.selectedCounselorOrder;
+    const newBookingOrder = state.bookingOrder?.id === orderId ? { ...state.bookingOrder, ...data } : state.bookingOrder;
+    return { orders: newOrders, selectedCounselorOrder: newSelectedOrder, bookingOrder: newBookingOrder };
+  }),
 
-  const addOrder = (order: any) => {
-    setOrders((prev) => [order, ...prev]);
-  };
-
-  const updateOrder = (orderId: string, data: any) => {
-    setOrders((prev) => prev.map(o => o.id === orderId ? { ...o, ...data } : o));
-    if (selectedCounselorOrder?.id === orderId) {
-      setSelectedCounselorOrder((prev: any) => ({ ...prev, ...data }));
-    }
-    if (bookingOrder?.id === orderId) {
-      setBookingOrder((prev: any) => ({ ...prev, ...data }));
-    }
-  };
-
-  const pushView = (view: AppView) => {
-    setViewStack((prev) => [...prev, view]);
-  };
-
-  const popView = () => {
-    setViewStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-  };
-
-  const resetToView = (view: AppView) => {
-    setViewStack([view]);
+  pushView: (view: AppView) => set((state) => ({ viewStack: [...state.viewStack, view] })),
+  popView: () => set((state) => ({ viewStack: state.viewStack.length > 1 ? state.viewStack.slice(0, -1) : state.viewStack })),
+  
+  resetToView: (view: AppView) => {
+    set({ viewStack: [view] });
     if (view === "main" || view === "counselor-workbench") {
       localStorage.setItem("isLoggedIn", "true");
     } else if (view === "login") {
       localStorage.removeItem("isLoggedIn");
     }
-  };
+  },
 
-  const setTab = (tab: AppTab) => {
-    setCurrentTab(tab);
-  };
+  setTab: (tab: AppTab) => set({ currentTab: tab }),
   
-  const handleSetAppMode = (mode: "user" | "counselor") => {
-    setAppMode(mode);
+  setAppMode: (mode: "user" | "counselor") => {
+    set({ appMode: mode });
     localStorage.setItem("appMode", mode);
-  };
+  },
 
-  const enterAppMode = (mode: "user" | "counselor") => {
-    handleSetAppMode(mode);
-    setCurrentTab("home");
-    resetToView("main");
-  };
+  enterAppMode: (mode: "user" | "counselor") => {
+    set({ appMode: mode, currentTab: "home" });
+    localStorage.setItem("appMode", mode);
+    get().resetToView("main");
+  },
 
-  const updateUser = (data: Partial<UserProfile>) => {
-    setUser((prev) => ({ ...prev, ...data }));
-  };
-
-  const updateBlackboard = (data: Partial<BlackboardState>) => {
-    setBlackboard((prev) => ({ ...prev, ...data }));
-  };
-
-  return (
-    <AppContext.Provider
-      value={{
-        viewStack,
-        currentTab,
-        appMode,
-        user,
-        blackboard,
-        selectedCounselorId,
-        selectedNotificationId,
-        selectedConsultationId,
-        selectedCounselorOrder,
-        bookingOrder,
-        orders,
-        assessmentRecords,
-        activeCallSession,
-        isCallMinimized,
-        assessmentState,
-        aiSettings,
-        setAssessmentState,
-        updateAISettings,
-        pushView,
-        popView,
-        resetToView,
-        setTab,
-        setAppMode: handleSetAppMode,
-        enterAppMode,
-        updateUser,
-        updateBlackboard,
-        setSelectedCounselorId,
-        setSelectedNotificationId,
-        setSelectedConsultationId,
-        setSelectedCounselorOrder,
-        setBookingOrder,
-        setOrders,
-        addOrder,
-        updateOrder,
-        setAssessmentRecords,
-        setActiveCallSession,
-        setIsCallMinimized,
-        isSessionCounselorDetail,
-        setIsSessionCounselorDetail,
-        counselorStatus,
-        setCounselorStatus,
-        activeOrderTab,
-        setActiveOrderTab,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  );
-}
-
-export function useAppStore() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error("useAppStore must be used within an AppProvider");
-  }
-  return context;
-}
+  updateUser: (data: Partial<UserProfile>) => set((state) => ({ user: { ...state.user, ...data } })),
+  updateBlackboard: (data: Partial<BlackboardState>) => set((state) => ({ blackboard: { ...state.blackboard, ...data } })),
+  
+  setSelectedCounselorId: (id: string) => set({ selectedCounselorId: id }),
+  setSelectedNotificationId: (id: string) => set({ selectedNotificationId: id }),
+  setSelectedConsultationId: (id: string) => set({ selectedConsultationId: id }),
+  setSelectedCounselorOrder: (order: any) => set({ selectedCounselorOrder: order }),
+  setBookingOrder: (order: any) => set({ bookingOrder: order }),
+  setOrders: (orders: any[]) => set({ orders }),
+  setAssessmentRecords: (records: any[]) => set({ assessmentRecords: records }),
+  setActiveCallSession: (session: any | null) => set({ activeCallSession: session }),
+  setIsCallMinimized: (minimized: boolean) => set({ isCallMinimized: minimized }),
+  setIsSessionCounselorDetail: (isSession: boolean) => set({ isSessionCounselorDetail: isSession }),
+  setCounselorStatus: (status: "active" | "paused") => set({ counselorStatus: status }),
+  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled") => set({ activeOrderTab: tab }),
+}));

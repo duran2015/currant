@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AppProvider, useAppStore } from "./store";
+import { useAppStore } from "./store";
 import { MobileLayout } from "./components/MobileLayout";
 import { motion, AnimatePresence } from "motion/react";
 import "./index.css";
@@ -164,11 +164,9 @@ function ViewManager() {
 
 function App() {
   return (
-    <AppProvider>
-      <MobileLayout>
-        <ViewManager />
-      </MobileLayout>
-    </AppProvider>
+    <MobileLayout>
+      <ViewManager />
+    </MobileLayout>
   );
 }
 
