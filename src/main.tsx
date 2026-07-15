@@ -65,7 +65,7 @@ import { CounselorEarnings } from "./pages/Counseling/CounselorEarnings";
 import { CounselorRiskReport } from "./pages/Counseling/CounselorRiskReport";
 
 function ViewManager() {
-  const { viewStack, activeCallSession } = useAppStore();
+  const { viewStack, activeCallSession, appMode } = useAppStore();
   const currentView = viewStack[viewStack.length - 1];
 
   return (
@@ -110,7 +110,7 @@ function ViewManager() {
       {currentView === "counseling-text-chat" && <TextChat key="tchat" />}
       {currentView === "counseling-summary" && <CallSummary key="csummary" />}
       {currentView === "orders-list" && (
-          useAppStore.getState().appMode === "counselor" ? <CounselorOrdersList key="c_orders" /> : <OrdersList key="orders" />
+          appMode === "counselor" ? <CounselorOrdersList key="c_orders" /> : <OrdersList key="orders" />
         )}
       {currentView === "user-order-detail" && <UserOrderDetail key="u_order_detail" />}
       {currentView === "profile-report" && <ProfileReport key="preport" />}

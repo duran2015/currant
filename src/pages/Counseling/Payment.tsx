@@ -304,7 +304,7 @@ export function Payment() {
             <div className="w-full max-w-xs space-y-4">
               <button
                   onClick={() => {
-                    pushView("counseling-precounseling-questionnaire");
+                    pushView("pre-questionnaire");
                   }}
                   className="w-full bg-gray-900 text-white font-bold py-4 rounded-full active:scale-95 transition-transform flex items-center justify-center shadow-md shadow-gray-900/20"
                 >
