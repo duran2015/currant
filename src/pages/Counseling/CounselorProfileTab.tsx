@@ -29,12 +29,8 @@ import {
   Sparkles
 } from "lucide-react";
 
-  export function CounselorProfileTab() {
-  const { pushView, resetToView, setTab, enterAppMode } = useAppStore();
-
-  const handleLogout = () => {
-    resetToView("login");
-  };
+export function CounselorProfileTab() {
+  const { pushView, setTab, enterAppMode } = useAppStore();
 
   const ServiceModules = [
     { icon: UserCircle, label: "入驻资料", view: "counselor-onboarding", color: "text-blue-500", bg: "bg-blue-50" },
@@ -244,12 +240,29 @@ import {
             <UserCircle size={18} className="mr-2" /> 切换为用户身份
           </button>
 
-          <button 
-            onClick={handleLogout}
-            className="w-full bg-white text-red-500 font-bold text-[15px] py-4 rounded-2xl shadow-sm border border-gray-100 active:bg-gray-50 transition-colors flex items-center justify-center mb-4"
-          >
-            <LogOut size={18} className="mr-2" /> 退出登录
-          </button>
+          <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <h3 className="mb-3 text-[14px] font-bold text-gray-900">账号安全</h3>
+            <p className="mb-4 text-[12px] leading-5 text-gray-500">
+              满足应用市场审核所需，当前账号支持退出登录与注销账号两种操作。
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => pushView("counselor-account-security" as any)}
+                className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-left active:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center">
+                  <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-600 shadow-sm">
+                    <LogOut size={18} />
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold text-gray-900">账号与安全</div>
+                    <div className="text-[12px] text-gray-500">退出登录、注销账号</div>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-gray-300" />
+              </button>
+            </div>
+          </div>
           
           <div className="text-center pb-6">
             <span className="text-[11px] text-gray-400">可鹿心理 咨询师端 v1.0.0</span>

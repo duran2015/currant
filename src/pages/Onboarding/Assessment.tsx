@@ -206,7 +206,7 @@ export function Assessment() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="flex-1 flex flex-col pt-4"
         >
-          {currentStep.type === "intro" && (
+          {currentStep && currentStep.type === "intro" && (
             <div className="flex-1 flex flex-col items-center justify-center text-center pb-20">
               <h2 className="text-[26px] font-black text-gray-900 mb-4">
                 {currentStep.title}
@@ -231,7 +231,7 @@ export function Assessment() {
             </div>
           )}
 
-          {currentStep.type === "phq2" && (
+          {currentStep && currentStep.type === "phq2" && (
             <div className="flex-1 flex flex-col">
               <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
                 {currentStep.title}
@@ -273,7 +273,7 @@ export function Assessment() {
             </div>
           )}
 
-          {currentStep.type === "feedback" && (
+          {currentStep && currentStep.type === "feedback" && (
             <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
               <div className="text-7xl mb-8">🦌</div>
               <h2 className="text-[24px] font-bold text-gray-900 mb-12 leading-relaxed">
@@ -295,7 +295,7 @@ export function Assessment() {
             </div>
           )}
 
-          {currentStep.type === "select" && (
+          {currentStep && currentStep.type === "select" && (
               <div className="flex-1 flex flex-col">
                 <h2 className="text-[24px] font-bold text-gray-900 mb-3 leading-tight">
                   {currentStep.title}
@@ -325,7 +325,7 @@ export function Assessment() {
               </div>
             )}
 
-            {currentStep.type === "finish" && (
+            {currentStep && currentStep.type === "finish" && (
               <div className="flex-1 flex flex-col items-center justify-center text-center pb-20 px-4">
                 <div className="text-7xl mb-8 animate-pulse">🦌👋</div>
                 <h2 className="text-[26px] font-black text-gray-900 mb-4">

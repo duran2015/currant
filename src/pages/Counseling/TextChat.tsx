@@ -5,7 +5,7 @@ import { useAppStore } from "../../store";
 import { mockCounselors, mockConsultationRecords } from "../../data";
 
 export function TextChat() {
-    const { popView, pushView, bookingOrder, selectedCounselorId, setSelectedCounselorId, selectedConsultationId, appMode, selectedCounselorOrder, setActiveCallSession, setIsSessionCounselorDetail, counselorStatus } =
+    const { popView, pushView, bookingOrder, selectedCounselorId, setSelectedCounselorId, selectedConsultationId, appMode, selectedCounselorOrder, setActiveCallSession, setIsSessionCounselorDetail, counselorStatus, bookingSummary } =
       useAppStore();
 
   const isCounselorMode = appMode === "counselor";
@@ -59,43 +59,75 @@ export function TextChat() {
     }
   ];
 
-  const defaultMessages = [
-    ...baseMessages,
-    ...(record?.messages ? record.messages.map((m, i) => ({ id: i.toString(), role: m.role as "user" | "counselor", text: m.content, type: "text" })) : []),
-    ...(order?.status === "paid" && isVoiceOrVideo ? [
-      {
-        id: "sys-upcoming-invite",
-        role: "system",
-        text: `距离您的${order?.type === 'video' ? '视频' : '语音'}咨询开始还有 5 分钟，请点击下方卡片进入咨询室。`,
-        type: "system"
-      },
-      {
-        id: "sys-room-invite",
-        role: "system",
-        text: "咨询室已开放",
-        type: "room_invite"
-      }
-    ] : []),
-    ...(order?.status === "completed" ? [
-      {
-        id: "sys-evaluation-prompt",
-        role: "system",
-        text: "本次咨询已结束，沟通记录已永久沉淀",
-        type: "evaluation_prompt"
-      }
-    ] : []),
-    ...(order?.status === "completed" && order?.counselorNotesWritten ? [
-      {
-        id: "sys-counselor-notes",
-        role: "counselor",
-        text: "这是一份关于您本次咨询的小结与下一步建议...",
-        type: "counselor_notes"
-      }
-    ] : [])
-  ];
+  const assistantAvatar = "https://ui-avatars.com/api/?name=Assistant&background=EBF0FA&color=2B3A67";
+  const assistantName = `${counselor.name}的小助理`;
 
   // Provide initial mock messages for the completed order
-  const [messages, setMessages] = useState<{ id: string; role: "user" | "counselor" | "system"; text: string; type?: "text" | "scale" | "system" | "booking_success" | "room_invite" | "counselor_notes" | "evaluation_prompt" | "tool" }[]>(() => {
+  const [messages, setMessages] = useState<{ id: string; role: "user" | "counselor" | "system" | "assistant"; text: string; type?: "text" | "scale" | "system" | "booking_success" | "room_invite" | "counselor_notes" | "evaluation_prompt" | "tool" | "summary_sync" | "assistant_ask"; assistantData?: any }[]>(() => {
+    let extraMessages: any[] = [];
+    
+    if (order?.status === "paid" && !isCounselorMode) {
+      const { bookingSummary } = useAppStore.getState();
+      if (bookingSummary && bookingSummary.authorized) {
+        extraMessages.push({
+          id: "sys-summary-synced",
+          role: "system",
+          text: `可鹿 AI 已根据你刚才的沟通整理了一份咨询前摘要，并已同步给${counselor.name}。`,
+          type: "summary_sync",
+          assistantData: bookingSummary
+        });
+      } else if (bookingSummary && !bookingSummary.authorized) {
+        extraMessages.push({
+          id: "ast-ask-1",
+          role: "assistant",
+          text: `你好，我是${counselor.name}的小助理。你暂时没有同步刚才的 AI 摘要。为了让老师更好地准备，你可以简单补充一下这次想聊的问题吗？`,
+          type: "assistant_ask"
+        });
+      } else {
+        extraMessages.push({
+          id: "ast-ask-2",
+          role: "assistant",
+          text: `你好，我是${counselor.name}的小助理。正式咨询前，我可以先帮老师了解你的情况，让咨询开始时更高效。你可以简单说说，这次最想和老师聊什么？`,
+          type: "assistant_ask"
+        });
+      }
+    }
+
+    const defaultMessages = [
+      ...baseMessages,
+      ...extraMessages,
+      ...(record?.messages ? record.messages.map((m, i) => ({ id: i.toString(), role: m.role as "user" | "counselor", text: m.content, type: "text" })) : []),
+      ...(order?.status === "paid" && isVoiceOrVideo ? [
+        {
+          id: "sys-upcoming-invite",
+          role: "system",
+          text: `距离您的${order?.type === 'video' ? '视频' : '语音'}咨询开始还有 5 分钟，请点击下方卡片进入咨询室。`,
+          type: "system"
+        },
+        {
+          id: "sys-room-invite",
+          role: "system",
+          text: "咨询室已开放",
+          type: "room_invite"
+        }
+      ] : []),
+      ...(order?.status === "completed" ? [
+        {
+          id: "sys-evaluation-prompt",
+          role: "system",
+          text: "本次咨询已结束，沟通记录已永久沉淀",
+          type: "evaluation_prompt"
+        }
+      ] : []),
+      ...(order?.status === "completed" && order?.counselorNotesWritten ? [
+        {
+          id: "sys-counselor-notes",
+          role: "counselor",
+          text: "这是一份关于您本次咨询的小结与下一步建议...",
+          type: "counselor_notes"
+        }
+      ] : [])
+    ];
     if (order?.id === "req-1" || order?.status === "completed") {
       return [
         ...defaultMessages,
@@ -155,6 +187,29 @@ export function TextChat() {
     }
   }, [order?.status, order?.counselorNotesWritten]);
 
+  // Watch for summary authorization
+  useEffect(() => {
+    if (!isCounselorMode && order?.status === "paid") {
+      if (bookingSummary?.authorized) {
+        setMessages(prev => {
+          if (!prev.some(m => m.type === "summary_sync")) {
+            return [
+              ...prev,
+              {
+                id: "sys-summary-synced-" + Date.now(),
+                role: "system",
+                text: `可鹿 AI 已根据你的反馈整理了一份咨询前摘要，并已同步给${counselor.name}。`,
+                type: "summary_sync",
+                assistantData: bookingSummary
+              }
+            ];
+          }
+          return prev;
+        });
+      }
+    }
+  }, [bookingSummary?.authorized, order?.status, isCounselorMode]);
+
   const handleSend = (text?: string) => {
     const userText = text || inputValue;
     if (!userText.trim()) return;
@@ -174,15 +229,41 @@ export function TextChat() {
 
     // Simulate other party reply
     setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "_2",
-          role: otherRole,
-          text: isCounselorMode ? "好的，我明白了。" : "收到，请问还有其他需要准备的吗？",
-          type: "text"
-        },
-      ]);
+      const state = useAppStore.getState();
+      const hasUnauthorizedSummary = state.bookingSummary && !state.bookingSummary.authorized;
+      const hasNoSummary = !state.bookingSummary;
+
+      if (!isCounselorMode && order?.status === "paid" && (hasUnauthorizedSummary || hasNoSummary)) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString() + "_ast_reply",
+            role: "assistant",
+            text: "谢谢你的分享。为了让咨询更高效，我帮你生成了一份咨询前摘要，请确认是否同步给老师。",
+            type: "text"
+          },
+        ]);
+        setTimeout(() => {
+          state.setBookingSummary({
+            problem: userText,
+            feeling: "有些焦虑",
+            reason: "近期发生的事件",
+            expectation: "希望能获得倾听和建议",
+            authorized: false
+          });
+          pushView("ai-summary-sync");
+        }, 2000);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString() + "_2",
+            role: otherRole,
+            text: isCounselorMode ? "好的，我明白了。" : "收到，请问还有其他需要准备的吗？",
+            type: "text"
+          },
+        ]);
+      }
     }, 1500);
   };
 
@@ -335,6 +416,45 @@ export function TextChat() {
                         {order?.isEvaluated ? "已评价" : "去评价本次咨询"}
                       </button>
                     )}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (msg.type === "summary_sync") {
+            return (
+              <div key={msg.id} className="flex justify-center my-4">
+                <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl shadow-sm text-left w-64 max-w-[85%]">
+                  <div className="flex items-center text-blue-600 mb-2">
+                    <Info size={16} className="mr-1.5 shrink-0" />
+                    <span className="font-bold text-[13px] leading-snug">{msg.text}</span>
+                  </div>
+                  {msg.assistantData && (
+                    <div className="bg-white rounded-xl p-3 border border-blue-50">
+                      <div className="text-[12px] font-bold text-gray-500 mb-1">主要困扰</div>
+                      <div className="text-[13px] text-gray-800 mb-2">{msg.assistantData.problem}</div>
+                      <div className="text-[12px] font-bold text-gray-500 mb-1">当前情绪</div>
+                      <div className="text-[13px] text-gray-800">{msg.assistantData.feeling}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          if (msg.type === "assistant_ask" || msg.role === "assistant") {
+            return (
+              <div key={msg.id} className="flex justify-start">
+                <img
+                  src={assistantAvatar}
+                  alt=""
+                  className="w-8 h-8 rounded-full object-cover mr-2 shrink-0 border border-gray-100 mt-1"
+                />
+                <div className="max-w-[75%]">
+                  <div className="text-[11px] text-gray-400 ml-1 mb-0.5">{assistantName}</div>
+                  <div className="p-3 text-[14px] leading-relaxed shadow-sm rounded-2xl rounded-tl-sm bg-white border border-gray-100 text-gray-800">
+                    {msg.text}
                   </div>
                 </div>
               </div>

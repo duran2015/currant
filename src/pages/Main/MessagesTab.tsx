@@ -26,9 +26,39 @@ export function MessagesTab() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {/* Chats List (Primary visual weight) */}
+        {/* Group 1: AI 倾诉分组 */}
+        <div className="mb-6">
+          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">AI 倾诉</h2>
+          
+          <button
+            onClick={() => pushView("ai-chat")}
+            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
+          >
+            <div className="relative mr-4 shrink-0">
+              <div className="w-12 h-12 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[24px]">
+                🦌
+              </div>
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex justify-between items-center mb-1">
+                <div className="flex items-center space-x-2 truncate">
+                  <h3 className="font-bold text-gray-900 text-[16px] truncate">可鹿 AI 情绪助手</h3>
+                  <span className="text-[10px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100 font-medium shrink-0">
+                    平台 AI
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center text-[13px] text-gray-500">
+                <p className="line-clamp-1">我可以继续陪你梳理刚才的问题。</p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Group 2: 咨询服务分组 */}
         <div>
-          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">最近消息</h2>
+          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">咨询服务</h2>
 
           {/* System Notifications Chat */}
           <button
@@ -89,16 +119,25 @@ export function MessagesTab() {
           {chats.map(({ record, counselor }) => {
             const isText = record.type === "text";
             let lastMsg = "";
-            if (record.status === "paid" && (record.type === "voice" || record.type === "video")) {
-               lastMsg = record.type === "voice" ? "语音咨询待履约..." : "视频咨询待履约...";
-            } else {
-               lastMsg = record.messages && record.messages.length > 0 
-                ? record.messages[record.messages.length - 1].content 
-                : record.type === "voice" ? "已结束语音咨询" : record.type === "video" ? "已结束视频咨询" : "随时留言，我会认真回复";
+            let subStatus = "待咨询前准备";
+            
+            // Mock subStatus logic for demonstration
+            if (record.status === "paid") {
+               if (record.type === "voice" || record.type === "video") {
+                 lastMsg = record.type === "voice" ? "语音咨询待履约..." : "视频咨询待履约...";
+                 subStatus = "已同步摘要";
+               } else {
+                 lastMsg = record.messages && record.messages.length > 0 
+                  ? record.messages[record.messages.length - 1].content 
+                  : `${counselor?.name}的小助理：正式咨询前，我可以先帮你整理问题。`;
+               }
+            } else if (record.status === "completed") {
+               lastMsg = "服务已完成";
+               subStatus = "服务已完成";
             }
             
             const displayAvatar = isCounselorMode ? (record.avatar || "https://ui-avatars.com/api/?name=User&background=random") : counselor?.avatar;
-            const displayName = isCounselorMode ? (record.userName || "匿名用户") : counselor?.name;
+            const displayName = isCounselorMode ? (record.userName || "匿名用户") : `${counselor?.name} · 45分钟心理咨询`;
               
             return (
               <button
@@ -126,19 +165,23 @@ export function MessagesTab() {
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center space-x-2 truncate">
-                      <h3 className="font-bold text-gray-900 text-[16px] truncate">{displayName}</h3>
+                      <h3 className="font-bold text-gray-900 text-[15px] truncate">{displayName}</h3>
                     </div>
                     <span className="text-[11px] text-gray-400 shrink-0 ml-2">
                       {isText ? "今天" : record.date}
                     </span>
                   </div>
-                  <div className="flex items-center text-[13px] text-gray-500">
-                    <div className="mr-1.5 shrink-0 text-gray-400">
-                      {isText ? <MessageSquare size={14} /> : <Mic size={14} />}
+                  <div className="flex justify-between items-center mt-1">
+                    <div className="flex items-center text-[12px] text-gray-500 truncate mr-2">
+                      <p className="line-clamp-1 truncate">
+                        {lastMsg}
+                      </p>
                     </div>
-                    <p className="line-clamp-1">
-                      {lastMsg}
-                    </p>
+                    {!isCounselorMode && (
+                      <span className="text-[10px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">
+                        {subStatus}
+                      </span>
+                    )}
                   </div>
                 </div>
               </button>

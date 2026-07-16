@@ -19,7 +19,8 @@ import {
   HeartPulse,
   Sparkles,
   ChevronDown,
-  FileText
+  FileText,
+  MessageSquare
 } from "lucide-react";
 import { useAppStore } from "../../store";
 import { mockUser } from "../../data";
@@ -209,6 +210,36 @@ export function HomeTab() {
               记录
             </button>
           )}
+        </div>
+      </div>
+
+      {/* 快捷入口 */}
+      <div className="px-5 mb-4 mt-2">
+        <div className="grid grid-cols-4 gap-2">
+          <button onClick={() => pushView("ai-chat")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
+            <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-2">
+              <MessageSquare size={20} />
+            </div>
+            <span className="text-[12px] font-bold text-gray-800">AI 倾诉</span>
+          </button>
+          <button onClick={() => pushView("counseling-entrance")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
+            <div className="w-10 h-10 bg-teal-50 text-teal-500 rounded-full flex items-center justify-center mb-2">
+              <Activity size={20} />
+            </div>
+            <span className="text-[12px] font-bold text-gray-800">真人咨询</span>
+          </button>
+          <button onClick={() => setShowInputSheet(true)} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
+            <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-2">
+              <Smile size={20} />
+            </div>
+            <span className="text-[12px] font-bold text-gray-800">情绪记录</span>
+          </button>
+          <button onClick={() => pushView("mini-assessment-home")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
+            <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-2">
+              <ClipboardList size={20} />
+            </div>
+            <span className="text-[12px] font-bold text-gray-800">心理测评</span>
+          </button>
         </div>
       </div>
 

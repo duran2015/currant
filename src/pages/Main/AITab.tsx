@@ -28,11 +28,9 @@ import {
   Filter
 } from "lucide-react";
 import { useAppStore } from "../../store";
-import { mockCounselors } from "../../data";
 
 export function AITab() {
   const { currentTab, pushView, popView, setSelectedCounselorId, user, blackboard, aiSettings, updateAISettings, counselorStatus } = useAppStore();
-  const [activeTab, setActiveTab] = useState<"ai" | "human">("ai");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [sortBy, setSortBy] = useState("recommended");
   const [feedbackState, setFeedbackState] = useState<Record<number, 'up' | 'down'>>({});
@@ -55,7 +53,7 @@ export function AITab() {
   const [messages, setMessages] = useState<{
     id: string;
     role: "ai" | "user";
-    type?: "text" | "referral" | "task";
+    type?: "text" | "referral" | "task" | "summary";
     text: string;
     time?: string;
     suggestedTopics?: string[];
@@ -64,6 +62,11 @@ export function AITab() {
       desc: string;
       actionText: string;
       duration?: string;
+    };
+    summary?: {
+      problem: string;
+      feeling: string;
+      reason: string;
     };
     recommendations?: {
       level: string;
@@ -176,7 +179,8 @@ export function AITab() {
       ba: ["不想动", "没力气", "无聊", "躺平", "没劲"],
       game: ["木鱼", "静心", "敲", "积德"],
       stress: ["焦虑", "压力", "累", "失眠", "考试", "睡", "抑郁"],
-      referral: ["找人", "真人", "倾听师", "咨询", "还是很难受", "没效果"]
+      referral: ["找人", "真人", "倾听师", "咨询", "还是很难受", "没效果"],
+      summary: ["总结", "梳理", "聊得差不多", "怎么办"]
     };
 
     const detectIntent = (text: string) => {
@@ -333,6 +337,37 @@ export function AITab() {
             }
           ];
           break;
+        case "summary":
+          aiResponses = [
+            {
+              id: Date.now().toString() + "_sum1",
+              role: "ai",
+              type: "text",
+              text: "我陪你聊了一会儿，为了让你能看清现在的状态，我简单帮你梳理了一下刚才聊到的内容。看看我说得对不对：",
+              time: responseTime,
+            },
+            {
+              id: Date.now().toString() + "_sum2",
+              role: "ai",
+              type: "summary",
+              text: "",
+              time: responseTime,
+              summary: {
+                problem: "最近压力很大，经常内耗",
+                feeling: "焦虑、无助、疲惫",
+                reason: "职场上遇到了难以处理的人际关系"
+              }
+            }
+          ];
+          // We can also save this to blackboard or global store so next pages can use it
+          useAppStore.getState().setBookingSummary({
+            problem: "最近压力很大，经常内耗",
+            feeling: "焦虑、无助、疲惫",
+            reason: "职场上遇到了难以处理的人际关系",
+            expectation: "希望能有人听我说，帮我梳理情绪",
+            source: "可鹿 AI 情绪助手"
+          });
+          break;
         default:
           aiResponses = [
             {
@@ -384,44 +419,14 @@ export function AITab() {
           <ChevronLeft size={24} />
         </button>
         <div className="flex justify-center space-x-8 mb-2 relative w-full px-2">
-          <button
-            onClick={() => setActiveTab("ai")}
-            className={`pb-2 text-[16px] font-bold transition-all relative ${
-              activeTab === "ai"
-                ? (isDark ? "text-white" : "text-gray-900")
-                : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
-            }`}
-          >
-            小鹿
-            {activeTab === "ai" && (
-              <motion.div
-                layoutId="activeTab"
-                className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-full ${isDark ? "bg-white" : "bg-gray-900"}`}
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("human")}
-            className={`pb-2 text-[16px] font-bold transition-all relative ${
-              activeTab === "human"
-                ? (isDark ? "text-white" : "text-gray-900")
-                : (isDark ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600")
-            }`}
-          >
-            真人倾听师
-            {activeTab === "human" && (
-              <motion.div
-                layoutId="activeTab"
-                className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-full ${isDark ? "bg-white" : "bg-gray-900"}`}
-              />
-            )}
-          </button>
+          <div className={`pb-2 text-[16px] font-bold transition-all relative ${isDark ? "text-white" : "text-gray-900"}`}>
+            可鹿 AI 情绪助手
+          </div>
         </div>
       </div>
 
-      {activeTab === "ai" ? (
-        <>
-          <div className={`backdrop-blur-md px-4 py-3 border-b flex items-center justify-between sticky top-[92px] z-20 transition-colors ${isDark ? 'bg-[#1A1A1A]/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
+      <>
+        <div className={`backdrop-blur-md px-4 py-3 border-b flex items-center justify-between sticky top-[92px] z-20 transition-colors ${isDark ? 'bg-[#1A1A1A]/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
          <div className="flex items-center space-x-3">
             <div className="relative">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl border overflow-hidden ${isDark ? 'bg-orange-900/20 border-orange-900/50' : 'bg-orange-50 border-orange-100'}`}>
@@ -561,12 +566,52 @@ export function AITab() {
                               </p>
                               <button
                                 onClick={() => {
-                                  setActiveTab("human");
+                                  pushView("ai-recommendation");
                                 }}
                                 className={`w-full font-bold py-2 rounded-xl text-[13px] active:scale-[0.98] transition-all flex justify-center items-center ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}
                               >
                                 查看推荐倾听师 <ArrowRight size={14} className="ml-1" />
                               </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {msg.type === "summary" && msg.summary && (
+                          <div className="flex items-start mt-2">
+                            <div className="w-2 mr-0 shrink-0"></div>
+                            <div className={`w-[280px] p-4 rounded-[1.2rem] border shadow-sm ${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-100'}`}>
+                              <div className="flex items-center mb-4">
+                                <FileText className="text-[#2CC1C1] mr-2" size={18} />
+                                <span className={`font-bold text-[15px] ${isDark ? 'text-white' : 'text-gray-900'}`}>阶段性总结</span>
+                              </div>
+                              <div className="space-y-3 mb-5">
+                                <div>
+                                  <div className={`text-[11px] font-bold mb-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>主要困扰</div>
+                                  <div className={`text-[13px] ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>{msg.summary.problem}</div>
+                                </div>
+                                <div>
+                                  <div className={`text-[11px] font-bold mb-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>当前感受</div>
+                                  <div className={`text-[13px] ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>{msg.summary.feeling}</div>
+                                </div>
+                                <div>
+                                  <div className={`text-[11px] font-bold mb-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>可能有关的事件</div>
+                                  <div className={`text-[13px] ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>{msg.summary.reason}</div>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <button
+                                  onClick={() => handleSend("我想继续跟你聊聊")}
+                                  className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-transform active:scale-[0.98] ${isDark ? 'bg-[#1C1C1E] text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                >
+                                  继续和 AI 聊
+                                </button>
+                                <button
+                                  onClick={() => pushView("ai-recommendation")}
+                                  className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-transform active:scale-[0.98] ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6] shadow-[0_2px_10px_rgba(44,193,193,0.2)]'}`}
+                                >
+                                  找真人咨询师
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -864,70 +909,6 @@ export function AITab() {
           )}
         </div>
         </>
-      ) : (
-        <div className={`flex-1 overflow-y-auto p-4 space-y-4 pb-32 min-h-full transition-colors ${isDark ? 'bg-[#121212]' : 'bg-[#f8f9fa]'}`}>
-          {mockCounselors.map((counselor) => (
-              <div
-                key={counselor.id}
-                onClick={() => {
-                  setSelectedCounselorId(counselor.id);
-                  pushView("counseling-detail");
-                }}
-                className={`rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border flex active:scale-[0.98] transition-transform cursor-pointer ${isDark ? 'bg-[#2A2A2A] border-gray-800' : 'bg-white border-gray-50'}`}
-              >
-                <div className="relative mr-4 shrink-0 flex items-center">
-                  <img
-                    src={counselor.avatar}
-                    alt={counselor.name}
-                    className={`w-[60px] h-[60px] rounded-full object-cover border-2 ${isDark ? 'border-gray-700' : 'border-gray-50'}`}
-                  />
-                  <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 rounded-full ${isDark ? 'border-[#2A2A2A]' : 'border-white'} ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                </div>
-
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center mb-2">
-                    <span className={`font-bold text-[16px] mr-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {counselor.name}
-                    </span>
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}`}>
-                      {(counselor.id === 'c1' ? counselorStatus === 'active' : counselor.status === 'online') ? '在线' : '离线'}
-                    </span>
-                  </div>
-
-                  {/* 统一的咨询师标签展示 */}
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {counselor.specialties?.slice(0, 1).map((spec, i) => (
-                      <span key={`spec-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
-                        擅长: {spec}
-                      </span>
-                    ))}
-                    {counselor.styles?.slice(0, 1).map((style, i) => (
-                      <span key={`style-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-purple-400' : 'bg-purple-50 text-purple-600'}`}>
-                        风格: {style}
-                      </span>
-                    ))}
-                    {counselor.credentials?.slice(0, 1).map((cred, i) => (
-                      <span key={`cred-${i}`} className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${isDark ? 'bg-[#1C1C1E] text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
-                        资质: {cred}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className={`flex items-center text-[12px] ${isDark ? 'text-gray-400' : 'text-[#999999]'}`}>
-                      <span>累计服务 {counselor.serviceHours || 1000}+ 小时</span>
-                    </div>
-                    <div className={`flex items-baseline ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      <span className="text-[12px] font-bold mr-0.5">¥</span>
-                      <span className="text-[16px] font-black">{counselor.price}</span>
-                      <span className={`text-[11px] ml-0.5 ${isDark ? 'text-gray-500' : 'text-[#999999]'}`}>/次</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
       
       {/* 危机预警弹窗 (L4 发现风险词拦截) */}
       <AnimatePresence>

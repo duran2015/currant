@@ -4,8 +4,8 @@ import { useAppStore } from "../../store";
 import { ChevronLeft, Wallet, Info, ArrowRight, CheckCircle2, Clock, Filter, AlertCircle } from "lucide-react";
 
 export function CounselorEarnings() {
-  const { currentView, popView } = useAppStore();
-  const isTab = currentView === "main"; // Check if it's being rendered as a tab
+  const { popView } = useAppStore();
+  const isTab = false; // Check if it's being rendered as a tab
   const [filter, setFilter] = useState("all");
 
   const [earningsData] = useState({

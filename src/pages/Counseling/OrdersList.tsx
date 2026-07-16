@@ -12,11 +12,11 @@ import {
 import { mockCounselors } from "../../data";
 
 export function OrdersList() {
-  const { popView, pushView, orders, setBookingOrder, setSelectedCounselorId, appMode, activeOrderTab, setSelectedCounselorOrder, currentView } = useAppStore();
+  const { popView, pushView, orders, setBookingOrder, setSelectedCounselorId, appMode, activeOrderTab, setSelectedCounselorOrder } = useAppStore();
   const [now, setNow] = useState(new Date());
 
   const isCounselorMode = appMode === "counselor";
-  const isTab = currentView === "main";
+  const isTab = false;
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);

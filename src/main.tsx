@@ -54,6 +54,7 @@ import { AssessmentReportDetail } from "./pages/Profile/AssessmentReportDetail";
 import { CounselingSummaryList } from "./pages/Profile/CounselingSummaryList";
 import { CounselingSummaryDetail } from "./pages/Profile/CounselingSummaryDetail";
 import { ProfileEdit } from "./pages/Profile/ProfileEdit";
+import { AccountSecurity } from "./pages/Profile/AccountSecurity";
 import { CounselorOnboarding } from "./pages/Counseling/CounselorOnboarding";
 import { CounselorBoundary } from "./pages/Counseling/CounselorBoundary";
 import { CounselorServices } from "./pages/Counseling/CounselorServices";
@@ -63,6 +64,12 @@ import { CounselorServiceChat } from "./pages/Counseling/CounselorServiceChat";
 import { CounselorEvaluations } from "./pages/Counseling/CounselorEvaluations";
 import { CounselorEarnings } from "./pages/Counseling/CounselorEarnings";
 import { CounselorRiskReport } from "./pages/Counseling/CounselorRiskReport";
+import { CounselorAccountSecurity } from "./pages/Counseling/CounselorAccountSecurity";
+import { DeleteAccount } from "./pages/Profile/DeleteAccount";
+import { AIRecommendation } from "./pages/Counseling/AIRecommendation";
+import { AISummarySync } from "./pages/Counseling/AISummarySync";
+import { CounselingEntrance } from "./pages/Counseling/CounselingEntrance";
+import { CounselorList } from "./pages/Counseling/CounselorList";
 
 function ViewManager() {
   const { viewStack, activeCallSession, appMode } = useAppStore();
@@ -70,7 +77,7 @@ function ViewManager() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         {currentView === "login" && <Login key="login" />}
       {currentView === "assessment" && <Assessment key="assessment" />}
       {currentView === "ai-interview" && <AIInterview key="ai-interview" />}
@@ -88,9 +95,7 @@ function ViewManager() {
         currentView === "assessment-records" ||
         currentView === "assessment-report-detail" ||
         currentView === "ai-chat-records" ||
-        currentView === "profile-report" ||
-        currentView === "assessment-records" ||
-        currentView === "ai-chat-records") && <MainLayout key="main" />}
+        currentView === "profile-report") && <MainLayout key="main" />}
 
       {/* Counselor Dashboard - Separate from MainLayout */}
       {currentView === "counselor-workbench" && <CounselorWorkbench key="c_workbench" />}
@@ -149,6 +154,16 @@ function ViewManager() {
       {currentView === "counseling-summary-list" && <CounselingSummaryList key="c_summary_list" />}
       {currentView === "counseling-summary-detail" && <CounselingSummaryDetail key="c_summary_detail" />}
       {currentView === "profile-edit" && <ProfileEdit key="p_edit" />}
+      {currentView === "account-security" && <AccountSecurity key="account_security" />}
+      {currentView === "counselor-account-security" && (
+        <CounselorAccountSecurity key="counselor_account_security" />
+      )}
+      {currentView === "delete-account" && <DeleteAccount key="delete_account" />}
+      
+      {currentView === "ai-recommendation" && <AIRecommendation key="ai_rec" />}
+      {currentView === "ai-summary-sync" && <AISummarySync key="ai_sync" />}
+      {currentView === "counseling-entrance" && <CounselingEntrance key="c_entrance" />}
+      {currentView === "counselor-list" && <CounselorList key="c_list" />}
       
       {currentView === "breathing" && <BreathingTool key="tool_breathing" />}
       {currentView === "white-noise" && <WhiteNoiseTool key="tool_white_noise" />}

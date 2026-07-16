@@ -1,22 +1,17 @@
 import { motion } from "motion/react";
 import {
   Settings,
-  Shield,
   User,
   FileText,
-  WalletCards,
   ChevronRight,
-  Lock,
-  MessageSquare,
   CalendarClock,
-  History,
-  Repeat2,
-  Briefcase
+  Briefcase,
+  LogOut,
 } from "lucide-react";
 import { useAppStore } from "../../store";
 
 export function ProfileTab() {
-  const { resetToView, pushView, enterAppMode, user } = useAppStore();
+  const { pushView, enterAppMode, user } = useAppStore();
 
   const menuGroups = [
     {
@@ -138,13 +133,33 @@ export function ProfileTab() {
         ))}
       </div>
 
-      <div className="mt-8 flex justify-center">
-        <button
-          onClick={() => resetToView("login")}
-          className="text-gray-400 font-medium py-4 active:text-gray-600 transition-colors text-[14px] px-8"
-        >
-          安全退出登录
-        </button>
+      <div className="mt-8">
+        <div className="space-y-3">
+          <h3 className="text-[14px] font-bold text-gray-900 flex items-center">
+            <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
+            账号设置
+          </h3>
+          <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
+            <button
+              onClick={() => pushView("account-security" as any)}
+              className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors group"
+            >
+              <div className="flex items-center space-x-3 text-gray-800">
+                <div className="w-8 h-8 rounded-full bg-surface group-hover:bg-primary/10 flex items-center justify-center text-gray-500 group-hover:text-primary transition-colors">
+                  <LogOut size={18} />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-[15px] text-gray-900">账号与安全</p>
+                  <p className="text-[12px] text-gray-500">退出登录、注销账号</p>
+                </div>
+              </div>
+              <ChevronRight
+                size={18}
+                className="text-gray-300 group-hover:text-gray-400 transition-colors"
+              />
+            </button>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

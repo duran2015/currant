@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileText } from "lucide-react";
 import { mockCounselors } from "../../data";
 
 export function BookingConfirm() {
-  const { popView, pushView, bookingOrder, setBookingOrder } = useAppStore();
+  const { popView, pushView, bookingOrder, setBookingOrder, bookingSummary } = useAppStore();
   const counselor =
     mockCounselors.find((c) => c.id === bookingOrder?.counselorId) ||
     mockCounselors[0];
@@ -72,7 +72,7 @@ export function BookingConfirm() {
                 {bookingOrder?.date} {bookingOrder?.time}
               </span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-3">
               <span className="text-gray-500 text-[13px]">服务方式</span>
               <span className="font-bold text-gray-900 text-[14px]">
                 {bookingOrder?.type === "voice"
@@ -82,6 +82,17 @@ export function BookingConfirm() {
                     : "文字咨询"}
               </span>
             </div>
+            {bookingSummary && (
+              <div className="flex justify-between items-center pt-3 border-t border-gray-200/50 mt-1">
+                <span className="text-gray-500 text-[13px] flex items-center">
+                  <FileText size={14} className="mr-1" />
+                  咨询前摘要
+                </span>
+                <span className={`font-bold text-[13px] ${bookingSummary.authorized ? 'text-[#2CC1C1]' : 'text-gray-400'}`}>
+                  {bookingSummary.authorized ? "已授权同步" : "未同步"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

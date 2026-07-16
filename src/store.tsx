@@ -2,6 +2,67 @@ import { create } from "zustand";
 import { AppView, AppTab, UserProfile, BlackboardState } from "./types";
 import { mockUser, mockOrders, mockAssessmentRecords } from "./data";
 
+const defaultUser: UserProfile = {
+  ...mockUser,
+  name: "未登录用户",
+  role: "guest",
+  isNewUser: true,
+};
+
+const defaultBlackboard: BlackboardState = {
+  clinical: null,
+  domain: null,
+  phase: 1,
+  recommendation: {
+    serviceLevel: "L1",
+    firstTool: "呼吸引导",
+    persona: "温暖陪伴",
+  },
+};
+
+const defaultAssessmentState = {
+  step: 0,
+  answers: { stage: "", domain: "" },
+  phq2Scores: [-1, -1],
+  phq2Step: 0,
+};
+
+const defaultAISettings = {
+  avatar: "cat" as const,
+  fontSize: "medium" as const,
+  theme: "light" as const,
+  voice: "gentle" as const,
+  autoPlayVoice: false,
+};
+
+const buildLoggedOutState = () => ({
+  viewStack: ["login"] as AppView[],
+  currentTab: "home" as AppTab,
+  appMode: "user" as const,
+  user: defaultUser,
+  blackboard: defaultBlackboard,
+  selectedCounselorId: "c1",
+  selectedNotificationId: "n1",
+  selectedConsultationId: "",
+  selectedCounselorOrder: null,
+  bookingOrder: null,
+  bookingSummary: null,
+  orders: mockOrders,
+  assessmentRecords: mockAssessmentRecords,
+  activeCallSession: null,
+  isCallMinimized: false,
+  assessmentState: defaultAssessmentState,
+  aiSettings: defaultAISettings,
+  isSessionCounselorDetail: false,
+  counselorStatus: "active" as const,
+  activeOrderTab: "all" as const,
+});
+
+const clearAuthStorage = () => {
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("appMode");
+};
+
 export interface AppState {
   viewStack: AppView[];
   currentTab: AppTab;
@@ -55,8 +116,12 @@ export interface AppState {
   setIsSessionCounselorDetail: (isSession: boolean) => void;
   counselorStatus: "active" | "paused";
   setCounselorStatus: (status: "active" | "paused") => void;
-  activeOrderTab: "all" | "pending" | "completed" | "cancelled";
-  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled") => void;
+  activeOrderTab: "all" | "pending" | "completed" | "cancelled" | "settlement";
+  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled" | "settlement") => void;
+  bookingSummary: any | null;
+  setBookingSummary: (summary: any | null) => void;
+  logout: () => void;
+  deleteAccount: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -67,22 +132,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   })(),
   currentTab: "home",
   appMode: (localStorage.getItem("appMode") as any) || "user",
-  user: mockUser,
-  blackboard: {
-    clinical: null,
-    domain: null,
-    phase: 1,
-    recommendation: {
-      serviceLevel: "L1",
-      firstTool: "呼吸引导",
-      persona: "温暖陪伴"
-    }
-  },
+  user: localStorage.getItem("isLoggedIn") === "true" ? mockUser : defaultUser,
+  blackboard: defaultBlackboard,
   selectedCounselorId: "c1",
   selectedNotificationId: "n1",
   selectedConsultationId: "",
   selectedCounselorOrder: null,
   bookingOrder: null,
+  bookingSummary: null,
   orders: mockOrders,
   assessmentRecords: mockAssessmentRecords,
   activeCallSession: null,
@@ -90,19 +147,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSessionCounselorDetail: false,
   counselorStatus: "active",
   activeOrderTab: "all",
-  assessmentState: {
-    step: 0,
-    answers: { stage: "", domain: "" },
-    phq2Scores: [-1, -1],
-    phq2Step: 0,
-  },
-  aiSettings: {
-    avatar: "otter",
-    fontSize: "medium",
-    theme: "light",
-    voice: "gentle",
-    autoPlayVoice: false,
-  },
+  assessmentState: defaultAssessmentState,
+  aiSettings: defaultAISettings,
 
   setAssessmentState: (state: any) => set({ assessmentState: state }),
   updateAISettings: (settings: Partial<AppState["aiSettings"]>) => 
@@ -125,7 +171,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (view === "main" || view === "counselor-workbench") {
       localStorage.setItem("isLoggedIn", "true");
     } else if (view === "login") {
-      localStorage.removeItem("isLoggedIn");
+      clearAuthStorage();
     }
   },
 
@@ -156,5 +202,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   setIsCallMinimized: (minimized: boolean) => set({ isCallMinimized: minimized }),
   setIsSessionCounselorDetail: (isSession: boolean) => set({ isSessionCounselorDetail: isSession }),
   setCounselorStatus: (status: "active" | "paused") => set({ counselorStatus: status }),
-  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled") => set({ activeOrderTab: tab }),
+  setActiveOrderTab: (tab: "all" | "pending" | "completed" | "cancelled" | "settlement") => set({ activeOrderTab: tab }),
+  setBookingSummary: (summary: any | null) => set({ bookingSummary: summary }),
+  logout: () => {
+    clearAuthStorage();
+    set(buildLoggedOutState());
+  },
+  deleteAccount: () => {
+    clearAuthStorage();
+    set(buildLoggedOutState());
+  },
 }));

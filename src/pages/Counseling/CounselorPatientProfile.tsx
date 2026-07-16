@@ -4,7 +4,11 @@ import { ArrowLeft, BrainCircuit, Activity, Target, MessageSquare, ClipboardList
 import { mockUser } from "../../data";
 
 export function CounselorPatientProfile() {
-  const { popView, pushView, selectedCounselorOrder } = useAppStore();
+  const { popView, pushView, selectedCounselorOrder, bookingSummary } = useAppStore();
+
+  const sourceLabel = bookingSummary?.source === "可鹿 AI 情绪助手" 
+    ? { title: "来自可鹿 AI 情绪助手", desc: "用户先与可鹿 AI 沟通，随后选择了该咨询师，并授权同步摘要。" }
+    : { title: "来自咨询师小助理", desc: "用户预约后，由咨询前小助理收集并确认同步。" };
 
   return (
     <motion.div
@@ -55,31 +59,75 @@ export function CounselorPatientProfile() {
 
          <div className="p-3 space-y-3">
             {/* 咨询前问卷 SOP 摘要 */}
-            <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
-               <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">
-                 <Target className="text-blue-500 mr-1.5" size={16} /> 本次服务预约摘要
-               </h3>
-               <div className="space-y-2">
-                 <div className="flex items-start text-[13px]">
-                   <span className="text-gray-400 w-16 shrink-0">主要诉求</span>
-                   <span className="text-gray-800 font-medium">{selectedCounselorOrder?.preQuestionnaire?.mainTopic || "希望梳理工作带来的焦虑感，找回状态"}</span>
-                 </div>
-                 <div className="flex items-start text-[13px]">
-                   <span className="text-gray-400 w-16 shrink-0">持续时间</span>
-                   <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.duration || "1-3个月"}</span>
-                 </div>
-                 <div className="flex items-start text-[13px]">
-                   <span className="text-gray-400 w-16 shrink-0">影响事件</span>
-                   <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.event || "上周被调到了新项目组，觉得领导在针对我"}</span>
-                 </div>
-                 <div className="flex items-start text-[13px]">
-                   <span className="text-gray-400 w-16 shrink-0">自伤倾向</span>
-                   <span className={selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
-                     {selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "有风险" : "无"}
+            {(bookingSummary && bookingSummary.authorized) ? (
+              <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-[#2CC1C1]/20">
+                 <div className="flex items-center justify-between mb-2">
+                   <h3 className="font-bold text-[14px] text-gray-900 flex items-center">
+                     <Target className="text-[#2CC1C1] mr-1.5" size={16} /> 本次服务预约摘要
+                   </h3>
+                   <span className="text-[10px] bg-[#2CC1C1]/10 text-[#2CC1C1] px-2 py-0.5 rounded font-bold">
+                     已授权同步
                    </span>
                  </div>
-               </div>
-            </div>
+                 <p className="text-[11px] text-gray-500 mb-3 bg-gray-50 p-2 rounded-lg leading-relaxed">
+                   <span className="font-bold">{sourceLabel.title}：</span>{sourceLabel.desc}
+                 </p>
+                 <div className="space-y-2.5">
+                   <div>
+                     <div className="text-[12px] font-bold text-gray-400 mb-0.5">主要困扰</div>
+                     <div className="text-[13px] text-gray-800">{bookingSummary.problem}</div>
+                   </div>
+                   <div>
+                     <div className="text-[12px] font-bold text-gray-400 mb-0.5">当前情绪</div>
+                     <div className="text-[13px] text-gray-800">{bookingSummary.feeling}</div>
+                   </div>
+                   <div>
+                     <div className="text-[12px] font-bold text-gray-400 mb-0.5">关键事件</div>
+                     <div className="text-[13px] text-gray-800">{bookingSummary.reason}</div>
+                   </div>
+                   <div>
+                     <div className="text-[12px] font-bold text-gray-400 mb-0.5">用户期待</div>
+                     <div className="text-[13px] text-gray-800">{bookingSummary.expectation}</div>
+                   </div>
+                   <div>
+                     <div className="text-[12px] font-bold text-gray-400 mb-0.5">风险提示</div>
+                     <div className="text-[13px] font-bold text-green-600">无明显风险</div>
+                   </div>
+                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
+                 <div className="flex items-center justify-between mb-3">
+                   <h3 className="font-bold text-[14px] text-gray-900 flex items-center">
+                     <Target className="text-blue-500 mr-1.5" size={16} /> 本次服务预约摘要
+                   </h3>
+                   <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">
+                     仅问卷
+                   </span>
+                 </div>
+                 <p className="text-[11px] text-gray-500 mb-3">用户未授权同步完整聊天摘要，仅展示预约问卷内容。</p>
+                 <div className="space-y-2">
+                   <div className="flex items-start text-[13px]">
+                     <span className="text-gray-400 w-16 shrink-0">主要诉求</span>
+                     <span className="text-gray-800 font-medium">{selectedCounselorOrder?.preQuestionnaire?.mainTopic || "希望梳理工作带来的焦虑感，找回状态"}</span>
+                   </div>
+                   <div className="flex items-start text-[13px]">
+                     <span className="text-gray-400 w-16 shrink-0">持续时间</span>
+                     <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.duration || "1-3个月"}</span>
+                   </div>
+                   <div className="flex items-start text-[13px]">
+                     <span className="text-gray-400 w-16 shrink-0">影响事件</span>
+                     <span className="text-gray-800">{selectedCounselorOrder?.preQuestionnaire?.event || "上周被调到了新项目组，觉得领导在针对我"}</span>
+                   </div>
+                   <div className="flex items-start text-[13px]">
+                     <span className="text-gray-400 w-16 shrink-0">自伤倾向</span>
+                     <span className={selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
+                       {selectedCounselorOrder?.preQuestionnaire?.hasSelfHarmThoughts ? "有风险" : "无"}
+                     </span>
+                   </div>
+                 </div>
+              </div>
+            )}
             {selectedCounselorOrder?.status === "completed" && (
                <div className="bg-white rounded-[1.25rem] p-4 shadow-sm border border-gray-100">
                   <h3 className="font-bold text-[14px] text-gray-900 mb-3 flex items-center">

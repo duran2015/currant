@@ -5,10 +5,10 @@ import { ChevronLeft, CalendarClock, Clock, MoreHorizontal } from "lucide-react"
 import { mockCounselors } from "../../data";
 
 export function CounselorOrdersList() {
-  const { popView, pushView, orders, appMode, activeOrderTab, setActiveOrderTab, currentView, setSelectedCounselorOrder } = useAppStore();
+  const { popView, pushView, orders, appMode, activeOrderTab, setActiveOrderTab, setSelectedCounselorOrder } = useAppStore();
   const [now, setNow] = useState(new Date());
 
-  const isTab = currentView === "main";
+  const isTab = false;
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);

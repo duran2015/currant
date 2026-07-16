@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, Camera, Check } from "lucide-react";
