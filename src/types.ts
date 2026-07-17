@@ -57,6 +57,7 @@ export type AppView =
   | "meditation"
   | "sleep-guide"
   | "bubble-wrap"
+  | "work-buddy-test"
   | "delete-account"
   | "ai-settings"
   | "ai-recommendation"

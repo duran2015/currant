@@ -19,15 +19,15 @@ export function MainLayout() {
   const isCounselorMode = appMode === "counselor";
 
   return (
-    <div className="flex flex-col h-full bg-surface relative overflow-hidden">
+    <div className={`flex flex-col h-full bg-surface relative overflow-hidden ${isCounselorMode ? "mode-counselor" : "mode-user"}`}>
       <div className="flex-1 relative overflow-hidden flex flex-col">
         <AnimatePresence mode="wait">
           {currentTab === "home" && (isCounselorMode ? <CounselorWorkbench key="counselor-home" /> : <HomeTab key="home" />)}
           {currentTab === "messages" && !isCounselorMode && <MessagesTab key="messages" />}
           {currentTab === "profile" && (isCounselorMode ? <CounselorProfileTab key="counselor-profile" /> : <ProfileTab key="profile" />)}
-          {currentTab === "appointments" && isCounselorMode && <CounselorOrdersList key="appointments" />}
+          {currentTab === "appointments" && isCounselorMode && <CounselorOrdersList key="appointments" isTab />}
           {currentTab === "clients" && isCounselorMode && <CounselorClientsTab key="clients" />}
-          {currentTab === "earnings" && isCounselorMode && <CounselorEarnings key="earnings" />}
+          {currentTab === "earnings" && isCounselorMode && <CounselorEarnings key="earnings" isTab />}
         </AnimatePresence>
       </div>
       <BottomNav />

@@ -7,6 +7,7 @@ import { BookingOrder } from "../../types";
 
 interface BookingProps {
   onClose?: () => void;
+  key?: string;
 }
 
 export function Booking({ onClose }: BookingProps) {

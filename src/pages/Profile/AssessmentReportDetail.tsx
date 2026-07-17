@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ArrowLeft, RefreshCw, FileText } from "lucide-react";
+import { ArrowLeft, RefreshCw, FileText, ClipboardX } from "lucide-react";
+import { MissingDataPage } from "../../components/EmptyState";
 
 export function AssessmentReportDetail() {
   const { popView, pushView, assessmentRecords } = useAppStore();
@@ -8,7 +9,9 @@ export function AssessmentReportDetail() {
   // Hardcoded to first record for demo, in real app would use selected record ID
   const record = assessmentRecords[0];
 
-  if (!record) return null;
+  if (!record) {
+    return <MissingDataPage icon={ClipboardX} title="报告还未生成" description="完成测评后，分数解读和个性化建议会保存在这里。" onBack={popView} actionLabel="返回测评记录" />;
+  }
 
   return (
     <motion.div

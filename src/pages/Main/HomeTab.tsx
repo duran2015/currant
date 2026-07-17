@@ -47,7 +47,7 @@ const TAGS = [
 ];
 
 export function HomeTab() {
-  const { user, pushView, setTab, assessmentRecords, orders } = useAppStore();
+  const { user, pushView, setTab, assessmentRecords } = useAppStore();
 
   const isNewUser = user.isNewUser || false;
   const hasRisk = user.hasRisk || false;
@@ -184,19 +184,19 @@ export function HomeTab() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa] relative pb-24 overflow-y-auto w-full"
+      className="flex flex-col h-full bg-transparent relative pb-24 overflow-y-auto w-full"
     >
       {/* 顶部栏 & 小鹿状态区 (IP Status) */}
-      <div className="px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 bg-[#f8f9fa]/90 backdrop-blur-md z-10">
+      <div className="px-5 pt-10 pb-4 flex items-center justify-between sticky top-0 bg-[#fbfaf6]/88 backdrop-blur-xl z-10 border-b border-white/30">
         <div className="flex items-center">
           <div className="relative mr-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-50 to-orange-100 rounded-full flex items-center justify-center text-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-white z-10 relative">
+            <div className="w-11 h-11 bg-gradient-to-br from-[#fff4df] to-[#e9f3ed] rounded-[16px] flex items-center justify-center text-xl shadow-[0_8px_22px_rgba(50,116,92,0.12)] border border-white z-10 relative">
               🦌
             </div>
           </div>
           <div>
-            <h1 className="text-[16px] font-black text-gray-900 tracking-tight leading-tight">可鹿</h1>
-            <p className="text-[11px] font-medium text-gray-500">{ipStatus.text}</p>
+            <h1 className="text-[17px] font-black text-gray-900 tracking-tight leading-tight">可鹿 <span className="text-[10px] font-semibold text-primary bg-primary/8 rounded-full px-2 py-0.5 ml-1">陪伴中</span></h1>
+            <p className="text-[11px] font-medium text-gray-500 mt-1">{ipStatus.text}</p>
           </div>
         </div>
         
@@ -204,7 +204,7 @@ export function HomeTab() {
           {!hasRecordedToday && (
             <button 
               onClick={() => setShowInputSheet(true)}
-              className="bg-primary text-white text-[13px] font-bold px-4 py-1.5 rounded-full shadow-[0_4px_15px_rgba(92,110,153,0.2)] flex items-center active:scale-95 transition-transform"
+              className="bg-primary text-white text-[13px] font-bold px-4 py-2 rounded-[14px] shadow-[0_8px_20px_rgba(50,116,92,0.2)] flex items-center active:scale-95 transition-transform"
             >
               <Plus size={14} className="mr-1" strokeWidth={3} />
               记录
@@ -214,56 +214,23 @@ export function HomeTab() {
       </div>
 
       {/* 快捷入口 */}
-      <div className="px-5 mb-4 mt-2">
-        <div className="grid grid-cols-4 gap-2">
-          <button onClick={() => pushView("ai-chat")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-2">
-              <MessageSquare size={20} />
-            </div>
-            <span className="text-[12px] font-bold text-gray-800">AI 倾诉</span>
-          </button>
-          <button onClick={() => pushView("counseling-entrance")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-teal-50 text-teal-500 rounded-full flex items-center justify-center mb-2">
-              <Activity size={20} />
-            </div>
-            <span className="text-[12px] font-bold text-gray-800">真人咨询</span>
-          </button>
-          <button onClick={() => setShowInputSheet(true)} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-2">
-              <Smile size={20} />
-            </div>
-            <span className="text-[12px] font-bold text-gray-800">情绪记录</span>
-          </button>
-          <button onClick={() => pushView("mini-assessment-home")} className="flex flex-col items-center justify-center bg-white rounded-2xl py-4 shadow-sm border border-gray-100 active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-2">
-              <ClipboardList size={20} />
-            </div>
-            <span className="text-[12px] font-bold text-gray-800">心理测评</span>
-          </button>
+      <div className="px-5 mb-5 mt-2">
+        <div className="grid grid-cols-4 gap-2.5">
+          <button onClick={() => pushView("ai-chat")} className="flex flex-col items-center justify-center bg-white/90 rounded-[20px] py-4 shadow-sm border border-white active:scale-95 transition-transform"><div className="w-10 h-10 bg-[#eeeefe] text-[#6567a8] rounded-[14px] flex items-center justify-center mb-2 shadow-inner"><MessageSquare size={20} /></div><span className="text-[12px] font-bold text-gray-800">AI 倾诉</span></button>
+          <button onClick={() => pushView("counseling-entrance")} className="flex flex-col items-center justify-center bg-white/90 rounded-[20px] py-4 shadow-sm border border-white active:scale-95 transition-transform"><div className="w-10 h-10 bg-[#e7f4ef] text-primary rounded-[14px] flex items-center justify-center mb-2 shadow-inner"><Activity size={20} /></div><span className="text-[12px] font-bold text-gray-800">真人咨询</span></button>
+          <button onClick={() => setShowInputSheet(true)} className="flex flex-col items-center justify-center bg-white/90 rounded-[20px] py-4 shadow-sm border border-white active:scale-95 transition-transform"><div className="w-10 h-10 bg-[#fff1df] text-[#c87a30] rounded-[14px] flex items-center justify-center mb-2 shadow-inner"><Smile size={20} /></div><span className="text-[12px] font-bold text-gray-800">情绪记录</span></button>
+          <button onClick={() => pushView("mini-assessment-home")} className="flex flex-col items-center justify-center bg-white/90 rounded-[20px] py-4 shadow-sm border border-white active:scale-95 transition-transform"><div className="w-10 h-10 bg-[#e8f1f7] text-[#4d7792] rounded-[14px] flex items-center justify-center mb-2 shadow-inner"><ClipboardList size={20} /></div><span className="text-[12px] font-bold text-gray-800">心理测评</span></button>
         </div>
       </div>
 
-      {/* Active Consultation Banner */}
-      {orders.filter((o: any) => o.status === 'paid').length > 0 && (
-        <div className="px-5 mb-2 mt-1">
-          <div className="bg-blue-50 border border-blue-100 p-3 rounded-[1.25rem] flex items-center justify-between shadow-sm cursor-pointer active:scale-[0.98] transition-transform" onClick={() => pushView("orders-list")}>
-             <div className="flex items-center space-x-3">
-               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 shrink-0">
-                 <Activity size={20} />
-               </div>
-               <div>
-                 <div className="text-[14px] font-bold text-gray-900">你有待进行的真人咨询</div>
-                 <div className="text-[11px] text-gray-500">点击查看订单与咨询室</div>
-               </div>
-             </div>
-             <ChevronRight size={16} className="text-gray-400" />
-          </div>
-        </div>
-      )}
+      {/* 双人职场关系测试：社交获客入口 */}
+      <div className="px-5 mb-6 mt-3">
+        <button onClick={() => pushView('work-buddy-test')} className="relative w-full overflow-hidden rounded-[1.75rem] bg-[#292b4d] p-5 text-left text-white shadow-[0_16px_38px_rgba(41,43,77,.2)] active:scale-[.98] transition-transform"><div className="absolute -right-8 -top-10 h-36 w-36 rounded-full bg-[#ffca75]/20" /><div className="relative flex items-center"><div className="flex-1"><span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-[#ffdc9c]">双人完成 · 职场关系测试</span><h2 className="mt-4 text-[20px] font-black leading-7">你和 TA 是哪种<br />职场搭子？</h2><p className="mt-2 text-[11px] text-white/55">12 道工作情境题，解锁双人默契报告</p></div><div className="ml-3 text-[52px]">🤝</div></div><div className="relative mt-4 flex items-center text-[11px] font-bold text-white">先完成我的部分 <ChevronRight size={14} className="ml-1" /></div></button>
+      </div>
 
       {/* 情绪追踪综合模块 */}
       <div className="px-5 mb-8 mt-2">
-        <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
+          <div className="bg-white/92 rounded-[1.75rem] p-5 shadow-[0_14px_38px_rgba(33,53,46,0.07)] border border-white">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[15px] font-bold text-gray-800 flex items-center">
               最近7天情绪
@@ -276,7 +243,7 @@ export function HomeTab() {
               {isCalendarExpanded ? '收起' : '展开月历'}
             </button>
           </div>
-          
+
           <AnimatePresence mode="wait" initial={false}>
             {!isCalendarExpanded ? (
               <motion.div 
@@ -335,24 +302,6 @@ export function HomeTab() {
           </AnimatePresence>
 
 
-        </div>
-      </div>
-
-      {/* 完善个人信息入口 */}
-      <div className="px-5 mb-8" onClick={() => pushView('assessment')}>
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-4 border border-indigo-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-500 mr-3 shadow-sm">
-              <ClipboardList size={18} />
-            </div>
-            <div>
-              <div className="text-[14px] font-bold text-gray-800 mb-0.5">完善你的心理画像</div>
-              <div className="text-[11px] text-gray-500">获取更精准的小鹿陪伴方案</div>
-            </div>
-          </div>
-          <button className="bg-indigo-500 text-white px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm">
-            去完善
-          </button>
         </div>
       </div>
 

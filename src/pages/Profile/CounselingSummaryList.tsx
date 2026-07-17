@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, FileText, CalendarClock } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { EmptyState } from "../../components/EmptyState";
 
 export function CounselingSummaryList() {
   const { popView, pushView, orders } = useAppStore();
@@ -35,10 +36,13 @@ export function CounselingSummaryList() {
 
       <div className="flex-1 overflow-y-auto p-4">
         {summaries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <FileText size={48} className="mb-4 text-gray-300" />
-            <p>暂无小结记录</p>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="暂时还没有咨询小结"
+            description="咨询结束后，咨询师整理的重点回顾和建议会保存在这里。"
+            actionLabel="查看预约记录"
+            onAction={() => pushView("orders-list")}
+          />
         ) : (
           <div className="space-y-4">
             {summaries.map((summary, ind) => {

@@ -1,12 +1,36 @@
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { mockCounselors, mockConsultationRecords, mockNotifications } from "../../data";
-import { ChevronRight, Bell, ShieldAlert, Mic, MessageSquare, Video, ArrowRight } from "lucide-react";
+import { ChevronRight, Bell, ShieldAlert, Mic, MessageSquare, Video, ArrowRight, PhoneCall } from "lucide-react";
 
 export function MessagesTab() {
   const { pushView, setTab, user, setSelectedConsultationId, setActiveCallSession, setIsCallMinimized, setBookingOrder, setSelectedCounselorOrder, orders, appMode, counselorStatus } = useAppStore();
 
   const isCounselorMode = appMode === "counselor";
+
+  const startCallDemo = (type: "voice" | "video") => {
+    const demoOrder = {
+      id: `demo-${type}-${Date.now()}`,
+      counselorId: "c1",
+      userName: "小鹿用户3821",
+      avatar: user.avatar,
+      type,
+      status: "paid",
+      date: "今天",
+      time: "现在",
+      title: type === "voice" ? "语音咨询模拟" : "视频咨询模拟",
+    };
+
+    setIsCallMinimized(false);
+    if (isCounselorMode) {
+      setBookingOrder(null);
+      setSelectedCounselorOrder(demoOrder);
+    } else {
+      setSelectedCounselorOrder(null);
+      setBookingOrder(demoOrder);
+    }
+    setActiveCallSession(demoOrder);
+  };
 
   // Load chat list from valid orders (paid or completed)
   const chats = orders.filter(o => o.status === "paid" || o.status === "completed").map(record => {
@@ -19,23 +43,27 @@ export function MessagesTab() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa]"
+      className="flex flex-col h-full bg-transparent"
     >
-      <div className="pt-14 pb-4 px-6 bg-white sticky top-0 z-20 shadow-[0_1px_10px_rgba(0,0,0,0.02)]">
-        <h1 className="text-[22px] font-bold text-gray-900">消息</h1>
+      <div className="page-header flex items-end justify-between">
+        <div>
+          <div className="page-kicker mb-1">CONVERSATIONS</div>
+          <h1 className="page-title">消息</h1>
+        </div>
+        <div className="rounded-full bg-primary-light px-3 py-1.5 text-[11px] font-bold text-primary">随时陪伴</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
         {/* Group 1: AI 倾诉分组 */}
         <div className="mb-6">
-          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">AI 倾诉</h2>
+          <h2 className="section-label mb-3 px-1">AI 倾诉</h2>
           
           <button
             onClick={() => pushView("ai-chat")}
-            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
+            className="ui-card ui-row w-full p-4 flex items-center mb-3"
           >
             <div className="relative mr-4 shrink-0">
-              <div className="w-12 h-12 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[24px]">
+              <div className="soft-icon w-12 h-12 bg-gradient-to-br from-[#fff1dc] to-[#e8f3ed] flex items-center justify-center text-[24px]">
                 🦌
               </div>
               <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
@@ -58,19 +86,37 @@ export function MessagesTab() {
 
         {/* Group 2: 咨询服务分组 */}
         <div>
-          <h2 className="text-[13px] font-bold text-gray-400 mb-3 px-2">咨询服务</h2>
+          <h2 className="section-label mb-3 px-1">咨询服务</h2>
+
+          <div className="hero-panel mb-4 p-4">
+            <div className="relative z-10 mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[14px] font-black text-white">通话体验室</div>
+                <div className="mt-1 text-[11px] text-white/60">模拟{isCounselorMode ? "咨询师" : "用户"}端接通与通话流程</div>
+              </div>
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/70">DEMO</span>
+            </div>
+            <div className="relative z-10 grid grid-cols-2 gap-2.5">
+              <button onClick={() => startCallDemo("voice")} className="flex items-center justify-center rounded-[15px] bg-white px-3 py-3 text-[12px] font-bold text-[#24483b]">
+                <PhoneCall size={16} className="mr-2" />模拟语音通话
+              </button>
+              <button onClick={() => startCallDemo("video")} className="flex items-center justify-center rounded-[15px] bg-white/12 px-3 py-3 text-[12px] font-bold text-white ring-1 ring-white/15">
+                <Video size={16} className="mr-2" />模拟视频通话
+              </button>
+            </div>
+          </div>
 
           {/* System Notifications Chat */}
           <button
             onClick={() => pushView("notifications-list")}
-            className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
+            className="ui-card ui-row w-full p-4 flex items-center mb-3"
           >
             <div className="relative mr-4 shrink-0">
-              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-inner">
+              <div className="soft-icon w-12 h-12 bg-[#557b91] flex items-center justify-center text-white shadow-inner">
                 <Bell size={24} />
               </div>
               {mockNotifications.some(n => !n.isRead) && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full" />
+                <div className="status-dot absolute bottom-0 right-0 w-3 h-3 bg-[#d95c5c] rounded-full" />
               )}
             </div>
             <div className="flex-1 text-left min-w-0">
@@ -151,7 +197,7 @@ export function MessagesTab() {
                   setSelectedConsultationId(record.id);
                   pushView("counseling-text-chat");
                 }}
-                className="w-full bg-white p-4 rounded-2xl flex items-center shadow-sm border border-gray-100 active:scale-[0.98] transition-transform mb-3"
+                className="ui-card ui-row w-full p-4 flex items-center mb-3"
               >
                 <div className="relative mr-4 shrink-0">
                   <img src={displayAvatar} alt="" className="w-12 h-12 rounded-full object-cover" />

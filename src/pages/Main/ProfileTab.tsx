@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import {
   Settings,
-  User,
   FileText,
   ChevronRight,
   CalendarClock,
@@ -17,7 +16,6 @@ export function ProfileTab() {
     {
       title: "我的心灵档案",
       items: [
-        { icon: User, label: "心理画像", tag: "NEW" },
         { icon: FileText, label: "量表记录" },
       ],
     },
@@ -35,30 +33,34 @@ export function ProfileTab() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="p-5 pb-8 overflow-y-auto h-full"
+      className="px-5 pb-28 overflow-y-auto h-full"
     >
-      <div className="pt-12 pb-6 flex items-center justify-between">
+      <div className="pt-12 pb-5">
+        <div className="page-kicker mb-4">MY WELLBEING</div>
+        <div className="hero-panel p-5 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
               src={user.avatar}
               alt="avatar"
-              className="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover"
+              className="w-[68px] h-[68px] rounded-[22px] border-2 border-white/70 shadow-md object-cover"
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
+            <h1 className="text-xl font-black text-white mb-1 flex items-center">
               {user.name}
             </h1>
-            <p className="text-gray-500 text-sm">在这里，关注最真实的自己</p>
+            <p className="text-white/65 text-xs">在这里，关注最真实的自己</p>
           </div>
         </div>
         <button 
           onClick={() => pushView("profile-edit")}
-          className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500 shadow-sm border border-gray-100 active:scale-95 transition-transform"
+          aria-label="编辑个人资料"
+          className="relative z-10 w-10 h-10 bg-white/12 rounded-[14px] flex items-center justify-center text-white border border-white/15 active:scale-95 transition-transform"
         >
           <Settings size={20} />
         </button>
+        </div>
       </div>
 
 
@@ -67,7 +69,7 @@ export function ProfileTab() {
         {user.role === "active" && (
           <button 
             onClick={() => enterAppMode("counselor")}
-            className="w-full flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+            className="ui-card ui-row w-full flex items-center justify-between p-4"
           >
             <div className="flex items-center space-x-3 text-primary">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -85,7 +87,7 @@ export function ProfileTab() {
               <span className="w-1 h-3.5 bg-primary rounded-full mr-2"></span>
               {group.title}
             </h3>
-            <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
+            <div className="ui-card overflow-hidden">
               {group.items.map((item, i) => {
                 const Icon = item.icon;
                 return (
@@ -96,15 +98,13 @@ export function ProfileTab() {
                         pushView("orders-list");
                       } else if (item.label === "咨询记录") {
                         pushView("consultation-records");
-                      } else if (item.label === "心理画像") {
-                        pushView("profile-report");
                       } else if (item.label === "量表记录") {
                         pushView("assessment-records");
                       } else if (item.label === "小结与建议") {
                         pushView("counseling-summary-list");
                       }
                     }}
-                    className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 group"
+                    className="ui-row w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 last:border-0 group"
                   >
                     <div className="flex items-center space-x-3 text-gray-800">
                       <div className="w-8 h-8 rounded-full bg-surface group-hover:bg-primary/10 flex items-center justify-center text-gray-500 group-hover:text-primary transition-colors">
@@ -115,11 +115,6 @@ export function ProfileTab() {
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 border-none">
-                      {item.tag && (
-                        <span className="bg-red-50 text-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                          {item.tag}
-                        </span>
-                      )}
                       <ChevronRight
                         size={18}
                         className="text-gray-300 group-hover:text-gray-400 transition-colors"
@@ -142,7 +137,7 @@ export function ProfileTab() {
           <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
             <button
               onClick={() => pushView("account-security" as any)}
-              className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors group"
+              className="ui-row w-full px-5 py-4 flex items-center justify-between group"
             >
               <div className="flex items-center space-x-3 text-gray-800">
                 <div className="w-8 h-8 rounded-full bg-surface group-hover:bg-primary/10 flex items-center justify-center text-gray-500 group-hover:text-primary transition-colors">

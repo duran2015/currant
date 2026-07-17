@@ -139,9 +139,9 @@ export function Login() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-white absolute inset-0 z-50 p-6"
+      className="flex flex-col h-full bg-transparent absolute inset-0 z-50 px-7 pb-7 overflow-hidden before:absolute before:w-64 before:h-64 before:rounded-full before:bg-primary/8 before:-top-32 before:-right-28 before:blur-2xl before:pointer-events-none"
     >
-      <div className="pt-10 mb-8 min-h-[40px]">
+      <div className="pt-10 mb-8 min-h-[40px] relative z-10">
         {(step === "code" || step === "bind-phone" || step === "role-select") && (
           <button
             onClick={() => {
@@ -211,10 +211,10 @@ export function Login() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col relative z-10"
             >
               <div className="mb-10 text-center">
-                <div className="w-16 h-16 bg-primary-light rounded-[1.2rem] flex items-center justify-center text-primary mx-auto mb-4 shadow-sm">
+                <div className="w-[72px] h-[72px] bg-gradient-to-br from-primary-light to-[#fff1dc] rounded-[24px] flex items-center justify-center text-primary mx-auto mb-5 shadow-[0_16px_36px_rgba(50,116,92,0.13)] border border-white">
                   <svg
                     width="32"
                     height="32"
@@ -228,15 +228,15 @@ export function Login() {
                     <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"></path>
                   </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-[28px] font-black text-gray-900 tracking-tight">
                   欢迎来到可鹿
                 </h1>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-500 text-sm mt-2.5 tracking-wide">
                   在这里，听见自己的声音
                 </p>
               </div>
 
-              <div className="flex items-center border-b border-gray-200 py-3 mb-8">
+              <div className="flex items-center bg-white/80 border border-white shadow-[0_10px_30px_rgba(33,53,46,0.06)] rounded-[18px] px-4 py-4 mb-5">
                 <span className="text-gray-900 font-medium mr-4 border-r pr-4">
                   +86
                 </span>
@@ -247,13 +247,13 @@ export function Login() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   placeholder="请输入手机号"
-                  className="flex-1 bg-transparent outline-none text-xl font-medium text-gray-900 placeholder-gray-300 w-full"
+                  className="flex-1 bg-transparent outline-none text-lg font-semibold text-gray-900 placeholder-gray-300 w-full"
                 />
               </div>
 
               <button
                 onClick={handleNext}
-                className={`w-full py-4 rounded-full font-medium flex justify-center items-center space-x-2 transition-all ${phone.length === 11 ? "bg-primary text-white shadow-md shadow-primary/20 hover:bg-primary/90" : "bg-gray-100 text-gray-400"}`}
+                className={`w-full py-4 rounded-[18px] font-bold flex justify-center items-center space-x-2 transition-all ${phone.length === 11 ? "bg-primary text-white shadow-[0_12px_28px_rgba(50,116,92,0.22)] hover:bg-primary/90" : "bg-gray-100 text-gray-400"}`}
               >
                 {loading && !thirdPartyProvider && <Loader2 size={18} className="animate-spin" />}
                 <span>获取验证码</span>

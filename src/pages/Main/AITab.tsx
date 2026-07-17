@@ -28,6 +28,7 @@ import {
   Filter
 } from "lucide-react";
 import { useAppStore } from "../../store";
+import { EmotionExercise } from "../../components/EmotionExercise";
 
 export function AITab() {
   const { currentTab, pushView, popView, setSelectedCounselorId, user, blackboard, aiSettings, updateAISettings, counselorStatus } = useAppStore();
@@ -35,6 +36,7 @@ export function AITab() {
   const [sortBy, setSortBy] = useState("recommended");
   const [feedbackState, setFeedbackState] = useState<Record<number, 'up' | 'down'>>({});
   const [playingMsgIdx, setPlayingMsgIdx] = useState<number | null>(null);
+  const [activeExercise, setActiveExercise] = useState<"breathing" | "rhythm" | null>(null);
 
   const toggleFeedback = (idx: number, type: 'up' | 'down') => {
     setFeedbackState(prev => ({
@@ -62,6 +64,7 @@ export function AITab() {
       desc: string;
       actionText: string;
       duration?: string;
+      actionView?: "muyu" | "breathing";
     };
     summary?: {
       problem: string;
@@ -133,6 +136,7 @@ export function AITab() {
   const [showEmojiMenu, setShowEmojiMenu] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const commonEmojis = ["😀","😂","😊","😍","🥰","😘","😎","🤔","🙄","😣","😪","😫","😌","😛","😜","🤤","😓","😔","🙃","😭","😱","😡","🤯","🤡","👻","💩","👍","👎","❤️","💔","✨","🎉","🔥","🌟","💯"];
 
@@ -140,7 +144,7 @@ export function AITab() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = (text?: string) => {
+  const handleSend = (text?: string, source: "input" | "quick-topic" | "quick-action" = "input") => {
     const newMsg = text || input;
     if (!newMsg.trim()) return;
     setInput("");
@@ -148,8 +152,7 @@ export function AITab() {
     setShowEmojiMenu(false);
     
     // reset textarea height
-    const ta = document.querySelector('textarea');
-    if (ta) ta.style.height = 'auto';
+    if (inputRef.current) inputRef.current.style.height = 'auto';
     
     const newMsgId = Date.now().toString();
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -196,6 +199,64 @@ export function AITab() {
       const responseTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
       let aiResponses: any[] = [];
+
+      if (source === "quick-action") {
+        if (newMsg.includes("木鱼")) {
+          aiResponses = [{
+            id: `${Date.now()}_muyu`,
+            role: "ai",
+            type: "task",
+            text: "",
+            time: responseTime,
+            task: { title: "60 秒节奏锚定", desc: "通过规律触碰和计数，把注意力从反复思考带回当下。完成后记录情绪变化。", actionText: "开始练习", duration: "注意力锚定 · 60秒", actionView: "muyu" },
+          }];
+        } else if (newMsg.includes("深呼吸")) {
+          aiResponses = [{
+            id: `${Date.now()}_breathing`,
+            role: "ai",
+            type: "task",
+            text: "",
+            time: responseTime,
+            task: { title: "三轮延长呼气", desc: "跟随节奏完成吸气 4 秒、呼气 6 秒，帮助身体从紧绷状态慢下来。", actionText: "开始练习", duration: "呼吸调节 · 约1分钟", actionView: "breathing" },
+          }];
+        } else {
+          aiResponses = [{
+            id: `${Date.now()}_vent`,
+            role: "ai",
+            type: "text",
+            text: "当然可以，你不用急着把事情讲得很有条理。就从最想吐槽的那一件开始吧——最近是谁或什么事让你最憋屈？",
+            time: responseTime,
+          }];
+        }
+        setMessages(prev => [...prev, ...aiResponses]);
+        return;
+      }
+
+      if (source === "quick-topic") {
+        const quickTopicReplies: Record<string, string> = {
+          "今天有件开心事": "听起来今天发生了值得开心的事呀 😊 我很想听听——是什么事情让你有了这份好心情？",
+          "分享开心事 🎉": "太好啦，我也想和你一起记住这份开心 🎉 是什么事情让你觉得特别值得分享？",
+          "发现新爱好": "发现新爱好是一件很有生命力的事。你最近开始喜欢上什么了？最吸引你的地方是什么？",
+          "记录好心情": "好心情值得被认真收藏。此刻如果用三个词记录，你会怎么形容今天的自己？",
+          "感觉有点无聊": "有点无聊的时候，时间好像会走得特别慢。你现在更想找点事情做，还是只是想有人陪你说说话？",
+          "其实有点焦虑": "谢谢你愿意说出来。焦虑时脑子里常会同时挤着很多担心——此刻最让你放不下的，是一件具体的事，还是一种说不清的紧绷感？",
+          "确实有点累 😮‍💨": "听起来你已经撑了一阵子了 😮‍💨 这种累更像是身体没力气，还是心里一直绷着、很难真正放松？",
+          "最近睡不好": "睡不好真的会把白天也变得很辛苦。最近主要是难入睡、容易醒，还是醒得太早呢？",
+          "带我深呼吸": "好，我们先不急着解决所有事情。把肩膀放松一点，慢慢吸气 4 秒，再缓缓呼气 6 秒；我会陪你做三轮。",
+          "压力好大 🥺": "我听见了，你现在承受的压力已经很满了 🥺 如果只挑最压着你的那一件事，会是什么？",
+          "控制不住情绪": "情绪一下子冲上来时，确实会让人很无助。刚才发生了什么？你最先注意到的是身体反应，还是脑子里的某个念头？",
+          "不知怎么缓解": "不知道该怎么缓解，并不代表你做得不够好。我们可以先把难受拆小一点：现在最明显的是焦虑、委屈、愤怒，还是疲惫？",
+        };
+        aiResponses = [{
+          id: `${Date.now()}_quick`,
+          role: "ai",
+          type: "text",
+          text: quickTopicReplies[newMsg] || "我在听。你愿意多告诉我一点，刚才是什么让你想到这个吗？",
+          time: responseTime,
+        }];
+        setMessages(prev => [...prev, ...aiResponses]);
+        return;
+      }
 
       switch (userIntent) {
         case "cbt":
@@ -398,8 +459,6 @@ export function AITab() {
     }, 1500);
   };
 
-  const quickReplies = ["我很焦虑", "我睡不着", "感觉很有压力", "我想倾诉"];
-
   // Determine if we should show the SOS option in input based on recent crisis attempts,
   // For demo, we can just show it if messages length > 0
   const hasRiskContext = messages.some(m => m.role === 'user' && ["死", "不想活"].some(k => m.text.includes(k)));
@@ -414,6 +473,7 @@ export function AITab() {
       <div className={`pt-12 pb-2 px-6 sticky top-0 z-20 flex flex-col shadow-[0_1px_10px_rgba(0,0,0,0.02)] relative transition-colors ${isDark ? 'bg-[#1A1A1A] border-b border-gray-800' : 'bg-white'}`}>
         <button 
           onClick={() => popView()} 
+          aria-label="返回"
           className={`absolute left-4 top-11 p-2 transition-colors z-10 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
         >
           <ChevronLeft size={24} />
@@ -444,11 +504,12 @@ export function AITab() {
          <div className="flex items-center space-x-2">
            <button 
              onClick={() => updateAISettings({ autoPlayVoice: !aiSettings.autoPlayVoice })}
+             aria-label={aiSettings.autoPlayVoice ? "关闭自动朗读" : "开启自动朗读"}
              className={`p-2 rounded-full transition-colors flex items-center ${aiSettings.autoPlayVoice ? (isDark ? 'text-blue-400 bg-blue-900/30' : 'text-blue-500 bg-blue-50') : (isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50')}`}
            >
               {aiSettings.autoPlayVoice ? <Volume2 size={20} /> : <VolumeX size={20} />}
            </button>
-           <button onClick={() => pushView("ai-settings")} className={`p-2 rounded-full transition-colors flex items-center ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50'}`}>
+           <button aria-label="AI 设置" onClick={() => pushView("ai-settings")} className={`p-2 rounded-full transition-colors flex items-center ${isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50'}`}>
               <MoreHorizontal size={20} />
            </button>
          </div>
@@ -508,12 +569,12 @@ export function AITab() {
                                  </button>
                               </div>
                               
-                              {idx === 0 && msg.suggestedTopics && (
+                              {idx === 0 && messages.length === 1 && msg.suggestedTopics && (
                                 <div className="mt-3 flex overflow-x-auto scrollbar-hide space-x-2 pb-1 -mr-4 pr-4">
                                   {msg.suggestedTopics.map((topic, tIdx) => (
                                     <button
                                       key={tIdx}
-                                      onClick={() => handleSend(topic)}
+                                      onClick={() => handleSend(topic, "quick-topic")}
                                       className={`shrink-0 text-[13px] border shadow-[0_2px_8px_rgba(43,58,103,0.04)] px-3.5 py-1.5 rounded-full font-medium active:scale-95 transition-all flex items-center ${isDark ? 'bg-[#2A2A2A] border-gray-800 text-gray-300 hover:text-white' : 'bg-white border-[#EBF0FA] text-[#2B3A67] hover:border-blue-200 hover:text-blue-500'}`}
                                     >
                                       {topic}
@@ -544,7 +605,7 @@ export function AITab() {
                                  <div className={`text-[11px] text-[#2CC1C1] font-bold flex items-center px-2 py-1 rounded-md ${isDark ? 'bg-[#2CC1C1]/20' : 'bg-[#2CC1C1]/10'}`}>
                                    {msg.task.duration}
                                  </div>
-                                 <button className={`px-5 py-2 font-bold rounded-xl text-[13px] transition-colors shadow-sm ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}>
+                                 <button onClick={() => msg.task?.actionView && setActiveExercise(msg.task.actionView === "muyu" ? "rhythm" : "breathing")} className={`px-5 py-2 font-bold rounded-xl text-[13px] transition-colors shadow-sm ${isDark ? 'bg-[#20A6A6] text-white hover:bg-[#1C8C8C]' : 'bg-primary text-white hover:bg-[#20A6A6]'}`}>
                                    {msg.task.actionText}
                                  </button>
                                </div>
@@ -693,13 +754,13 @@ export function AITab() {
         <div className={`absolute bottom-0 left-0 right-0 border-t pt-2 z-20 flex flex-col transition-colors duration-200 ${isDark ? 'bg-[#121212] border-gray-800' : 'bg-[#f8f9fa] border-gray-200/60'}`}>
           {/* Quick Replies */}
           <div className="px-3 pb-2 flex space-x-2 overflow-x-auto scrollbar-hide">
-             <button onClick={() => handleSend("心里有点烦，想敲敲木鱼")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+             <button onClick={() => handleSend("心里有点烦，想敲敲木鱼", "quick-action")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
                <Activity size={14} className="text-orange-500 mr-1.5" /> 敲木鱼静静心
              </button>
-             <button onClick={() => handleSend("我觉得有点紧绷，带我做个深呼吸吧")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+             <button onClick={() => handleSend("我觉得有点紧绷，带我做个深呼吸吧", "quick-action")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
                <Wind size={14} className="text-blue-500 mr-1.5" /> 带我深呼吸
              </button>
-             <button onClick={() => handleSend("最近压力有点大，想找你吐吐槽")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
+             <button onClick={() => handleSend("最近压力有点大，想找你吐吐槽", "quick-action")} className={`shrink-0 border shadow-sm text-[12px] px-3 py-1.5 rounded-full font-medium flex items-center active:scale-95 transition-transform ${isDark ? 'bg-[#1C1C1E] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-700'}`}>
                <Lightbulb size={14} className="text-green-500 mr-1.5" /> 想找你吐吐槽
              </button>
           </div>
@@ -710,6 +771,7 @@ export function AITab() {
                {/* + Menu Trigger (Inside input) */}
                <button 
                  onClick={() => setShowPlusMenu(!showPlusMenu)} 
+                 aria-label={showPlusMenu ? "关闭附件菜单" : "打开附件菜单"}
                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${showPlusMenu ? (isDark ? 'text-gray-300' : 'text-gray-800') : (isDark ? 'text-gray-500 active:text-gray-400' : 'text-gray-400 active:text-gray-600')}`}
                >
                  <PlusCircle size={24} strokeWidth={1.5} className={showPlusMenu ? 'rotate-45 transition-transform' : 'transition-transform'} />
@@ -718,6 +780,8 @@ export function AITab() {
                {inputMode === "text" ? (
                  <>
                 <textarea
+                  ref={inputRef}
+                  aria-label="消息内容"
                   value={input}
                   onChange={(e) => {
                     setInput(e.target.value);
@@ -744,19 +808,20 @@ export function AITab() {
                 />
                 <button 
                   onClick={() => { setShowEmojiMenu(!showEmojiMenu); setShowPlusMenu(false); }} 
+                  aria-label={showEmojiMenu ? "关闭表情面板" : "打开表情面板"}
                   className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}
                 >
                   <Smile size={22} strokeWidth={1.5} className={showEmojiMenu ? 'text-primary' : ''} />
                 </button>
                 {!input.trim() && (
-                  <button onClick={() => setInputMode("voice")} className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                  <button aria-label="切换到语音输入" onClick={() => setInputMode("voice")} className={`w-9 h-9 transition-colors flex items-center justify-center shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
                     <Mic size={22} strokeWidth={1.5} />
                   </button>
                 )}
               </>
                ) : (
                  <div className="flex-1 flex items-center h-[36px] mt-0.5 pr-1">
-                <button onClick={() => { setInputMode("text"); setShowEmojiMenu(false); }} className={`pl-1 pr-3 transition-colors flex items-center h-full shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
+                <button aria-label="切换到文字输入" onClick={() => { setInputMode("text"); setShowEmojiMenu(false); }} className={`pl-1 pr-3 transition-colors flex items-center h-full shrink-0 ${isDark ? 'text-gray-500 hover:text-primary' : 'text-gray-400 active:text-primary'}`}>
                   <Keyboard size={20} strokeWidth={1.5} />
                 </button>
                    <div 
@@ -788,7 +853,7 @@ export function AITab() {
                    exit={{ scale: 0, opacity: 0 }}
                    className="shrink-0 mb-1"
                  >
-                   <button onClick={() => handleSend()} className="w-[38px] h-[38px] bg-primary text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform">
+                   <button aria-label="发送消息" onClick={() => handleSend()} className="w-[38px] h-[38px] bg-primary text-white rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform">
                      <ArrowUp size={22} strokeWidth={2.5} />
                    </button>
                  </motion.div>
@@ -810,6 +875,7 @@ export function AITab() {
                     {commonEmojis.map((emoji, i) => (
                       <button 
                         key={i} 
+                        aria-label={`插入表情 ${emoji}`}
                         onClick={() => {
                           setInput(prev => prev + emoji);
                         }}
@@ -912,6 +978,11 @@ export function AITab() {
       
       {/* 危机预警弹窗 (L4 发现风险词拦截) */}
       <AnimatePresence>
+        {activeExercise && <EmotionExercise type={activeExercise} onClose={() => setActiveExercise(null)} onComplete={(score) => {
+          const exerciseName = activeExercise === "breathing" ? "呼吸练习" : "节奏锚定";
+          setActiveExercise(null);
+          setMessages((items) => [...items, { id: `${Date.now()}_exercise_result`, role: "ai", type: "text", text: score <= 2 ? `${exerciseName}完成了。你现在已经平静了不少，先保持这个节奏，不急着马上处理所有事情。你愿意说说刚才最明显的变化在哪里吗？` : score === 3 ? `${exerciseName}完成了。情绪有一点松动，但还在。我们可以继续聊聊：此刻最占据你注意力的念头是什么？` : `${exerciseName}完成了，但难受仍然比较强烈。练习没有立刻见效并不是你的问题。我们先不勉强放松，你愿意告诉我现在最需要的是被倾听，还是一起梳理具体困扰？`, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
+        }} />}
         {showCrisisAlert && (
           <motion.div
             initial={{ opacity: 0 }}

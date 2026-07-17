@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, Bell, ChevronRight } from "lucide-react";
 import { mockNotifications } from "../../data";
+import { EmptyState } from "../../components/EmptyState";
 
 export function NotificationsList() {
   const { popView, pushView, setSelectedNotificationId } = useAppStore();
@@ -43,10 +44,7 @@ export function NotificationsList() {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {mockNotifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <Bell size={48} className="mb-4 text-gray-300" />
-            <p>暂无通知</p>
-          </div>
+          <EmptyState icon={Bell} title="通知都看完啦" description="预约提醒、测评结果和服务进度会第一时间出现在这里。" />
         ) : (
           <div className="space-y-6 pb-8">
             {mockNotifications.slice().reverse().map((notif) => (

@@ -75,17 +75,17 @@ export function CounselorClientsTab() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa] overflow-hidden relative w-full"
+      className="counselor-page flex flex-col h-full overflow-hidden relative w-full"
     >
       {/* 1. 顶部标题 */}
-      <div className="pt-14 pb-3 px-4 bg-white sticky top-0 z-20 shadow-sm border-b border-gray-100 flex items-center justify-between">
-        <h1 className="text-[17px] font-bold text-gray-900 ml-2">我的客户</h1>
+      <div className="page-header flex items-end justify-between">
+        <div><div className="page-kicker mb-1.5">CLIENT CARE</div><h1 className="page-title">客户</h1></div><span className="pb-1 text-[11px] font-bold text-gray-400">共 28 位</span>
       </div>
 
       <div className="flex-1 overflow-y-auto w-full pb-28">
         
         {/* 2. 客户数据总览 */}
-        <div className="bg-white px-4 py-5 mb-2 shadow-sm">
+        <div className="counselor-metrics mx-4 mt-4 px-4 py-5">
           <div className="grid grid-cols-4 gap-2">
             <div className="flex flex-col items-center">
               <span className="text-[20px] font-bold text-gray-900 mb-1">28</span>
@@ -106,7 +106,7 @@ export function CounselorClientsTab() {
           </div>
         </div>
 
-        <div className="px-4 py-2">
+        <div className="px-4 py-5">
           {/* 6. 待跟进提醒模块 */}
           <div className="mb-5">
             <div className="flex items-center mb-3">

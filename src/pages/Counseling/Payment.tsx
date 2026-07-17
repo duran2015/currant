@@ -7,8 +7,10 @@ import {
   Smartphone,
   ShieldCheck,
   FileText,
+  ShoppingBag,
 } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { MissingDataPage } from "../../components/EmptyState";
 
 export function Payment() {
   const {
@@ -74,7 +76,9 @@ export function Payment() {
     resetToView("main");
   };
 
-  if (!bookingOrder || !counselor) return null;
+  if (!bookingOrder || !counselor) {
+    return <MissingDataPage icon={ShoppingBag} title="订单信息已失效" description="可能是预约尚未完成，或订单已经被取消。返回后可以重新选择咨询师和服务时间。" onBack={popView} />;
+  }
 
   return (
     <motion.div

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ArrowLeft, Star, Heart, CheckCircle2, CalendarPlus, ActivitySquare } from "lucide-react";
+import { ArrowLeft, Star, Heart, CheckCircle2, CalendarPlus, ActivitySquare, MessageSquareOff } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { MissingDataPage } from "../../components/EmptyState";
 
 export function UserEvaluation() {
   const { popView, bookingOrder, updateOrder, pushView, selectedCounselorId } = useAppStore();
@@ -21,7 +22,9 @@ export function UserEvaluation() {
 
   const availableTags = ["温柔耐心", "专业见解深", "认知行为学派", "倾听者", "一针见血"];
 
-  if (!bookingOrder) return null;
+  if (!bookingOrder) {
+    return <MissingDataPage icon={MessageSquareOff} title="暂时无法评价" description="没有找到对应的已完成服务。请从预约记录中选择一笔已结束的咨询后再评价。" onBack={popView} actionLabel="返回预约记录" />;
+  }
 
   const counselor = mockCounselors.find((c) => c.id === bookingOrder.counselorId);
 

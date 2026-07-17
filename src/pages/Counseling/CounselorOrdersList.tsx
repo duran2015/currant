@@ -3,12 +3,11 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, CalendarClock, Clock, MoreHorizontal } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { EmptyState } from "../../components/EmptyState";
 
-export function CounselorOrdersList() {
+export function CounselorOrdersList({ isTab = false }: { isTab?: boolean; key?: string }) {
   const { popView, pushView, orders, appMode, activeOrderTab, setActiveOrderTab, setSelectedCounselorOrder } = useAppStore();
   const [now, setNow] = useState(new Date());
-
-  const isTab = false;
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
@@ -43,6 +42,7 @@ export function CounselorOrdersList() {
           {!isTab && (
             <button
               onClick={popView}
+              aria-label="返回"
               className="w-10 h-10 -ml-2 flex items-center justify-center text-gray-900 border border-transparent active:bg-gray-50 rounded-full transition-colors"
             >
               <ChevronLeft size={24} />
@@ -79,19 +79,13 @@ export function CounselorOrdersList() {
 
       <div className={`flex-1 overflow-y-auto p-4 ${isTab ? 'pb-28' : ''}`}>
         {displayOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 pt-20">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <CalendarClock size={32} className="text-gray-300" />
-            </div>
-            <p className="text-[14px] font-bold text-gray-700 mb-1">今日暂无预约</p>
-            <p className="text-[12px] text-gray-400 mb-6">设置更充裕的时间，获得更多预约吧</p>
-            <button 
-              onClick={() => pushView("counselor-schedule" as any)}
-              className="px-6 py-2.5 bg-primary text-white text-[13px] font-bold rounded-full active:scale-95 transition-transform shadow-lg shadow-primary/20"
-            >
-              去设置可预约时间
-            </button>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title={activeOrderTab === "pending" ? "暂时没有待服务预约" : "这个分类还没有订单"}
+            description={activeOrderTab === "pending" ? "开放更多可预约时段，用户就能更方便地找到你。" : "新的订单状态变化后，会自动归档到这里。"}
+            actionLabel="设置可预约时间"
+            onAction={() => pushView("counselor-schedule" as any)}
+          />
         ) : (
           <div className="space-y-4">
             {displayOrders.map((order, ind) => {

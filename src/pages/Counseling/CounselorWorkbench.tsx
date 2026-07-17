@@ -35,17 +35,18 @@ export function CounselorWorkbench() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa] relative pb-24 overflow-y-auto w-full"
+      className="flex flex-col h-full bg-transparent relative pb-24 overflow-y-auto w-full"
     >
-      <div className="pt-14 pb-6 px-5 bg-white relative shadow-sm border-b border-gray-100">
+      <div className="pt-12 pb-5 px-5 relative">
+         <div className="page-kicker mb-3">今日工作台 · {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}</div>
          <div className="flex justify-between items-start mb-6">
            <div className="flex items-center space-x-3">
              <div className="relative">
                 <img src={mockUser.avatar} alt="counselor" className="w-12 h-12 rounded-full border border-gray-100 object-cover shadow-sm" />
              </div>
              <div>
-                <h1 className="text-[18px] font-bold text-gray-900 mb-0.5 leading-tight flex items-center">
-                  林安
+                <h1 className="text-[20px] font-black text-gray-900 mb-0.5 leading-tight flex items-center">
+                  林安，今天好
                   <span className="ml-2 bg-blue-50 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-medium">
                     已入驻
                   </span>
@@ -57,26 +58,27 @@ export function CounselorWorkbench() {
            </div>
            <button 
               onClick={() => enterAppMode("user")}
-              className="text-white/80 bg-white/10 hover:bg-white/20 border border-white/20 text-[12px] font-medium px-3 py-1.5 rounded-full active:scale-95 transition-all"
+              className="text-primary bg-primary-light border border-primary/10 text-[11px] font-bold px-3 py-2 rounded-[12px] active:scale-95 transition-all"
             >
               切回用户端
             </button>
          </div>
 
          {/* Core Stats */}
-         <div className="bg-gray-900 rounded-[1.2rem] p-5 text-white mb-2 shadow-md relative overflow-hidden">
+         <div className="hero-panel counselor-hero p-5 text-white mb-2">
            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
            <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
            
            <div className="flex justify-between items-center mb-5 relative z-10">
              <div className="flex flex-col">
-               <span className="text-white/70 text-[12px] font-medium mb-1">本月预估收入 (元)</span>
+               <span className="text-white/70 text-[11px] font-medium mb-1">本月服务收入 · 元</span>
                <div className="flex items-baseline">
-                 <span className="text-[28px] font-bold">2,450.00</span>
+               <span className="text-[30px] font-black tracking-tight">2,450</span><span className="ml-1 text-[12px] text-white/45">.00</span>
                </div>
              </div>
              <button 
                onClick={() => pushView("counselor-earnings" as any)}
+               aria-label="查看收入明细"
                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm active:scale-95"
              >
                <ChevronRight size={18} className="text-white" />
@@ -100,7 +102,7 @@ export function CounselorWorkbench() {
       <div className="px-4 pt-5 pb-12 w-full space-y-4">
         
         {/* Toggle Status */}
-        <div className="bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100">
+        <div className="ui-card p-4 flex items-center justify-between">
           <div className="flex items-center">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${counselorStatus === 'active' ? 'bg-green-50 text-green-500' : 'bg-gray-50 text-gray-400'}`}>
               <Power size={20} />
@@ -116,6 +118,8 @@ export function CounselorWorkbench() {
           </div>
           <button 
             onClick={() => setCounselorStatus(counselorStatus === 'active' ? 'paused' : 'active')}
+            aria-label={counselorStatus === 'active' ? '暂停接单' : '开启接单'}
+            aria-pressed={counselorStatus === 'active'}
             className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ${counselorStatus === 'active' ? 'bg-green-500' : 'bg-gray-200'}`}
           >
             <motion.div 
@@ -127,8 +131,8 @@ export function CounselorWorkbench() {
         </div>
 
         {/* Quick Links */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <h2 className="text-[15px] font-bold text-gray-900 mb-4 px-1">工作台捷径</h2>
+        <div className="ui-card p-4">
+          <div className="mb-4 flex items-center justify-between px-1"><h2 className="text-[15px] font-black text-gray-900">服务管理</h2><span className="text-[10px] font-bold text-gray-400">按今天优先级排列</span></div>
           <div className="grid grid-cols-4 gap-y-5 gap-x-2">
             {[
               { icon: MessageSquare, label: "待咨询", color: "text-blue-500", bg: "bg-blue-50", view: "appointments", badge: pendingOrdersCount, tab: "pending" },
@@ -152,7 +156,7 @@ export function CounselorWorkbench() {
                 }}
                 className="flex flex-col items-center active:scale-95 transition-transform relative"
               >
-                <div className={`w-12 h-12 ${item.bg} rounded-xl flex items-center justify-center mb-1.5 relative`}>
+                <div className={`soft-icon w-12 h-12 ${item.bg} flex items-center justify-center mb-2 relative`}>
                   <item.icon size={22} className={item.color} />
                   {item.badge ? (
                     <div className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">

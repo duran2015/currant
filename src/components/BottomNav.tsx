@@ -25,7 +25,7 @@ export function BottomNav() {
   const tabs = isCounselorMode ? counselorTabs : userTabs;
 
   return (
-    <div className="w-full shrink-0 h-20 bg-white/95 backdrop-blur-md border-t border-gray-100 flex pb-4 items-center justify-around z-30 relative">
+    <nav aria-label={isCounselorMode ? "咨询师主导航" : "用户主导航"} className="client-bottom-nav w-full shrink-0 min-h-[68px] flex px-2 items-start justify-around z-30 relative">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = currentTab === tab.id;
@@ -39,28 +39,28 @@ export function BottomNav() {
                 setTab(tab.id as any);
               }
             }}
-            className="flex flex-col items-center justify-center w-20 relative pt-2"
+            className={`nav-item flex flex-col items-center justify-center flex-1 min-w-0 relative py-1 ${isActive ? "is-active" : ""}`}
           >
             <div
-              className={`relative flex items-center justify-center h-8 w-8 mb-1 ${isActive ? "text-primary" : "text-gray-400"}`}
+              className={`relative flex items-center justify-center h-9 w-11 mb-0.5 rounded-[14px] ${isActive ? "text-primary" : "text-gray-400"}`}
             >
               <Icon strokeWidth={isActive ? 2.5 : 2} size={24} />
               {isActive && (
                 <motion.div
                   layoutId="bubble"
-                  className="absolute inset-0 bg-primary-light rounded-full -z-10"
+                  className="nav-active-mark absolute -z-10"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
             </div>
             <span
-              className={`text-[10px] ${isActive ? "text-primary font-medium" : "text-gray-400"}`}
+              className={`text-[10px] tracking-wide ${isActive ? "text-primary font-bold" : "text-gray-400 font-medium"}`}
             >
               {tab.label}
             </span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }

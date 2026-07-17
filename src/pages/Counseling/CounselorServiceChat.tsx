@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export function CounselorServiceChat() {
-  const { popView, pushView, selectedCounselorOrder } = useAppStore();
+  const { popView, pushView, selectedCounselorOrder, setSelectedCounselorOrder, setActiveCallSession, setIsCallMinimized } = useAppStore();
   
   // States
   const [inputText, setInputText] = useState("");
@@ -49,9 +49,18 @@ export function CounselorServiceChat() {
 
   // Mock order info
   const order = selectedCounselorOrder || {
+    id: "demo-service-chat",
+    counselorId: "c1",
     userName: "新用户",
     type: "text",
     time: "45"
+  };
+
+  const startCall = (type: "voice" | "video") => {
+    const callOrder = { ...order, type, status: "paid" };
+    setSelectedCounselorOrder(callOrder);
+    setIsCallMinimized(false);
+    setActiveCallSession(callOrder);
   };
 
   return (
@@ -85,10 +94,10 @@ export function CounselorServiceChat() {
             </div>
           </div>
           <div className="flex space-x-3">
-            <button className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50">
+            <button aria-label="发起语音通话" onClick={() => startCall("voice")} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50">
               <Phone size={20} />
             </button>
-            <button className="p-2 text-gray-300 rounded-full" onClick={() => alert("视频通话功能即将上线")}>
+            <button aria-label="发起视频通话" className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50" onClick={() => startCall("video")}>
               <Video size={20} />
             </button>
           </div>

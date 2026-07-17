@@ -69,12 +69,12 @@ export function CounselorProfileTab() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-[#f8f9fa] overflow-hidden relative w-full"
+      className="counselor-page flex flex-col h-full overflow-hidden relative w-full"
     >
       <div className="flex-1 overflow-y-auto w-full pb-28">
         
         {/* 1. 顶部个人信息卡 */}
-        <div className="bg-white px-4 pt-16 pb-6 shadow-sm border-b border-gray-100">
+        <div className="counselor-profile-head px-5 pt-16 pb-6 border-b">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center">
               <img 
@@ -93,7 +93,7 @@ export function CounselorProfileTab() {
                 </div>
               </div>
             </div>
-            <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-600">
+            <button aria-label="咨询师设置" className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-600">
               <Settings size={18} />
             </button>
           </div>

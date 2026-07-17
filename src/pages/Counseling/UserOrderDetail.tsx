@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store";
-import { ArrowLeft, MessageSquare, Video, Clock, Lock, ShieldAlert } from "lucide-react";
+import { ArrowLeft, MessageSquare, Video, Clock, Lock, ShieldAlert, CalendarX } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { MissingDataPage } from "../../components/EmptyState";
 
 export function UserOrderDetail() {
   const { popView, pushView, bookingOrder, updateOrder, setActiveCallSession, setIsCallMinimized } = useAppStore();
@@ -13,20 +14,22 @@ export function UserOrderDetail() {
     return () => clearInterval(timer);
   }, []);
 
-  if (!bookingOrder) return null;
-
   let paymentTimeLeft = 0;
-  if (bookingOrder.status === "pending" && bookingOrder.createdAt) {
+  if (bookingOrder?.status === "pending" && bookingOrder.createdAt) {
     const createdTime = new Date(bookingOrder.createdAt).getTime();
     const expiryTime = createdTime + 30 * 60000;
     paymentTimeLeft = Math.max(0, Math.floor((expiryTime - now.getTime()) / 1000));
   }
 
   useEffect(() => {
-    if (bookingOrder.status === "pending" && paymentTimeLeft === 0 && bookingOrder.createdAt) {
+    if (bookingOrder?.status === "pending" && paymentTimeLeft === 0 && bookingOrder.createdAt) {
       updateOrder(bookingOrder.id, { status: "cancelled" });
     }
-  }, [paymentTimeLeft, bookingOrder.status, bookingOrder.id, bookingOrder.createdAt, updateOrder]);
+  }, [paymentTimeLeft, bookingOrder?.status, bookingOrder?.id, bookingOrder?.createdAt, updateOrder]);
+
+  if (!bookingOrder) {
+    return <MissingDataPage icon={CalendarX} title="找不到这笔预约" description="订单可能已被清理或链接已经失效，可以返回预约列表重新查看。" onBack={popView} actionLabel="返回预约列表" />;
+  }
 
   const formatPaymentTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, "0");

@@ -3,9 +3,8 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, Wallet, Info, ArrowRight, CheckCircle2, Clock, Filter, AlertCircle } from "lucide-react";
 
-export function CounselorEarnings() {
+export function CounselorEarnings({ isTab = false }: { isTab?: boolean; key?: string }) {
   const { popView } = useAppStore();
-  const isTab = false; // Check if it's being rendered as a tab
   const [filter, setFilter] = useState("all");
 
   const [earningsData] = useState({
@@ -92,6 +91,7 @@ export function CounselorEarnings() {
         {!isTab ? (
           <button
             onClick={popView}
+            aria-label="返回"
             className="w-10 h-10 -ml-2 flex items-center justify-center active:bg-gray-50 rounded-full transition-colors"
           >
             <ChevronLeft size={24} className="text-gray-900" />
@@ -101,7 +101,7 @@ export function CounselorEarnings() {
         )}
         <span className="font-bold text-gray-900 text-[17px]">{isTab ? '我的收入' : '收入明细'}</span>
         <div className="w-10 flex justify-end">
-          <button className="text-gray-400 hover:text-gray-600">
+          <button aria-label="查看结算说明" className="text-gray-400 hover:text-gray-600">
             <Info size={20} />
           </button>
         </div>

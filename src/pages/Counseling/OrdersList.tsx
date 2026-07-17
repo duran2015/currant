@@ -10,6 +10,7 @@ import {
   Lock,
 } from "lucide-react";
 import { mockCounselors } from "../../data";
+import { EmptyState } from "../../components/EmptyState";
 
 export function OrdersList() {
   const { popView, pushView, orders, setBookingOrder, setSelectedCounselorId, appMode, activeOrderTab, setSelectedCounselorOrder } = useAppStore();
@@ -62,10 +63,13 @@ export function OrdersList() {
 
       <div className={`flex-1 overflow-y-auto p-4 ${isTab ? 'pb-28' : ''}`}>
         {displayOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <CalendarClock size={48} className="mb-4 text-gray-300" />
-            <p>暂无相关记录</p>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title="还没有预约订单"
+            description="找到合适的咨询师并完成预约后，服务时间和订单进度会显示在这里。"
+            actionLabel="去找咨询师"
+            onAction={() => pushView("counseling-entrance")}
+          />
         ) : (
           <div className="space-y-4">
             {displayOrders.map((order, ind) => {

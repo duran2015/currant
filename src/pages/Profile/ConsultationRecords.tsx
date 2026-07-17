@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useAppStore } from "../../store";
 import { ChevronLeft, MessageSquare, Mic, CalendarClock, ChevronRight, History } from "lucide-react";
 import { mockConsultationRecords, mockCounselors } from "../../data";
+import { EmptyState } from "../../components/EmptyState";
 
 export function ConsultationRecords() {
   const { popView, pushView, setSelectedConsultationId } = useAppStore();
@@ -37,10 +38,13 @@ export function ConsultationRecords() {
 
       <div className="flex-1 overflow-y-auto p-4">
         {mockConsultationRecords.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <History size={48} className="mb-4 text-gray-300" />
-            <p>暂无咨询记录</p>
-          </div>
+          <EmptyState
+            icon={History}
+            title="还没有沟通记录"
+            description="与咨询师完成文字或语音沟通后，可在这里回顾时间和服务信息。"
+            actionLabel="预约真人咨询"
+            onAction={() => pushView("counseling-entrance")}
+          />
         ) : (
           <div className="space-y-4">
             {mockConsultationRecords.map((record) => {

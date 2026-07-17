@@ -1,463 +1,221 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { useAppStore } from "../../store";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
+  BellRing,
+  CalendarClock,
+  CheckCircle2,
+  ChevronLeft,
+  Copy,
+  LockKeyhole,
+  MessageSquare,
   Mic,
   MicOff,
+  Minimize2,
   PhoneOff,
+  Send,
+  ShieldCheck,
+  SwitchCamera,
   Video as VideoIcon,
   VideoOff,
-  MessageSquare,
   Volume2,
-  ShieldAlert,
-  Loader2,
-  MoreVertical,
-  SwitchCamera,
-  Minimize2,
-  Send,
-  X
+  X,
 } from "lucide-react";
+import { useAppStore } from "../../store";
 import { mockCounselors, mockUser } from "../../data";
 
-type CallState = "connecting" | "in-call";
+type MeetingState = "lobby" | "waiting" | "in-call" | "ended";
 
 export function VoiceCall() {
-  const { popView, pushView, bookingOrder, selectedCounselorOrder, selectedCounselorId, isCallMinimized, setIsCallMinimized, setActiveCallSession, updateOrder } = useAppStore();
-  
-  // Determine roles and order context
-  const isCounselorView = !!selectedCounselorOrder;
+  const {
+    popView,
+    bookingOrder,
+    selectedCounselorOrder,
+    selectedCounselorId,
+    isCallMinimized,
+    setIsCallMinimized,
+    setActiveCallSession,
+    updateOrder,
+  } = useAppStore();
+
+  const isCounselorView = Boolean(selectedCounselorOrder);
   const order = isCounselorView ? selectedCounselorOrder : bookingOrder;
   const isVideo = order?.type === "video";
-  
-  const counselor = mockCounselors.find((c) => c.id === (order?.counselorId || selectedCounselorId)) || mockCounselors[0];
+  const counselor = mockCounselors.find((item) => item.id === (order?.counselorId || selectedCounselorId)) || mockCounselors[0];
   const user = mockUser;
+  const otherName = isCounselorView ? order?.userName || "小鹿用户3821" : counselor.name;
+  const otherAvatar = isCounselorView ? order?.avatar || user.avatar : counselor.avatar;
+  const selfAvatar = isCounselorView ? counselor.avatar : user.avatar;
+  const selfName = isCounselorView ? counselor.name : user.name || "我";
+  const selfRole = isCounselorView ? "咨询师" : "用户";
+  const otherRole = isCounselorView ? "用户" : "咨询师";
+  const roomNumber = `KL-${String(order?.id || "849201").replace(/\D/g, "").slice(-6).padStart(6, "0")}`;
 
-  const [callState, setCallState] = useState<CallState>("connecting");
+  const [meetingState, setMeetingState] = useState<MeetingState>("lobby");
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(!isVideo);
   const [speaker, setSpeaker] = useState(true);
   const [duration, setDuration] = useState(0);
   const [showChat, setShowChat] = useState(false);
+  const [notice, setNotice] = useState("");
   const [messages, setMessages] = useState<{ id: string; sender: "me" | "other"; text: string; time: string }[]>([]);
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (meetingState !== "waiting") return;
+    const joinTimer = setTimeout(() => setMeetingState("in-call"), 6000);
+    return () => clearTimeout(joinTimer);
+  }, [meetingState]);
+
+  useEffect(() => {
+    if (meetingState !== "in-call") return;
+    const timer = setInterval(() => setDuration((value) => value + 1), 1000);
+    return () => clearInterval(timer);
+  }, [meetingState]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(""), 1600);
+    return () => clearTimeout(timer);
+  }, [notice]);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, showChat]);
 
-  useEffect(() => {
-    // Simulate connection delay
-    const connectTimer = setTimeout(() => {
-      setCallState("in-call");
-    }, 2000);
+  const formatTime = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
 
-    return () => clearTimeout(connectTimer);
-  }, []);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (callState === "in-call") {
-      timer = setInterval(() => {
-        setDuration((d) => d + 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [callState]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
-  const handleHangup = () => {
+  const leaveMeeting = () => {
     setActiveCallSession(null);
-    if (order) {
-      updateOrder(order.id, { status: "completed" });
-    }
     setIsCallMinimized(false);
     popView();
   };
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-    const newMsg = {
-      id: Date.now().toString(),
-      sender: "me" as const,
-      text: inputValue.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    setMessages([...messages, newMsg]);
-    setInputValue("");
-    
-    // Simulate reply
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          sender: "other",
-          text: isCounselorView ? "收到，请继续讲。" : "好的，我看到了。",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    }, 1000);
+  const endMeeting = () => {
+    if (order?.id) updateOrder(order.id, { status: "completed", callDuration: duration });
+    setMeetingState("ended");
+    setShowChat(false);
+    setIsCallMinimized(false);
   };
 
-  if (isCallMinimized) {
+  const sendMessage = () => {
+    const value = inputValue.trim();
+    if (!value) return;
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setMessages((items) => [...items, { id: `${Date.now()}-me`, sender: "me", text: value, time }]);
+    setInputValue("");
+    setTimeout(() => {
+      setMessages((items) => [...items, { id: `${Date.now()}-other`, sender: "other", text: isCounselorView ? "收到，我们继续。" : "我看到了，我们慢慢聊。", time }]);
+    }, 900);
+  };
+
+  if (isCallMinimized && meetingState !== "lobby" && meetingState !== "ended") {
     return (
-      <motion.div
+      <motion.button
         drag
         dragConstraints={{ left: 10, right: 300, top: 50, bottom: 700 }}
-        dragElastic={0.1}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="absolute top-20 right-4 w-24 h-32 bg-gray-900 rounded-2xl shadow-2xl z-[200] overflow-hidden border-2 border-white/20 flex flex-col items-center justify-center"
         onClick={() => setIsCallMinimized(false)}
+        aria-label="返回预约会议室"
+        className="absolute right-4 top-20 z-[200] h-32 w-24 overflow-hidden rounded-2xl border-2 border-white/20 bg-[#17382d] shadow-2xl"
       >
-        {isVideo && !cameraOff ? (
-          <img 
-            src={isCounselorView ? counselor.avatar : user.avatar} 
-            alt="Self Stream" 
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-indigo-900/80 flex flex-col items-center justify-center">
-            <img 
-              src={isCounselorView ? user.avatar : counselor.avatar} 
-              alt="Avatar" 
-              className="w-10 h-10 rounded-full border-2 border-white/30 object-cover shadow-lg mb-2"
-            />
-            {callState === "connecting" ? (
-              <Loader2 size={14} className="text-white/70 animate-spin" />
-            ) : (
-              <span className="text-[10px] text-white/90 font-mono bg-black/40 px-2 py-0.5 rounded-full">{formatTime(duration)}</span>
-            )}
+        <img src={otherAvatar} alt={otherName} className="h-full w-full object-cover opacity-55" />
+        <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 to-transparent p-2 text-white">
+          <span className="text-[10px] font-bold">{meetingState === "waiting" ? "等待加入" : formatTime(duration)}</span>
+        </div>
+      </motion.button>
+    );
+  }
+
+  if (meetingState === "lobby") {
+    return (
+      <div className="absolute inset-0 z-[100] flex flex-col overflow-hidden bg-[#f7f6f1]">
+        <div className="flex items-center justify-between px-5 pb-4 pt-12">
+          <button onClick={leaveMeeting} aria-label="退出会议室" className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-700 shadow-sm"><ChevronLeft size={22} /></button>
+          <div className="text-center"><div className="text-[15px] font-black text-gray-900">预约咨询会议室</div><div className="mt-0.5 text-[10px] font-bold tracking-wider text-gray-400">{roomNumber}</div></div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light text-primary"><LockKeyhole size={18} /></div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 pb-6">
+          <div className="hero-panel mb-4 p-5">
+            <div className="relative z-10 mb-4 flex items-center justify-between"><div><div className="text-[11px] font-bold text-white/55">{order?.date || "今天"} · {order?.time || "预约时间"}</div><h1 className="mt-1 text-[20px] font-black">{isVideo ? "视频咨询" : "语音咨询"}</h1></div><CalendarClock size={28} className="text-white/60" /></div>
+            <div className="relative z-10 flex items-center rounded-2xl bg-black/10 p-3">
+              <img src={otherAvatar} alt={otherName} className="mr-3 h-11 w-11 rounded-[14px] border border-white/20 object-cover" />
+              <div><div className="text-[13px] font-bold text-white">与 {otherName} 会面</div><div className="mt-0.5 text-[10px] text-white/55">双方进入后才开始计算咨询时长</div></div>
+            </div>
           </div>
-        )}
+
+          <div className="mb-5 flex items-start rounded-[18px] border border-blue-100 bg-blue-50/70 p-4"><ShieldCheck size={18} className="mr-3 mt-0.5 shrink-0 text-blue-600" /><p className="text-[11px] leading-5 text-blue-800">会议室仅限本次预约双方进入，通话内容默认不录音、不录像。请确认当前环境安静且私密。</p></div>
+          <button onClick={() => setMeetingState("waiting")} className="w-full rounded-[18px] bg-primary py-4 text-[14px] font-black text-white shadow-[0_12px_28px_rgba(50,116,92,.24)]">进入预约会议室</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (meetingState === "ended") {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#f7f6f1] p-7 text-center">
+        <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-[26px] bg-primary-light text-primary"><CheckCircle2 size={38} /></div>
+        <h1 className="text-[22px] font-black text-gray-900">本次会议已结束</h1>
+        <p className="mt-2 text-[13px] leading-6 text-gray-500">双方已离开预约会议室，通话时长 {formatTime(duration)}</p>
+        <div className="ui-card mt-7 w-full p-4 text-left"><div className="flex justify-between border-b border-gray-100 pb-3 text-[12px]"><span className="text-gray-500">会议号</span><span className="font-bold text-gray-800">{roomNumber}</span></div><div className="flex justify-between pt-3 text-[12px]"><span className="text-gray-500">服务状态</span><span className="font-bold text-primary">已完成</span></div></div>
+        <button onClick={leaveMeeting} className="mt-6 w-full rounded-[18px] bg-primary py-4 text-[14px] font-black text-white">返回预约详情</button>
       </motion.div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="flex flex-col items-center justify-between h-full absolute inset-0 z-[100] bg-[#1a1c23] overflow-hidden"
-    >
-      {/* Background for Voice Mode */}
-      {!isVideo && (
-        <div className="absolute inset-0 bg-indigo-900/20 blur-[100px] opacity-60" />
-      )}
-      
-      {/* Video Background for Video Mode (Main Stream) */}
-      {isVideo && callState === "in-call" && !cameraOff && (
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={isCounselorView ? user.avatar : counselor.avatar} 
-            alt="Main Stream" 
-            className="w-full h-full object-cover opacity-80"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
-        </div>
-      )}
-
-      {/* Top Bar Navigation */}
-      <div className="relative z-20 w-full flex justify-between items-center px-4 pt-14 pb-4">
-        <button
-          onClick={() => setIsCallMinimized(true)}
-          className="w-10 h-10 flex items-center justify-center text-white/70 active:bg-white/10 rounded-full transition-colors"
-        >
-          <Minimize2 size={22} />
-        </button>
-        
-        <div className="flex flex-col items-center">
-            <div className="flex bg-white/10 rounded-full px-2.5 py-1 space-x-1.5 items-center backdrop-blur-md mb-1">
-              <ShieldAlert size={12} className="text-green-400" />
-              <span className="text-[10px] text-white/90 font-medium tracking-wide">
-                会议号: 849 201 394
-              </span>
-            </div>
-            <span className="text-[12px] text-white/60 font-medium tracking-widest font-mono mt-0.5">
-              {callState === "connecting" ? "连接中..." : formatTime(duration)}
-            </span>
-          </div>
-
-        <button className="w-10 h-10 flex items-center justify-center text-white/70 active:bg-white/10 rounded-full">
-          {isVideo ? <SwitchCamera size={20} /> : <MoreVertical size={20} />}
-        </button>
+    <motion.div data-meeting-room initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-[#15271f] text-white">
+      <div className="relative z-20 flex items-center justify-between px-4 pb-4 pt-12">
+        <button onClick={() => setIsCallMinimized(true)} aria-label="最小化会议" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"><Minimize2 size={20} /></button>
+        <div className="text-center"><div className="flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold"><LockKeyhole size={11} className="mr-1.5 text-green-300" />预约会议 · {roomNumber}</div><div className="mt-2 text-[12px] font-mono text-white/65">{meetingState === "waiting" ? "1/2 人已入会" : formatTime(duration)}</div></div>
+        <button onClick={() => { setNotice("已切换摄像头"); }} aria-label="切换摄像头" className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ${isVideo ? "" : "invisible"}`}><SwitchCamera size={20} /></button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full px-8">
-        
-        {/* Voice Mode Layout */}
-        {!isVideo && (
-            <div className="flex flex-col items-center space-y-12 mt-4">
-              <div className="flex items-center space-x-6">
-                {/* User Avatar */}
-                <div className="relative">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-[84px] h-[84px] rounded-full border-[1.5px] border-white/20 object-cover relative z-10"
-                  />
-                </div>
-                
-                {/* Connection Animation */}
-                <div className="flex space-x-1.5 px-2">
-                  {[...Array(3)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
-                      className="w-1.5 h-1.5 rounded-full bg-white/40"
-                    />
-                  ))}
-                </div>
- 
-                {/* Counselor Avatar */}
-                <div className="relative">
-                  <AnimatePresence>
-                    {callState === "in-call" && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: [1, 1.2, 1] }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 2.5,
-                          ease: "easeInOut",
-                        }}
-                        className="absolute inset-0 bg-indigo-500/40 rounded-full blur-md"
-                      />
-                    )}
-                  </AnimatePresence>
-                  <img
-                    src={counselor.avatar}
-                    alt={counselor.name}
-                    className="w-[84px] h-[84px] rounded-full border-[2px] border-indigo-400/80 object-cover shadow-[0_0_20px_rgba(99,102,241,0.3)] relative z-10"
-                  />
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <h1 className="text-[24px] font-bold text-white mb-2">
-                  {isCounselorView ? order?.userName : counselor.name}
-                </h1>
-                {callState === "connecting" && (
-                  <div className="flex items-center justify-center text-white/60 space-x-2 mt-1">
-                    <span className="text-[13px] font-medium tracking-wide">
-                      等待对方加入会议...
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+      <AnimatePresence>{notice && <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="absolute left-1/2 top-28 z-50 -translate-x-1/2 rounded-full bg-black/55 px-4 py-2 text-[11px] backdrop-blur-md">{notice}</motion.div>}</AnimatePresence>
 
-        {/* Video Mode Layout (PIP) */}
-        {isVideo && callState === "in-call" && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="absolute bottom-8 right-6 w-28 h-40 bg-gray-800 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 z-30"
-          >
-            {cameraOff ? (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center mb-2">
-                  <VideoOff size={16} className="text-gray-400" />
-                </div>
-                <span className="text-[10px] text-gray-400">摄像头已关</span>
-              </div>
-            ) : (
-              <img 
-                src={isCounselorView ? counselor.avatar : user.avatar} 
-                alt="Self Stream" 
-                className="w-full h-full object-cover"
-              />
-            )}
-          </motion.div>
-        )}
-        
-        {isVideo && callState === "connecting" && (
-          <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mb-6 backdrop-blur-md">
-              <VideoIcon size={32} className="text-white/50" />
-            </div>
-            <div className="flex items-center justify-center text-white/80 space-x-2">
-              <Loader2 size={18} className="animate-spin" />
-              <span className="text-[15px] font-medium tracking-wide">
-                等待对方加入视频会议...
-              </span>
-            </div>
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-6 text-center">
+        {meetingState === "waiting" ? <div className="flex h-full w-full flex-col pb-2">
+          <div className="mb-3 flex items-center justify-between rounded-[16px] border border-white/10 bg-white/[0.06] px-3 py-2.5 text-left">
+            <div><div className="text-[11px] font-black">会议已开放</div><div className="mt-0.5 text-[9px] text-white/40">{order?.date || "今天"} {order?.time || "预约时间"} · {isVideo ? "视频咨询" : "语音咨询"}</div></div>
+            <button onClick={() => setNotice("会议信息已复制")} className="flex items-center rounded-[10px] bg-white/10 px-2.5 py-2 text-[9px] font-bold text-white/70"><Copy size={12} className="mr-1" />复制信息</button>
           </div>
-        )}
+          <div className="grid min-h-0 flex-1 grid-rows-2 gap-2">
+          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[22px] border border-green-300/20 bg-[#243b32]">
+            <img src={selfAvatar} alt={selfName} className="mb-3 h-20 w-20 rounded-[24px] object-cover" />
+            <div className="text-[13px] font-black">{selfName}</div>
+            <div className="mt-1 flex items-center text-[10px] font-bold text-green-300"><span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-400" />{selfRole} · 已进入</div>
+          </div>
+          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[22px] border border-dashed border-white/15 bg-white/[0.04]">
+            <img src={otherAvatar} alt={otherName} className="mb-3 h-20 w-20 rounded-[24px] object-cover opacity-35 grayscale" />
+            <div className="text-[13px] font-black text-white/55">{otherName}</div>
+            <div className="mt-1 text-[10px] font-bold text-white/35">{otherRole} · 待加入</div>
+            <button onClick={() => setNotice(`已提醒${otherName}加入会议`)} className="mt-4 flex items-center rounded-full bg-white/10 px-4 py-2 text-[10px] font-bold text-white/65"><BellRing size={13} className="mr-1.5" />提醒对方</button>
+          </div>
+          </div>
+        </div> : !isVideo ? <><div className="mb-8 flex items-center gap-5"><img src={selfAvatar} alt="我" className="h-20 w-20 rounded-[26px] border-2 border-white/15 object-cover" /><div className="flex gap-1">{[0,1,2].map((i) => <motion.span key={i} animate={{ opacity: [.25,1,.25], height: [6,18,6] }} transition={{ repeat: Infinity, delay: i*.16 }} className="w-1 rounded-full bg-green-300" />)}</div><img src={otherAvatar} alt={otherName} className="h-20 w-20 rounded-[26px] border-2 border-green-300/40 object-cover" /></div><h1 className="text-[22px] font-black">正在与 {otherName} 进行语音咨询</h1><p className="mt-2 text-[12px] text-white/50">双方已进入 · 会议已加密</p></> : <div className="grid h-full w-full grid-rows-2 gap-2 pb-2">
+          <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[#243b32]">
+            <img src={otherAvatar} alt={`${otherName}的视频画面`} className="h-full w-full object-cover opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+            <div className="absolute bottom-3 left-3 flex items-center rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-bold backdrop-blur-md"><span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-400" />{otherName} · {otherRole}</div>
+          </div>
+          <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[#243b32]">
+            {cameraOff ? <div className="flex h-full flex-col items-center justify-center"><img src={selfAvatar} alt={selfName} className="mb-2 h-16 w-16 rounded-[20px] object-cover opacity-75" /><span className="text-[10px] text-white/45">摄像头已关闭</span></div> : <img src={selfAvatar} alt={`${selfName}的视频画面`} className="h-full w-full object-cover opacity-80" />}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+            <div className="absolute bottom-3 left-3 flex items-center rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-bold backdrop-blur-md">{muted ? <MicOff size={11} className="mr-1.5 text-orange-300" /> : <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-400" />}{selfName} · {selfRole}</div>
+          </div>
+        </div>}
       </div>
 
-      {/* Bottom Controls */}
-        <div className="relative z-30 w-full px-8 pb-12 pt-6 bg-gradient-to-t from-black/80 to-transparent">
-          <div className="flex items-center justify-between max-w-sm mx-auto">
-            {/* Mute Button */}
-            <button
-              onClick={() => setMuted(!muted)}
-              className="flex flex-col items-center space-y-2 w-16"
-            >
-              <div
-                className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors ${
-                  muted ? "bg-white/90 text-black" : "bg-white/10 text-white backdrop-blur-md border border-white/10"
-                }`}
-              >
-                {muted ? <MicOff size={24} /> : <Mic size={24} />}
-              </div>
-              <span className="text-[12px] text-white/80 font-medium">
-                {muted ? "解除静音" : "静音"}
-              </span>
-            </button>
-
-            {isVideo && (
-              <button
-                onClick={() => setCameraOff(!cameraOff)}
-                className="flex flex-col items-center space-y-2 w-16"
-              >
-                <div
-                  className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors ${
-                    cameraOff ? "bg-white/90 text-black" : "bg-white/10 text-white backdrop-blur-md border border-white/10"
-                  }`}
-                >
-                  {cameraOff ? <VideoOff size={24} /> : <VideoIcon size={24} />}
-                </div>
-                <span className="text-[12px] text-white/80 font-medium">
-                  {cameraOff ? "开启视频" : "关闭视频"}
-                </span>
-              </button>
-            )}
-            
-            {!isVideo && (
-              <button
-                className="flex flex-col items-center space-y-2 w-16"
-              >
-                <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-white/10 text-white backdrop-blur-md border border-white/10">
-                  <Volume2 size={24} />
-                </div>
-                <span className="text-[12px] text-white/80 font-medium">
-                  免提
-                </span>
-              </button>
-            )}
-
-            {/* Chat Button */}
-            <button
-              onClick={() => setShowChat(true)}
-              className="flex flex-col items-center space-y-2 w-16 relative"
-            >
-              <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-white/10 text-white backdrop-blur-md border border-white/10 relative">
-                <MessageSquare size={24} />
-                {messages.length > 0 && messages[messages.length - 1].sender === "other" && !showChat && (
-                  <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1a1c23]" />
-                )}
-              </div>
-              <span className="text-[12px] text-white/80 font-medium">
-                聊天
-              </span>
-            </button>
-
-            {/* Hangup Button */}
-            <button
-              onClick={handleHangup}
-              className="flex flex-col items-center space-y-2 w-16"
-            >
-              <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center bg-[#FF3B30] text-white shadow-lg shadow-red-500/30 active:scale-95 transition-transform">
-                <PhoneOff size={24} />
-              </div>
-              <span className="text-[12px] text-white/80 font-medium">
-                挂断
-              </span>
-            </button>
-          </div>
+      <div className="relative z-30 shrink-0 bg-gradient-to-t from-black/80 to-transparent px-6 pb-10 pt-4">
+        <div className="mx-auto flex max-w-sm items-center justify-around">
+          <button onClick={() => setMuted(!muted)} aria-label={muted ? "解除静音" : "静音"} className="flex w-16 flex-col items-center gap-2"><span className={`flex h-14 w-14 items-center justify-center rounded-full ${muted ? "bg-white text-black" : "bg-white/12"}`}>{muted ? <MicOff /> : <Mic />}</span><span className="text-[10px] text-white/70">{muted ? "解除静音" : "静音"}</span></button>
+          {isVideo ? <button onClick={() => setCameraOff(!cameraOff)} aria-label={cameraOff ? "开启视频" : "关闭视频"} className="flex w-16 flex-col items-center gap-2"><span className={`flex h-14 w-14 items-center justify-center rounded-full ${cameraOff ? "bg-white text-black" : "bg-white/12"}`}>{cameraOff ? <VideoOff /> : <VideoIcon />}</span><span className="text-[10px] text-white/70">视频</span></button> : <button onClick={() => setSpeaker(!speaker)} aria-label="切换免提" className="flex w-16 flex-col items-center gap-2"><span className={`flex h-14 w-14 items-center justify-center rounded-full ${speaker ? "bg-white text-black" : "bg-white/12"}`}><Volume2 /></span><span className="text-[10px] text-white/70">免提</span></button>}
+          {meetingState === "waiting" ? <button onClick={() => setNotice(`已提醒${otherName}加入会议`)} aria-label="提醒对方加入" className="flex w-16 flex-col items-center gap-2"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/12"><BellRing /></span><span className="text-[10px] text-white/70">提醒</span></button> : <button onClick={() => setShowChat(true)} aria-label="会议聊天" className="flex w-16 flex-col items-center gap-2"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/12"><MessageSquare /></span><span className="text-[10px] text-white/70">聊天</span></button>}
+          <button onClick={meetingState === "waiting" ? leaveMeeting : endMeeting} aria-label={meetingState === "waiting" ? "离开会议室" : "结束会议"} className="flex w-16 flex-col items-center gap-2"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-500 shadow-lg shadow-red-900/30"><PhoneOff /></span><span className="text-[10px] text-white/70">{meetingState === "waiting" ? "离开" : "结束"}</span></button>
         </div>
+      </div>
 
-      {/* Chat Overlay */}
-      <AnimatePresence>
-        {showChat && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute inset-0 z-[110] bg-[#1a1c23]/95 backdrop-blur-lg flex flex-col"
-          >
-            {/* Chat Header */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
-              <h2 className="text-white font-medium">会议聊天</h2>
-              <button
-                onClick={() => setShowChat(false)}
-                className="w-8 h-8 flex items-center justify-center text-white/70 active:bg-white/10 rounded-full"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Messages List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
-              {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-white/40">
-                  <MessageSquare size={32} className="mb-2 opacity-50" />
-                  <span className="text-[13px]">暂无聊天记录</span>
-                  <span className="text-[11px] mt-1">这里发送的消息仅在会议中可见</span>
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}
-                  >
-                    <span className="text-[10px] text-white/40 mb-1 px-1">{msg.sender === "me" ? "我" : (isCounselorView ? order?.userName : counselor.name)} {msg.time}</span>
-                    <div
-                      className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed ${
-                        msg.sender === "me"
-                          ? "bg-indigo-500 text-white rounded-tr-sm"
-                          : "bg-white/10 text-white/90 rounded-tl-sm"
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Chat Input */}
-            <div className="p-4 bg-black/20 border-t border-white/5">
-              <div className="flex items-center bg-white/10 rounded-full p-1 border border-white/10">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  placeholder="输入消息..."
-                  className="flex-1 bg-transparent text-white placeholder-white/40 px-4 text-[14px] outline-none"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim()}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                    inputValue.trim() ? "bg-indigo-500 text-white" : "bg-white/5 text-white/30"
-                  }`}
-                >
-                  <Send size={16} className={inputValue.trim() ? "ml-0.5" : ""} />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{showChat && <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="absolute inset-0 z-[110] flex flex-col bg-[#17241f]/98 backdrop-blur-xl"><div className="flex items-center justify-between border-b border-white/10 px-5 py-4 pt-12"><div><h2 className="font-black">会议内聊天</h2><p className="mt-1 text-[10px] text-white/40">仅本次预约双方可见</p></div><button onClick={() => setShowChat(false)} aria-label="关闭聊天" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10"><X /></button></div><div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">{messages.length === 0 && <div className="flex h-full flex-col items-center justify-center text-white/35"><MessageSquare className="mb-3" /><span className="text-[12px]">还没有会议消息</span></div>}{messages.map((msg) => <div key={msg.id} className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"}`}><span className="mb-1 text-[9px] text-white/35">{msg.sender === "me" ? "我" : otherName} · {msg.time}</span><div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[13px] ${msg.sender === "me" ? "bg-primary text-white" : "bg-white/10 text-white/90"}`}>{msg.text}</div></div>)}</div><div className="border-t border-white/10 p-4"><div className="flex rounded-full bg-white/10 p-1"><input aria-label="会议消息" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="输入会议消息" className="flex-1 bg-transparent px-4 text-[13px] text-white outline-none placeholder:text-white/30" /><button onClick={sendMessage} aria-label="发送消息" disabled={!inputValue.trim()} className="flex h-9 w-9 items-center justify-center rounded-full bg-primary disabled:opacity-30"><Send size={16} /></button></div></div></motion.div>}</AnimatePresence>
     </motion.div>
   );
 }

@@ -7,6 +7,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAppStore } from "../../store";
+import { EmptyState } from "../../components/EmptyState";
 
 export function AssessmentRecords() {
   const { popView, pushView, assessmentRecords } = useAppStore();
@@ -35,9 +36,14 @@ export function AssessmentRecords() {
         <div className="p-4 space-y-4">
           <div className="space-y-3 mt-2">
             {assessmentRecords.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-gray-400 text-sm">暂无测评记录</p>
-              </div>
+              <EmptyState
+                compact
+                icon={FileSpreadsheet}
+                title="还没有测评记录"
+                description="完成一次专业量表，了解最近的情绪状态与变化趋势。"
+                actionLabel="开始心理测评"
+                onAction={() => pushView("mini-assessment-home")}
+              />
             ) : (
               assessmentRecords.map((record) => (
                 <button

@@ -70,6 +70,7 @@ import { AIRecommendation } from "./pages/Counseling/AIRecommendation";
 import { AISummarySync } from "./pages/Counseling/AISummarySync";
 import { CounselingEntrance } from "./pages/Counseling/CounselingEntrance";
 import { CounselorList } from "./pages/Counseling/CounselorList";
+import { WorkBuddyTest } from "./pages/Main/WorkBuddyTest";
 
 function ViewManager() {
   const { viewStack, activeCallSession, appMode } = useAppStore();
@@ -103,7 +104,9 @@ function ViewManager() {
 
 
       {/* Sub views stacked above Main Layout absolutely */}
+      {currentView === "counseling-booking" && <Booking key="counseling_booking" />}
       {currentView === "booking-confirm" && <BookingConfirm key="booking_confirm" />}
+      {currentView === "counseling-booking-confirm" && <BookingConfirm key="counseling_booking_confirm" />}
       {currentView === "pre-questionnaire" && <PreCounselingQuestionnaire key="pre_q" />}
       {currentView === "ai-chat" && (
         <div className="absolute inset-0 z-50 bg-white">
@@ -171,6 +174,7 @@ function ViewManager() {
       {currentView === "meditation" && <MeditationTool key="tool_meditation" />}
       {currentView === "sleep-guide" && <SleepGuideTool key="tool_sleep" />}
       {currentView === "bubble-wrap" && <BubbleWrapTool key="tool_bubble" />}
+      {currentView === "work-buddy-test" && <WorkBuddyTest key="work_buddy_test" />}
     </AnimatePresence>
     {activeCallSession && <VoiceCall />}
     </>
