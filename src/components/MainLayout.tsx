@@ -12,6 +12,7 @@ import { CounselorOrdersList } from "../pages/Counseling/CounselorOrdersList";
 import { CounselorEarnings } from "../pages/Counseling/CounselorEarnings";
 import { CounselorClientsTab } from "../pages/Counseling/CounselorClientsTab";
 import { CounselorProfileTab } from "../pages/Counseling/CounselorProfileTab";
+import { CounselorGrowthCenter } from "../pages/Counseling/CounselorGrowthCenter";
 import { Users, Wallet } from "lucide-react";
 
 export function MainLayout() {
@@ -23,9 +24,10 @@ export function MainLayout() {
       <div className="flex-1 relative overflow-hidden flex flex-col">
         <AnimatePresence mode="wait">
           {currentTab === "home" && (isCounselorMode ? <CounselorWorkbench key="counselor-home" /> : <HomeTab key="home" />)}
-          {currentTab === "messages" && !isCounselorMode && <MessagesTab key="messages" />}
+          {currentTab === "messages" && <MessagesTab key="messages" />}
           {currentTab === "profile" && (isCounselorMode ? <CounselorProfileTab key="counselor-profile" /> : <ProfileTab key="profile" />)}
           {currentTab === "appointments" && isCounselorMode && <CounselorOrdersList key="appointments" isTab />}
+          {currentTab === "growth" && isCounselorMode && <CounselorGrowthCenter key="growth" isTab />}
           {currentTab === "clients" && isCounselorMode && <CounselorClientsTab key="clients" />}
           {currentTab === "earnings" && isCounselorMode && <CounselorEarnings key="earnings" isTab />}
         </AnimatePresence>

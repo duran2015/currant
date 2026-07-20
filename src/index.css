@@ -164,6 +164,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .counselor-metrics .text-gray-900, .counselor-metrics .text-orange-500, .counselor-metrics .text-blue-500 { color: white; }
 .counselor-metrics .text-gray-500 { color: rgba(255,255,255,.58); }
 .counselor-profile-head { background: linear-gradient(180deg, #f8faf9, #eef4f1); border-color: var(--line); }
+.platform-ticker > span {
+  display: inline-block;
+  min-width: max-content;
+  padding-left: 100%;
+  animation: platform-ticker 12s linear infinite;
+}
+@keyframes platform-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
 
 /* A quiet state-track signature: records connect instead of floating as unrelated cards. */
 .mode-user [class*="overflow-x-auto"] > [class*="snap-end"] { position: relative; }
@@ -203,4 +213,5 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .platform-ticker > span { padding-left: 0; transform: none; }
 }

@@ -71,6 +71,7 @@ import { AISummarySync } from "./pages/Counseling/AISummarySync";
 import { CounselingEntrance } from "./pages/Counseling/CounselingEntrance";
 import { CounselorList } from "./pages/Counseling/CounselorList";
 import { WorkBuddyTest } from "./pages/Main/WorkBuddyTest";
+import { CounselorGrowthCenter } from "./pages/Counseling/CounselorGrowthCenter";
 
 function ViewManager() {
   const { viewStack, activeCallSession, appMode } = useAppStore();
@@ -161,6 +162,7 @@ function ViewManager() {
       {currentView === "counselor-account-security" && (
         <CounselorAccountSecurity key="counselor_account_security" />
       )}
+      {currentView === "counselor-growth-center" && <CounselorGrowthCenter key="counselor_growth_center" />}
       {currentView === "delete-account" && <DeleteAccount key="delete_account" />}
       
       {currentView === "ai-recommendation" && <AIRecommendation key="ai_rec" />}

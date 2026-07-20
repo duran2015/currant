@@ -47,15 +47,15 @@ export function MessagesTab() {
     >
       <div className="page-header flex items-end justify-between">
         <div>
-          <div className="page-kicker mb-1">CONVERSATIONS</div>
+          <div className="page-kicker mb-1">{isCounselorMode ? "SERVICE INBOX" : "CONVERSATIONS"}</div>
           <h1 className="page-title">消息</h1>
         </div>
-        <div className="rounded-full bg-primary-light px-3 py-1.5 text-[11px] font-bold text-primary">随时陪伴</div>
+        <div className="rounded-full bg-primary-light px-3 py-1.5 text-[11px] font-bold text-primary">{isCounselorMode ? "用户沟通与通知" : "随时陪伴"}</div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
         {/* Group 1: AI 倾诉分组 */}
-        <div className="mb-6">
+        {!isCounselorMode && <div className="mb-6">
           <h2 className="section-label mb-3 px-1">AI 倾诉</h2>
           
           <button
@@ -82,13 +82,29 @@ export function MessagesTab() {
               </div>
             </div>
           </button>
-        </div>
+        </div>}
+
+        {isCounselorMode && (
+          <div className="mb-6">
+            <h2 className="section-label mb-3 px-1">平台消息</h2>
+            <button onClick={() => pushView("notifications-list")} className="ui-card ui-row w-full p-4 flex items-center">
+              <div className="relative mr-4 shrink-0">
+                <div className="soft-icon w-12 h-12 bg-[#557b91] flex items-center justify-center text-white shadow-inner"><Bell size={24} /></div>
+                {mockNotifications.some(n => !n.isRead) && <div className="status-dot absolute bottom-0 right-0 w-3 h-3 bg-[#d95c5c] rounded-full" />}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <div className="mb-1 flex items-center justify-between"><div className="flex items-center gap-2"><h3 className="font-bold text-gray-900 text-[16px]">平台通知</h3><span className="rounded border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600">官方</span></div><span className="text-[11px] text-gray-400">今天</span></div>
+                <p className="line-clamp-1 text-[13px] text-gray-500">预约变更、审核结果、结算与风险提醒</p>
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* Group 2: 咨询服务分组 */}
         <div>
-          <h2 className="section-label mb-3 px-1">咨询服务</h2>
+          <h2 className="section-label mb-3 px-1">{isCounselorMode ? "用户沟通" : "咨询服务"}</h2>
 
-          <div className="hero-panel mb-4 p-4">
+          {!isCounselorMode && <div className="hero-panel mb-4 p-4">
             <div className="relative z-10 mb-3 flex items-center justify-between">
               <div>
                 <div className="text-[14px] font-black text-white">通话体验室</div>
@@ -104,10 +120,10 @@ export function MessagesTab() {
                 <Video size={16} className="mr-2" />模拟视频通话
               </button>
             </div>
-          </div>
+          </div>}
 
           {/* System Notifications Chat */}
-          <button
+          {!isCounselorMode && <button
             onClick={() => pushView("notifications-list")}
             className="ui-card ui-row w-full p-4 flex items-center mb-3"
           >
@@ -137,10 +153,10 @@ export function MessagesTab() {
                 </p>
               </div>
             </div>
-          </button>
+          </button>}
 
           {/* Crisis Intervention Channel (Highest Priority) */}
-          {user.hasRisk && (
+          {!isCounselorMode && user.hasRisk && (
             <button
               onClick={() => pushView("counseling-text-chat")}
               className="w-full bg-[#FFF0F0] p-4 rounded-2xl flex items-center shadow-sm border border-red-100 active:scale-[0.98] transition-transform mb-3 relative overflow-hidden"
@@ -234,7 +250,7 @@ export function MessagesTab() {
             );
           })}
           
-          {chats.length === 0 && !user.hasRisk && (
+          {chats.length === 0 && (!user.hasRisk || isCounselorMode) && (
             <div className="pt-10 flex flex-col items-center justify-center text-gray-400">
               <div className="text-4xl mb-3 opacity-50">💭</div>
               <p className="text-[13px]">暂无沟通记录</p>

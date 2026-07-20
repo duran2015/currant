@@ -47,6 +47,7 @@ export type AppView =
   | "counselor-clients-tab"
   | "counselor-profile-tab"
   | "counselor-account-security"
+  | "counselor-growth-center"
   | "notifications-list"
   | "notification-detail"
   | "consultation-records"
@@ -65,7 +66,7 @@ export type AppView =
   | "counseling-entrance"
   | "counselor-list";
 
-export type AppTab = "home" | "counseling" | "messages" | "profile" | "appointments" | "clients" | "earnings";
+export type AppTab = "home" | "counseling" | "messages" | "profile" | "appointments" | "growth" | "clients" | "earnings";
 
 export interface UserProfile {
   id: string;

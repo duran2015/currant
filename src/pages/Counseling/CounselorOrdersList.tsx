@@ -35,9 +35,9 @@ export function CounselorOrdersList({ isTab = false }: { isTab?: boolean; key?: 
       animate={isTab ? { opacity: 1 } : { x: 0 }}
       exit={isTab ? { opacity: 0 } : { x: "100%" }}
       transition={isTab ? undefined : { type: "spring", damping: 25, stiffness: 200 }}
-      className={`flex flex-col h-full bg-[#f8f9fa] overflow-hidden ${isTab ? 'relative w-full' : 'absolute inset-0 z-50'}`}
+      className={`flex flex-col h-full bg-transparent overflow-hidden ${isTab ? 'relative w-full' : 'absolute inset-0 z-50'}`}
     >
-      <div className="pt-14 pb-0 px-4 bg-white sticky top-0 z-20 shadow-sm border-b border-gray-100">
+      <div className="pt-14 pb-0 px-5 bg-white/90 backdrop-blur-xl sticky top-0 z-20 border-b border-gray-100">
         <div className="flex items-center mb-3">
           {!isTab && (
             <button
@@ -49,7 +49,7 @@ export function CounselorOrdersList({ isTab = false }: { isTab?: boolean; key?: 
             </button>
           )}
           <h1 className={`text-[17px] font-bold text-gray-900 ${!isTab ? 'ml-2' : ''}`}>
-            我的预约
+            预约
           </h1>
         </div>
 
@@ -95,7 +95,7 @@ export function CounselorOrdersList({ isTab = false }: { isTab?: boolean; key?: 
               return (
                 <div
                   key={ind}
-                  className="bg-white rounded-[1.2rem] shadow-sm border border-gray-100 overflow-hidden"
+                  className="bg-white rounded-[16px] border border-gray-100 overflow-hidden"
                 >
                   {/* Top Status Bar */}
                   <div className={`px-4 py-2.5 flex justify-between items-center border-b border-gray-50 ${isStartingSoon ? 'bg-orange-50/50' : ''}`}>
@@ -168,7 +168,7 @@ export function CounselorOrdersList({ isTab = false }: { isTab?: boolean; key?: 
                           setSelectedCounselorOrder(order);
                           pushView("counselor-service-chat");
                         }}
-                          className="flex-[1.5] py-2.5 rounded-xl bg-gray-900 text-white text-[13px] font-bold active:bg-gray-800 transition-colors shadow-md shadow-gray-900/10"
+                        className="flex-[1.5] py-2.5 rounded-xl bg-primary text-white text-[13px] font-bold transition-colors"
                         >
                           开始服务
                         </button>

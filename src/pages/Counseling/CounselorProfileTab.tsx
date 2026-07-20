@@ -1,275 +1,48 @@
 import { motion } from "motion/react";
-import { useAppStore } from "../../store";
-import { 
-  ChevronRight, 
-  UserCircle, 
-  ShoppingBag, 
-  Clock, 
-  ShieldCheck, 
-  Star, 
-  Users, 
-  Link as LinkIcon, 
-  Ticket, 
-  PenTool, 
-  Lightbulb, 
-  ClipboardList, 
-  FileText, 
-  Wallet, 
-  Lock, 
-  AlertTriangle, 
-  FileSignature, 
-  Settings, 
-  Bell, 
-  Headphones, 
-  MessageSquare, 
-  LogOut,
-  QrCode,
-  Share2,
+import {
+  CalendarDays,
   CheckCircle2,
-  Sparkles
+  ChevronRight,
+  CircleHelp,
+  Eye,
+  Settings2,
+  UserCircle,
+  Wallet,
 } from "lucide-react";
+import { useAppStore } from "../../store";
 
 export function CounselorProfileTab() {
-  const { pushView, setTab, enterAppMode } = useAppStore();
+  const { pushView, enterAppMode } = useAppStore();
 
-  const ServiceModules = [
-    { icon: UserCircle, label: "入驻资料", view: "counselor-onboarding", color: "text-blue-500", bg: "bg-blue-50" },
-    { icon: ShoppingBag, label: "服务商品", view: "counselor-services", color: "text-pink-500", bg: "bg-pink-50" },
-    { icon: Clock, label: "可预约时间", view: "counselor-schedule", color: "text-purple-500", bg: "bg-purple-50" },
-    { icon: ShieldCheck, label: "服务边界确认", view: "counselor-boundary", color: "text-teal-500", bg: "bg-teal-50" },
-    { icon: Star, label: "我的评价", view: "counselor-evaluations", color: "text-orange-500", bg: "bg-orange-50" },
-    { icon: Users, label: "我的客户", view: "counselor-clients", color: "text-indigo-500", bg: "bg-indigo-50", isTab: true },
-  ];
-
-  const GrowthModules = [
-    { icon: LinkIcon, label: "专属预约链接", isNew: false },
-    { icon: Ticket, label: "首单优惠券", isNew: false },
-    { icon: PenTool, label: "主页文案助手", isNew: true, tag: "内测中" },
-    { icon: Lightbulb, label: "内容选题库", isNew: true, tag: "即将上线" },
-    { icon: ClipboardList, label: "测评获客工具", isNew: true, tag: "即将上线" },
-  ];
-
-  const RuleModules = [
-    { icon: FileText, label: "服务规则" },
-    { icon: Wallet, label: "结算规则" },
-    { icon: Lock, label: "隐私与数据说明" },
-    { icon: AlertTriangle, label: "风险上报说明" },
-    { icon: FileSignature, label: "平台合作协议" },
-  ];
-
-  const SupportModules = [
-    { icon: Settings, label: "账号设置" },
-    { icon: Bell, label: "消息通知" },
-    { icon: Headphones, label: "联系平台运营" },
-    { icon: MessageSquare, label: "意见反馈" },
+  const items = [
+    { icon: UserCircle, title: "执业资料", desc: "资质、介绍和擅长方向", view: "counselor-onboarding" },
+    { icon: Settings2, title: "服务与价格", desc: "服务方式、时长和价格", view: "counselor-services" },
+    { icon: CalendarDays, title: "可预约时间", desc: "开放时间和休假设置", view: "counselor-schedule" },
+    { icon: Wallet, title: "收入账户", desc: "收入明细、结算和提现", view: "counselor-earnings" },
+    { icon: CircleHelp, title: "账号与安全", desc: "退出登录和注销账号", view: "counselor-account-security" },
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="counselor-page flex flex-col h-full overflow-hidden relative w-full"
-    >
-      <div className="flex-1 overflow-y-auto w-full pb-28">
-        
-        {/* 1. 顶部个人信息卡 */}
-        <div className="counselor-profile-head px-5 pt-16 pb-6 border-b">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center">
-              <img 
-                src="https://ui-avatars.com/api/?name=Lin&background=random" 
-                alt="avatar" 
-                className="w-16 h-16 rounded-full bg-gray-100 border-2 border-white shadow-sm object-cover mr-4"
-              />
-              <div>
-                <h1 className="text-[20px] font-bold text-gray-900 mb-1 flex items-center">
-                  林老师
-                  <CheckCircle2 size={16} className="text-green-500 ml-1.5" />
-                </h1>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[12px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium border border-blue-100">心理咨询师</span>
-                  <span className="text-[12px] text-gray-500">已通过审核</span>
-                </div>
-              </div>
-            </div>
-            <button aria-label="咨询师设置" className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-600">
-              <Settings size={18} />
-            </button>
-          </div>
-
-          <div className="flex justify-between items-center bg-gray-50 rounded-xl p-3 border border-gray-100">
-            <div className="flex-1 flex flex-col items-center border-r border-gray-200 last:border-0">
-              <span className="text-[15px] font-bold text-gray-900 mb-0.5">85%</span>
-              <span className="text-[11px] text-gray-500">主页完整度</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center border-r border-gray-200 last:border-0">
-              <span className="text-[15px] font-bold text-gray-900 mb-0.5">128次</span>
-              <span className="text-[11px] text-gray-500">服务次数</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <span className="text-[15px] font-bold text-gray-900 mb-0.5">98%</span>
-              <span className="text-[11px] text-gray-500">好评率</span>
-            </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full overflow-y-auto pb-28">
+      <header className="bg-white px-5 pb-6 pt-14">
+        <div className="flex items-center">
+          <img src="https://ui-avatars.com/api/?name=LA&background=2f6b5a&color=fff" alt="林安" className="h-16 w-16 rounded-[20px] object-cover shadow-sm" />
+          <div className="ml-4 min-w-0 flex-1">
+            <div className="flex items-center gap-2"><h1 className="text-[20px] font-black text-gray-900">林安</h1><CheckCircle2 size={16} className="text-green-600" /></div>
+            <p className="mt-1 text-[11px] text-gray-500">职场支持师 · 已通过平台审核</p>
+            <button onClick={() => pushView("counseling-detail")} className="mt-2 flex items-center text-[10px] font-bold text-primary"><Eye size={13} className="mr-1" />查看用户看到的主页</button>
           </div>
         </div>
+      </header>
 
-        {/* 2. 个人主页入口 (私域营销强导向) */}
-        <div className="p-4">
-          <div className="bg-gray-900 rounded-[1.2rem] p-4 shadow-md text-white relative overflow-hidden flex flex-col mb-2">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div className="flex items-center justify-between mb-4 relative z-10">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mr-3 backdrop-blur-sm">
-                  <UserCircle size={20} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-[15px] mb-0.5">我的个人主页</h3>
-                  <p className="text-[11px] text-white/70">完善主页可提升 30% 转化率</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => pushView("counselor-detail" as any)}
-                className="text-[12px] bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full font-medium transition-colors backdrop-blur-sm"
-              >
-                预览效果
-              </button>
-            </div>
+      <main className="px-4 pt-4">
+        <section className="overflow-hidden rounded-[22px] border border-black/5 bg-white">
+          {items.map((item) => <button key={item.title} onClick={() => pushView(item.view as any)} className="flex w-full items-center border-b border-gray-100 px-4 py-4 text-left last:border-0"><span className="mr-3 grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-gray-50 text-gray-600"><item.icon size={19} /></span><span className="min-w-0 flex-1"><b className="block text-[13px] text-gray-900">{item.title}</b><small className="mt-1 block text-[10px] text-gray-400">{item.desc}</small></span><ChevronRight size={16} className="text-gray-300" /></button>)}
+        </section>
 
-            <div className="flex space-x-3 relative z-10">
-              <button className="flex-1 bg-white text-gray-900 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-                <Share2 size={16} className="mr-1.5" /> 分享主页
-              </button>
-              <button className="flex-1 bg-white/10 text-white py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center active:bg-white/20 transition-colors backdrop-blur-sm">
-                <QrCode size={16} className="mr-1.5" /> 生成二维码
-              </button>
-            </div>
-          </div>
-
-          {/* 3. 服务管理模块 */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 mt-4">
-            <h3 className="font-bold text-gray-900 text-[14px] mb-3 px-1">服务管理</h3>
-            <div className="grid grid-cols-4 gap-y-4">
-              {ServiceModules.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="flex flex-col items-center cursor-pointer active:opacity-70 transition-opacity"
-                  onClick={() => {
-                  if (item.isTab) {
-                    setTab('clients');
-                  } else if (item.view) {
-                    pushView(item.view as any);
-                  }
-                }}
-                >
-                  <div className={`w-12 h-12 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center mb-1.5`}>
-                    <item.icon size={22} />
-                  </div>
-                  <span className="text-[11px] text-gray-700 font-medium">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 4. 增长工具模块 */}
-          <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 mb-4">
-            <div className="flex items-center px-3 py-2">
-              <Sparkles size={16} className="text-orange-500 mr-2" />
-              <h3 className="font-bold text-gray-900 text-[14px]">增长工具</h3>
-            </div>
-            <div>
-              {GrowthModules.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between px-3 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50 transition-colors cursor-pointer">
-                  <div className="flex items-center">
-                    <item.icon size={18} className="text-gray-400 mr-3" />
-                    <span className="text-[14px] text-gray-700">{item.label}</span>
-                  </div>
-                  <div className="flex items-center">
-                    {item.isNew && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium mr-2 ${item.tag === '内测中' ? 'bg-orange-50 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
-                        {item.tag}
-                      </span>
-                    )}
-                    <ChevronRight size={16} className="text-gray-300" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 5. 平台规则模块 */}
-          <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 mb-4">
-            <h3 className="font-bold text-gray-900 text-[14px] px-3 py-2">规则与协议</h3>
-            <div>
-              {RuleModules.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between px-3 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50 transition-colors cursor-pointer">
-                  <div className="flex items-center">
-                    <item.icon size={18} className="text-gray-400 mr-3" />
-                    <span className="text-[14px] text-gray-700">{item.label}</span>
-                  </div>
-                  <ChevronRight size={16} className="text-gray-300" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 6. 账号与支持模块 */}
-          <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 mb-4">
-            <h3 className="font-bold text-gray-900 text-[14px] px-3 py-2">账号与支持</h3>
-            <div>
-              {SupportModules.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between px-3 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50 transition-colors cursor-pointer">
-                  <div className="flex items-center">
-                    <item.icon size={18} className="text-gray-400 mr-3" />
-                    <span className="text-[14px] text-gray-700">{item.label}</span>
-                  </div>
-                  <ChevronRight size={16} className="text-gray-300" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Switch to User Mode */}
-          <button 
-            onClick={() => {
-              enterAppMode("user");
-            }}
-            className="w-full bg-white text-primary font-bold text-[15px] py-4 rounded-2xl shadow-sm border border-primary/20 active:bg-gray-50 transition-colors flex items-center justify-center mb-4"
-          >
-            <UserCircle size={18} className="mr-2" /> 切换为用户身份
-          </button>
-
-          <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <h3 className="mb-3 text-[14px] font-bold text-gray-900">账号安全</h3>
-            <p className="mb-4 text-[12px] leading-5 text-gray-500">
-              满足应用市场审核所需，当前账号支持退出登录与注销账号两种操作。
-            </p>
-            <div className="space-y-3">
-              <button
-                onClick={() => pushView("counselor-account-security" as any)}
-                className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-left active:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center">
-                  <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-600 shadow-sm">
-                    <LogOut size={18} />
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-bold text-gray-900">账号与安全</div>
-                    <div className="text-[12px] text-gray-500">退出登录、注销账号</div>
-                  </div>
-                </div>
-                <ChevronRight size={16} className="text-gray-300" />
-              </button>
-            </div>
-          </div>
-          
-          <div className="text-center pb-6">
-            <span className="text-[11px] text-gray-400">可鹿心理 咨询师端 v1.0.0</span>
-          </div>
-        </div>
-
-      </div>
+        <button onClick={() => enterAppMode("user")} className="mt-4 flex h-[50px] w-full items-center justify-center rounded-[17px] bg-white text-[12px] font-bold text-gray-600">切换为用户身份</button>
+        <p className="pb-5 pt-4 text-center text-[9px] text-gray-400">可鹿咨询师端</p>
+      </main>
     </motion.div>
   );
 }

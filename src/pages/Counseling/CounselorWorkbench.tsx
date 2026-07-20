@@ -1,191 +1,78 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
+import { Bell, CalendarClock, ChevronRight, Clock3, FileText, MessageSquare } from "lucide-react";
 import { useAppStore } from "../../store";
-import { 
-    Clock, 
-    MessageSquare,
-    Phone,
-    Target,
-    Repeat2,
-    ChevronRight,
-    TrendingUp,
-    Settings,
-    Sparkles,
-    Video,
-    Wallet,
-    CalendarCheck,
-    FileText,
-    ShieldAlert,
-    UserCheck,
-    Power,
-    CheckCircle,
-    XCircle,
-    ShoppingBag,
-    Star
-  } from "lucide-react";
-import { mockUser } from "../../data";
+import { mockCounselors } from "../../data";
 
 export function CounselorWorkbench() {
-  const { pushView, enterAppMode, resetToView, counselorStatus, setCounselorStatus, orders, setActiveOrderTab, setTab } = useAppStore();
+  const { pushView, enterAppMode, counselorStatus, orders, setActiveOrderTab, setTab } = useAppStore();
+  const counselorOrders = orders.filter((order) => order.counselorId === "c1");
+  const pendingOrders = counselorOrders.filter((order) => order.status === "paid" || order.status === "pending");
+  const completedOrders = counselorOrders.filter((order) => order.status === "completed");
+  const nextOrder = pendingOrders[0];
+  const counselor = mockCounselors.find((item) => item.id === "c1");
 
-  const pendingOrdersCount = orders.filter(o => o.counselorId === 'c1' && (o.status === 'paid' || o.status === 'pending')).length;
-  
+  const openAppointments = (tab: "all" | "pending" | "completed") => {
+    setActiveOrderTab(tab);
+    setTab("appointments");
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-transparent relative pb-24 overflow-y-auto w-full"
-    >
-      <div className="pt-12 pb-5 px-5 relative">
-         <div className="page-kicker mb-3">今日工作台 · {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}</div>
-         <div className="flex justify-between items-start mb-6">
-           <div className="flex items-center space-x-3">
-             <div className="relative">
-                <img src={mockUser.avatar} alt="counselor" className="w-12 h-12 rounded-full border border-gray-100 object-cover shadow-sm" />
-             </div>
-             <div>
-                <h1 className="text-[20px] font-black text-gray-900 mb-0.5 leading-tight flex items-center">
-                  林安，今天好
-                  <span className="ml-2 bg-blue-50 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-medium">
-                    已入驻
-                  </span>
-                </h1>
-                <div className="text-gray-500 text-[12px] font-medium">
-                  职场支持师
-                </div>
-             </div>
-           </div>
-           <button 
-              onClick={() => enterAppMode("user")}
-              className="text-primary bg-primary-light border border-primary/10 text-[11px] font-bold px-3 py-2 rounded-[12px] active:scale-95 transition-all"
-            >
-              切回用户端
-            </button>
-         </div>
-
-         {/* Core Stats */}
-         <div className="hero-panel counselor-hero p-5 text-white mb-2">
-           <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-           <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-           
-           <div className="flex justify-between items-center mb-5 relative z-10">
-             <div className="flex flex-col">
-               <span className="text-white/70 text-[11px] font-medium mb-1">本月服务收入 · 元</span>
-               <div className="flex items-baseline">
-               <span className="text-[30px] font-black tracking-tight">2,450</span><span className="ml-1 text-[12px] text-white/45">.00</span>
-               </div>
-             </div>
-             <button 
-               onClick={() => pushView("counselor-earnings" as any)}
-               aria-label="查看收入明细"
-               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm active:scale-95"
-             >
-               <ChevronRight size={18} className="text-white" />
-             </button>
-           </div>
-           
-           <div className="flex items-center space-x-6 relative z-10">
-             <div>
-               <span className="text-white/70 text-[11px] font-medium block mb-0.5">今日待服务</span>
-               <span className="text-[16px] font-bold">{pendingOrdersCount}</span>
-             </div>
-             <div className="w-[1px] h-6 bg-white/10"></div>
-             <div>
-               <span className="text-white/70 text-[11px] font-medium block mb-0.5">今日已完成</span>
-               <span className="text-[16px] font-bold">{orders.filter(o => o.counselorId === 'c1' && o.status === 'completed' && (o.date === '今天' || o.date === new Date().toISOString().split('T')[0])).length || 1}</span>
-             </div>
-           </div>
-         </div>
-      </div>
-
-      <div className="px-4 pt-5 pb-12 w-full space-y-4">
-        
-        {/* Toggle Status */}
-        <div className="ui-card p-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${counselorStatus === 'active' ? 'bg-green-50 text-green-500' : 'bg-gray-50 text-gray-400'}`}>
-              <Power size={20} />
-            </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full overflow-y-auto pb-28">
+      <header className="px-5 pb-4 pt-12">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={counselor?.avatar} alt="林安" className="h-11 w-11 rounded-full border-2 border-white object-cover shadow-sm" />
             <div>
-              <div className="text-[15px] font-bold text-gray-900 mb-0.5">
-                {counselorStatus === 'active' ? '当前在线接单中' : '已暂停接单'}
-              </div>
-              <div className="text-[11px] text-gray-500">
-                {counselorStatus === 'active' ? '用户可以预约您的服务' : '用户暂时无法预约您的服务'}
+              <h1 className="text-[18px] font-black text-gray-900">林安，上午好</h1>
+              <div className="mt-1 flex items-center gap-2">
+                <span className={`h-1.5 w-1.5 rounded-full ${counselorStatus === "active" ? "bg-green-500" : "bg-gray-400"}`} />
+                <span className="text-[10px] font-medium text-gray-500">{counselorStatus === "active" ? "接单中" : "暂停接单"}</span>
+                <span className="text-[10px] text-gray-300">·</span><span className="text-[10px] text-gray-400">职场支持师</span>
               </div>
             </div>
           </div>
-          <button 
-            onClick={() => setCounselorStatus(counselorStatus === 'active' ? 'paused' : 'active')}
-            aria-label={counselorStatus === 'active' ? '暂停接单' : '开启接单'}
-            aria-pressed={counselorStatus === 'active'}
-            className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ${counselorStatus === 'active' ? 'bg-green-500' : 'bg-gray-200'}`}
-          >
-            <motion.div 
-              layout
-              className="w-6 h-6 bg-white rounded-full shadow-sm"
-              animate={{ x: counselorStatus === 'active' ? 24 : 0 }}
-            />
+          <button onClick={() => enterAppMode("user")} className="rounded-[12px] border border-primary/10 bg-primary-light px-3 py-2 text-[10px] font-bold text-primary">用户端</button>
+        </div>
+
+        <button onClick={() => setTab("messages")} className="mb-3 flex h-8 w-full items-center overflow-hidden rounded-[10px] bg-[#e8f0ed] px-3 text-left">
+          <Bell size={13} className="mr-2 shrink-0 text-[#557b91]" />
+          <span className="mr-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d95c5c]" />
+          <span className="platform-ticker min-w-0 flex-1 overflow-hidden text-[10px] text-[#667a73]"><span>平台通知：预约变更、审核结果和结算提醒已更新</span></span>
+          <ChevronRight size={12} className="ml-2 shrink-0 text-[#90a09a]" />
+        </button>
+
+        <section className="overflow-hidden rounded-[20px] bg-[#193b32] p-5 text-white shadow-[0_14px_30px_rgba(25,59,50,.16)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-[10px] font-bold tracking-[.12em] text-white/45">下一项服务</p>
+              <h2 className="mt-2 text-[21px] font-black">{nextOrder ? `${nextOrder.time || "19:30"} · ${nextOrder.type === "video" ? "视频咨询" : "语音咨询"}` : "暂无待服务预约"}</h2>
+              <p className="mt-2 text-[10px] text-white/50">{nextOrder ? `${nextOrder.userName || "小鹿用户3821"} · 开始前 10 分钟开放进入` : "今天可以安排自己的时间"}</p>
+            </div>
+            <div className="grid h-11 w-11 place-items-center rounded-[14px] bg-white/10"><CalendarClock size={21} /></div>
+          </div>
+          <div className="mt-5 flex items-center gap-3 border-t border-white/10 pt-4">
+            {nextOrder ? <><button onClick={() => openAppointments("pending")} className="flex-1 rounded-[13px] bg-white py-3 text-[12px] font-black text-[#193b32]">进入服务</button><button onClick={() => openAppointments("pending")} className="px-2 py-2 text-[11px] font-bold text-white/65">查看详情</button></> : <button onClick={() => pushView("counselor-schedule")} className="w-full rounded-[13px] bg-white py-3 text-[12px] font-black text-[#193b32]">管理可预约时间</button>}
+          </div>
+        </section>
+      </header>
+
+      <main className="px-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div><h2 className="text-[15px] font-black text-gray-900">待办事项</h2><p className="mt-1 text-[10px] text-gray-400">按服务进度集中处理</p></div>
+          <button onClick={() => openAppointments("all")} className="flex items-center text-[10px] font-bold text-primary">全部预约<ChevronRight size={13} /></button>
+        </div>
+        <section className="overflow-hidden rounded-[16px] border border-black/[.05] bg-white">
+          <button onClick={() => openAppointments("pending")} className="flex w-full items-center border-b border-black/[.05] px-4 py-3.5 text-left">
+            <div className="mr-3 grid h-9 w-9 place-items-center rounded-[11px] bg-blue-50 text-blue-600"><Clock3 size={17} /></div><div className="flex-1"><h3 className="text-[12px] font-black text-gray-800">待服务预约</h3><p className="mt-0.5 text-[9px] text-gray-400">确认信息并完成服务准备</p></div><b className="mr-2 text-[16px] font-black text-gray-900">{pendingOrders.length}</b><ChevronRight size={14} className="text-gray-300" />
           </button>
-        </div>
-
-        {/* Quick Links */}
-        <div className="ui-card p-4">
-          <div className="mb-4 flex items-center justify-between px-1"><h2 className="text-[15px] font-black text-gray-900">服务管理</h2><span className="text-[10px] font-bold text-gray-400">按今天优先级排列</span></div>
-          <div className="grid grid-cols-4 gap-y-5 gap-x-2">
-            {[
-              { icon: MessageSquare, label: "待咨询", color: "text-blue-500", bg: "bg-blue-50", view: "appointments", badge: pendingOrdersCount, tab: "pending" },
-              { icon: CheckCircle, label: "已咨询", color: "text-green-500", bg: "bg-green-50", view: "appointments", tab: "completed" },
-              { icon: ShoppingBag, label: "服务商品", color: "text-pink-500", bg: "bg-pink-50", view: "counselor-services" },
-              { icon: Clock, label: "可服务时间", color: "text-purple-500", bg: "bg-purple-50", view: "counselor-schedule" },
-              { icon: Star, label: "用户评价", color: "text-indigo-500", bg: "bg-indigo-50", view: "counselor-evaluations" },
-              { icon: Wallet, label: "收入明细", color: "text-orange-500", bg: "bg-orange-50", view: "earnings" },
-              { icon: UserCheck, label: "入驻资料", color: "text-teal-500", bg: "bg-teal-50", view: "counselor-onboarding" },
-              { icon: CalendarCheck, label: "服务规则", color: "text-gray-500", bg: "bg-gray-50", view: "counselor-boundary" },
-            ].map((item, i) => (
-              <button 
-                key={i} 
-                onClick={() => {
-                  if (item.tab) setActiveOrderTab(item.tab as any);
-                  if (item.view === "appointments" || item.view === "earnings") {
-                    setTab(item.view as any);
-                  } else {
-                    pushView(item.view as any);
-                  }
-                }}
-                className="flex flex-col items-center active:scale-95 transition-transform relative"
-              >
-                <div className={`soft-icon w-12 h-12 ${item.bg} flex items-center justify-center mb-2 relative`}>
-                  <item.icon size={22} className={item.color} />
-                  {item.badge ? (
-                    <div className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                      {item.badge}
-                    </div>
-                  ) : null}
-                </div>
-                <span className="text-[11px] text-gray-700 font-medium">{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Risk Reminder */}
-        <div 
-          onClick={() => pushView("counselor-boundary" as any)}
-          className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start active:scale-[0.98] transition-transform cursor-pointer"
-        >
-          <ShieldAlert size={20} className="text-red-500 mr-3 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h3 className="text-[14px] font-bold text-red-800 mb-1">平台服务边界与风险提醒</h3>
-            <p className="text-[12px] text-red-600/80 leading-relaxed">
-              您提供的是职场支持服务，不是心理治疗、医学诊断或法律咨询。遇到危机事件请立即上报。点击查看完整规范。
-            </p>
-          </div>
-          <ChevronRight size={16} className="text-red-300 mt-0.5 shrink-0" />
-        </div>
-
-      </div>
+          <button onClick={() => setTab("messages")} className="flex w-full items-center border-b border-black/[.05] px-4 py-3.5 text-left">
+            <div className="mr-3 grid h-9 w-9 place-items-center rounded-[11px] bg-orange-50 text-orange-600"><MessageSquare size={17} /></div><div className="flex-1"><h3 className="text-[12px] font-black text-gray-800">用户消息</h3><p className="mt-0.5 text-[9px] text-gray-400">服务关系内的沟通消息</p></div><span className="mr-2 rounded-full bg-[#d95c5c] px-2 py-0.5 text-[9px] font-bold text-white">1 未读</span><ChevronRight size={14} className="text-gray-300" />
+          </button>
+          <button onClick={() => openAppointments("completed")} className="flex w-full items-center px-4 py-3.5 text-left">
+            <div className="mr-3 grid h-9 w-9 place-items-center rounded-[11px] bg-green-50 text-green-600"><FileText size={17} /></div><div className="flex-1"><h3 className="text-[12px] font-black text-gray-800">服务记录</h3><p className="mt-0.5 text-[9px] text-gray-400">补充记录并查看用户反馈</p></div><b className="mr-2 text-[16px] font-black text-gray-900">{completedOrders.length}</b><ChevronRight size={14} className="text-gray-300" />
+          </button>
+        </section>
+      </main>
     </motion.div>
   );
 }

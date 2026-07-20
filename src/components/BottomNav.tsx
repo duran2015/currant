@@ -1,5 +1,5 @@
 import { useAppStore } from "../store";
-import { Home, MessageCircle, MessageSquare, User, Briefcase, CalendarClock, Users, Wallet } from "lucide-react";
+import { Home, MessageCircle, MessageSquare, User, Briefcase, CalendarClock, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 
 export function BottomNav() {
@@ -17,8 +17,8 @@ export function BottomNav() {
   const counselorTabs = [
     { id: "home", icon: Briefcase, label: "工作台" },
     { id: "appointments", icon: CalendarClock, label: "预约" },
-    { id: "clients", icon: Users, label: "客户" },
-    { id: "earnings", icon: Wallet, label: "收入" },
+    { id: "messages", icon: MessageSquare, label: "消息" },
+    { id: "growth", icon: TrendingUp, label: "获客" },
     { id: "profile", icon: User, label: "我的" },
   ] as const;
 
@@ -45,6 +45,9 @@ export function BottomNav() {
               className={`relative flex items-center justify-center h-9 w-11 mb-0.5 rounded-[14px] ${isActive ? "text-primary" : "text-gray-400"}`}
             >
               <Icon strokeWidth={isActive ? 2.5 : 2} size={24} />
+              {isCounselorMode && tab.id === "messages" && !isActive && (
+                <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-[#d95c5c] ring-2 ring-white" aria-label="有未读消息" />
+              )}
               {isActive && (
                 <motion.div
                   layoutId="bubble"

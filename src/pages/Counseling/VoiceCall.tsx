@@ -24,6 +24,16 @@ import { useAppStore } from "../../store";
 import { mockCounselors, mockUser } from "../../data";
 
 type MeetingState = "lobby" | "waiting" | "in-call" | "ended";
+type MediaPermissionState = { camera: boolean; microphone: boolean };
+
+const detectClientPlatform = () => {
+  if (typeof navigator === "undefined") return "当前设备";
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes("miniprogram") || ua.includes("micromessenger")) return "微信小程序";
+  if (/iphone|ipad|ipod/.test(ua)) return "iOS";
+  if (ua.includes("android")) return "Android";
+  return "当前设备";
+};
 
 export function VoiceCall() {
   const {
@@ -56,6 +66,20 @@ export function VoiceCall() {
   const [speaker, setSpeaker] = useState(true);
   const [duration, setDuration] = useState(0);
   const [showChat, setShowChat] = useState(false);
+  const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const platform = detectClientPlatform();
+  const permissionStorageKey = `kelu-media-permissions:${platform}`;
+  const [mediaPermissions, setMediaPermissions] = useState<MediaPermissionState>(() => {
+    if (typeof window === "undefined") return { camera: false, microphone: false };
+    try {
+      return JSON.parse(window.localStorage.getItem(permissionStorageKey) || "null") || { camera: false, microphone: false };
+    } catch {
+      return { camera: false, microphone: false };
+    }
+  });
+  const needsCameraPermission = isVideo && !mediaPermissions.camera;
+  const needsMicrophonePermission = !mediaPermissions.microphone;
+  const requestedPermissionLabel = needsCameraPermission && needsMicrophonePermission ? "相机和麦克风" : needsCameraPermission ? "相机" : "麦克风";
   const [notice, setNotice] = useState("");
   const [messages, setMessages] = useState<{ id: string; sender: "me" | "other"; text: string; time: string }[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -109,6 +133,25 @@ export function VoiceCall() {
     }, 900);
   };
 
+  const enterMeeting = () => {
+    if (needsCameraPermission || needsMicrophonePermission) {
+      setShowPermissionPrompt(true);
+      return;
+    }
+    setMeetingState("waiting");
+  };
+
+  const grantRequestedPermissions = () => {
+    const nextPermissions = {
+      camera: mediaPermissions.camera || needsCameraPermission,
+      microphone: mediaPermissions.microphone || needsMicrophonePermission,
+    };
+    setMediaPermissions(nextPermissions);
+    if (typeof window !== "undefined") window.localStorage.setItem(permissionStorageKey, JSON.stringify(nextPermissions));
+    setShowPermissionPrompt(false);
+    setMeetingState("waiting");
+  };
+
   if (isCallMinimized && meetingState !== "lobby" && meetingState !== "ended") {
     return (
       <motion.button
@@ -145,8 +188,10 @@ export function VoiceCall() {
           </div>
 
           <div className="mb-5 flex items-start rounded-[18px] border border-blue-100 bg-blue-50/70 p-4"><ShieldCheck size={18} className="mr-3 mt-0.5 shrink-0 text-blue-600" /><p className="text-[11px] leading-5 text-blue-800">会议室仅限本次预约双方进入，通话内容默认不录音、不录像。请确认当前环境安静且私密。</p></div>
-          <button onClick={() => setMeetingState("waiting")} className="w-full rounded-[18px] bg-primary py-4 text-[14px] font-black text-white shadow-[0_12px_28px_rgba(50,116,92,.24)]">进入预约会议室</button>
+          <button onClick={enterMeeting} className="w-full rounded-[18px] bg-primary py-4 text-[14px] font-black text-white shadow-[0_12px_28px_rgba(50,116,92,.24)]">进入预约会议室</button>
         </div>
+
+        <AnimatePresence>{showPermissionPrompt && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 flex items-end bg-black/35" onClick={() => setShowPermissionPrompt(false)}><motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} onClick={(event) => event.stopPropagation()} className="w-full rounded-t-[28px] bg-white p-6 pb-[calc(24px+env(safe-area-inset-bottom))]"><button onClick={() => setShowPermissionPrompt(false)} aria-label="关闭" className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-gray-100 text-gray-600"><X size={17} /></button><div className="flex gap-3">{needsCameraPermission && <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-sky-50 text-sky-700"><VideoIcon size={23} /></div>}{needsMicrophonePermission && <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-violet-50 text-violet-700"><Mic size={23} /></div>}</div><h2 className="mt-5 text-[20px] font-black text-gray-900">开启{requestedPermissionLabel}</h2><p className="mt-3 text-[13px] leading-6 text-gray-500">用于本次{isVideo ? "视频" : "语音"}咨询，仅在会议中使用，结束后立即停止。拒绝后仍可使用会议内文字聊天。</p><p className="mt-4 rounded-[14px] bg-gray-50 p-3 text-[11px] leading-5 text-gray-500">已识别为 {platform}。授权成功后会记住当前状态，下次不再重复提醒；未授权时，下次使用仍会提示。</p><button onClick={grantRequestedPermissions} className="mt-5 h-[52px] w-full rounded-[16px] bg-primary text-[14px] font-black text-white">继续并授权</button><button onClick={() => setShowPermissionPrompt(false)} className="mt-2 h-12 w-full text-[13px] font-bold text-gray-500">暂不开启</button></motion.div></motion.div>}</AnimatePresence>
       </div>
     );
   }
@@ -167,7 +212,7 @@ export function VoiceCall() {
     <motion.div data-meeting-room initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-[#15271f] text-white">
       <div className="relative z-20 flex items-center justify-between px-4 pb-4 pt-12">
         <button onClick={() => setIsCallMinimized(true)} aria-label="最小化会议" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10"><Minimize2 size={20} /></button>
-        <div className="text-center"><div className="flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold"><LockKeyhole size={11} className="mr-1.5 text-green-300" />预约会议 · {roomNumber}</div><div className="mt-2 text-[12px] font-mono text-white/65">{meetingState === "waiting" ? "1/2 人已入会" : formatTime(duration)}</div></div>
+        <div className="text-center"><div className="flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold"><LockKeyhole size={11} className="mr-1.5 text-green-300" />预约会议 · {roomNumber}</div><div className="mt-2 text-[12px] font-mono text-white/65">{meetingState === "waiting" ? "1/2 人已入会" : formatTime(duration)}</div><div className="mt-1.5 flex items-center justify-center gap-2 text-[9px] font-bold text-white/45"><span className={muted ? "text-orange-300" : "text-green-300"}>{muted ? "麦克风已关闭" : "● 麦克风使用中"}</span>{isVideo && <span className={cameraOff ? "text-white/35" : "text-green-300"}>{cameraOff ? "相机已关闭" : "● 相机使用中"}</span>}</div></div>
         <button onClick={() => { setNotice("已切换摄像头"); }} aria-label="切换摄像头" className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ${isVideo ? "" : "invisible"}`}><SwitchCamera size={20} /></button>
       </div>
 
